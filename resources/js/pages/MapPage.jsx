@@ -97,19 +97,23 @@ export default function MapPage() {
     setIsSampleData(false);
 
     try {
-      const urlTerkini = `https://api.allorigins.win/get?url=${encodeURIComponent('https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json')}`;
-      const urlDirasakan = `https://api.allorigins.win/get?url=${encodeURIComponent('https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json')}`;
+      // Use our own Laravel proxy — fetched server-side (no CORS issues)
+      const [resTerkini, resDirasakan] = await Promise.all([
+        fetch('/api/bmkg/gempa-terkini'),
+        fetch('/api/bmkg/gempa-dirasakan'),
+      ]);
 
-      const [resTerkini, resDirasakan] = await Promise.all([fetch(urlTerkini), fetch(urlDirasakan)]);
-      if (!resTerkini.ok || !resDirasakan.ok) throw new Error('API Gagal');
+      if (!resTerkini.ok || !resDirasakan.ok) throw new Error('Proxy API gagal');
 
-      const jsonTerkini = await resTerkini.json();
-      const jsonDirasakan = await resDirasakan.json();
-      const parsedTerkini = JSON.parse(jsonTerkini.contents);
-      const parsedDirasakan = JSON.parse(jsonDirasakan.contents);
+      const parsedTerkini = await resTerkini.json();
+      const parsedDirasakan = await resDirasakan.json();
 
-      const listTerkini = parsedTerkini.Infogempa.gempa || [];
-      const listDirasakan = parsedDirasakan.Infogempa.gempa || [];
+      if (parsedTerkini.error || parsedDirasakan.error) {
+        throw new Error(parsedTerkini.error || parsedDirasakan.error);
+      }
+
+      const listTerkini = parsedTerkini.Infogempa?.gempa || [];
+      const listDirasakan = parsedDirasakan.Infogempa?.gempa || [];
 
       const allGempa = [...listTerkini, ...listDirasakan];
       const uniqueGempa = Array.from(new Set(allGempa.map(g => g.DateTime)))
@@ -145,7 +149,8 @@ export default function MapPage() {
       setData(formattedData);
       setLastUpdate(new Date());
     } catch (err) {
-      setError('Gagal mengambil data real-time BMKG. Menampilkan contoh tampilan data.');
+      console.error('[GeoAlert] Gagal mengambil data BMKG:', err.message);
+      setError(`Gagal memuat data BMKG: ${err.message}. Menampilkan contoh tampilan data.`);
       setData(sampleData);
       setIsSampleData(true);
     } finally {
