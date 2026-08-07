@@ -29,20 +29,21 @@
   --spacing-12: 6rem;
   
   /* Radii */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 20px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 32px;
   --radius-full: 9999px;
   
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(14, 42, 92, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(14, 42, 92, 0.1), 0 2px 4px -1px rgba(14, 42, 92, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(14, 42, 92, 0.1), 0 4px 6px -2px rgba(14, 42, 92, 0.05);
+  --shadow-sm: 0 2px 8px rgba(14, 42, 92, 0.04);
+  --shadow-md: 0 8px 24px rgba(14, 42, 92, 0.08);
+  --shadow-lg: 0 20px 40px rgba(14, 42, 92, 0.12);
+  --shadow-glow: 0 0 20px rgba(192, 73, 43, 0.5); /* Terracotta glow */
   
   /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-normal: 300ms ease;
+  --transition-fast: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* CSS Reset */
@@ -111,16 +112,16 @@ h4 { font-size: 1.25rem; }
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--spacing-4);
+  padding: 0 var(--spacing-5);
 }
 
 .section {
-  padding: var(--spacing-8) 0;
+  padding: var(--spacing-12) 0;
 }
 
 @media (min-width: 768px) {
   .section {
-    padding: var(--spacing-12) 0;
+    padding: calc(var(--spacing-12) * 1.5) 0;
   }
 }
 
@@ -133,6 +134,22 @@ h4 { font-size: 1.25rem; }
 .bg-alert { background-color: var(--color-alert); color: var(--color-white); }
 .bg-standby { background-color: var(--color-standby); color: var(--color-white); }
 .bg-white { background-color: var(--color-white); }
+
+/* Glassmorphism */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-dark {
+  background: rgba(14, 42, 92, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-white);
+}
 
 /* Flexbox Utilities */
 .flex { display: flex; }
