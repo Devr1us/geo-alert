@@ -56,18 +56,33 @@ export default function MapPage() {
     setIsSampleData(false);
     
     try {
-      // Trying BMKG API via proxy or directly (mostly fails CORS directly on browser, but let's try via allorigins)
-      // Since it's a demo, we will try allorigins proxy.
-      const url = `https://api.allorigins.win/get?url=${encodeURIComponent('https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json')}`;
-      const response = await fetch(url);
+      // Fetch both endpoints via proxy
+      const urlTerkini = `https://api.allorigins.win/get?url=${encodeURIComponent('https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json')}`;
+      const urlDirasakan = `https://api.allorigins.win/get?url=${encodeURIComponent('https://data.bmkg.go.id/DataMKG/TEWS/gempadirasakan.json')}`;
       
-      if (!response.ok) throw new Error('API Gagal');
+      const [resTerkini, resDirasakan] = await Promise.all([
+        fetch(urlTerkini),
+        fetch(urlDirasakan)
+      ]);
       
-      const jsonResponse = await response.json();
-      const parsedData = JSON.parse(jsonResponse.contents);
-      const gempaList = parsedData.Infogempa.gempa;
+      if (!resTerkini.ok || !resDirasakan.ok) throw new Error('API Gagal');
       
-      const formattedData = gempaList.map((g, index) => {
+      const jsonTerkini = await resTerkini.json();
+      const jsonDirasakan = await resDirasakan.json();
+      
+      const parsedTerkini = JSON.parse(jsonTerkini.contents);
+      const parsedDirasakan = JSON.parse(jsonDirasakan.contents);
+      
+      const gempaListTerkini = parsedTerkini.Infogempa.gempa || [];
+      const gempaListDirasakan = parsedDirasakan.Infogempa.gempa || [];
+      
+      // Combine and filter out duplicates based on Date+Time
+      const allGempa = [...gempaListTerkini, ...gempaListDirasakan];
+      const uniqueGempa = Array.from(new Set(allGempa.map(g => g.DateTime))).map(time => {
+        return allGempa.find(g => g.DateTime === time);
+      });
+      
+      const formattedData = uniqueGempa.map((g, index) => {
         const coords = g.Coordinates.split(',');
         const mag = parseFloat(g.Magnitude);
         let risk = 'standby';

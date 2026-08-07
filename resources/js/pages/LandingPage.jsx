@@ -248,6 +248,52 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Education Section */}
+      <section className="section bg-white">
+        <div className="container">
+          <div className="text-center" style={{ marginBottom: '3rem' }}>
+            <h2>Edukasi Bencana</h2>
+            <p className="text-muted" style={{ maxWidth: '600px', margin: '1rem auto' }}>
+              Kenali jenis-jenis bencana alam yang sering terjadi di Indonesia agar Anda dan keluarga bisa lebih siap menghadapinya.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1.5rem', display: 'flex', gap: '1rem' }}>
+              <Activity size={24} color="var(--color-alert)" style={{ flexShrink: 0 }} />
+              <div>
+                <h4 style={{ marginBottom: '0.5rem' }}>Gempa Bumi</h4>
+                <p className="text-muted" style={{ fontSize: '0.875rem' }}>Getaran atau guncangan yang terjadi di permukaan bumi akibat pelepasan energi dari dalam secara tiba-tiba yang menciptakan gelombang seismik. Indonesia rawan gempa karena berada di Cincin Api Pasifik.</p>
+              </div>
+            </div>
+            
+            <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1.5rem', display: 'flex', gap: '1rem' }}>
+              <Mountain size={24} color="var(--color-status-warning)" style={{ flexShrink: 0 }} />
+              <div>
+                <h4 style={{ marginBottom: '0.5rem' }}>Tanah Longsor</h4>
+                <p className="text-muted" style={{ fontSize: '0.875rem' }}>Perpindahan material pembentuk lereng berupa batuan, bahan rombakan, tanah, atau material campuran yang bergerak ke bawah atau keluar lereng. Sering dipicu oleh curah hujan tinggi.</p>
+              </div>
+            </div>
+            
+            <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1.5rem', display: 'flex', gap: '1rem' }}>
+              <Droplets size={24} color="var(--color-standby)" style={{ flexShrink: 0 }} />
+              <div>
+                <h4 style={{ marginBottom: '0.5rem' }}>Banjir</h4>
+                <p className="text-muted" style={{ fontSize: '0.875rem' }}>Peristiwa terbenamnya daratan yang biasanya kering karena volume air yang meningkat. Banjir dapat terjadi perlahan maupun tiba-tiba (banjir bandang) dengan aliran air yang sangat deras.</p>
+              </div>
+            </div>
+            
+            <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1.5rem', display: 'flex', gap: '1rem' }}>
+              <Wind size={24} color="var(--color-primary)" style={{ flexShrink: 0 }} />
+              <div>
+                <h4 style={{ marginBottom: '0.5rem' }}>Cuaca Ekstrem</h4>
+                <p className="text-muted" style={{ fontSize: '0.875rem' }}>Kondisi cuaca yang tidak normal dan berbahaya, seperti puting beliung, hujan es, atau badai tropis. Hal ini berpotensi merusak bangunan dan membahayakan keselamatan.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Mitigation Guide */}
       <section className="section">
         <div className="container">
