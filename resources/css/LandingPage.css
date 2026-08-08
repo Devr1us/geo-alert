@@ -1,7 +1,9 @@
 /* LandingPage.css */
 
 .hero-section {
-  padding: calc(var(--spacing-12) * 1.5) 0 var(--spacing-12);
+  /* padding-top harus lebih besar dari tinggi navbar (fixed + top:16px + tinggi ~56px) ≈ 96px,
+     tambah buffer agar konten tidak tertutup navbar di zoom 100% */
+  padding: calc(var(--navbar-height) + 4rem) 0 var(--spacing-12);
   background: radial-gradient(circle at top right, rgba(14, 42, 92, 0.08), transparent 40%),
               radial-gradient(circle at bottom left, rgba(192, 73, 43, 0.05), transparent 40%),
               var(--color-bg);
@@ -49,19 +51,30 @@
 
 .live-status-card {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--spacing-4);
-  padding: var(--spacing-3) var(--spacing-6);
-  border-radius: var(--radius-full);
+  justify-content: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-5);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
   margin-top: var(--spacing-4);
   animation: float 6s ease-in-out infinite;
+  max-width: 720px;
+  row-gap: var(--spacing-2);
 }
 
 @keyframes float {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
   100% { transform: translateY(0px); }
+}
+
+.status-divider {
+  height: 40px;
+  width: 1px;
+  background-color: var(--color-border);
+  flex-shrink: 0;
 }
 
 .trust-bar {
@@ -76,9 +89,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: var(--spacing-6);
+  gap: var(--spacing-4);
   margin-top: var(--spacing-3);
   flex-wrap: wrap;
+  row-gap: var(--spacing-2);
 }
 
 .trust-item {
@@ -135,6 +149,40 @@
 .card-education:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-md);
+}
+
+/* About Section Grid Layout */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .about-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 4.5rem; /* Jarak luas dan rapi antara peta dan kartu fitur */
+  }
+}
+
+@media (min-width: 1280px) {
+  .about-grid {
+    gap: 5.5rem; /* Jarak ekstra di monitor besar */
+  }
+}
+
+.about-features-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+}
+
+@media (min-width: 576px) {
+  .about-features-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
 }
 
 /* Mini Map Preview Card */
@@ -248,9 +296,11 @@
 
 .mini-map-cta {
   position: absolute;
-  bottom: 20px;
+  bottom: 28px;
   z-index: 5;
   box-shadow: var(--shadow-lg);
+  padding: 0.85rem 2rem;    /* lebih lapang secara horizontal & vertikal */
+  font-size: 1rem;
 }
 
 .stats-section {
@@ -489,4 +539,44 @@
     transform: none !important;
     transition: none !important;
   }
+}
+
+/* ============================================================
+   Responsive fixes — hero, live-status-card, trust bar
+   ============================================================ */
+
+/* Pada layar ≤ 640px, buat live-status-card full-width dengan
+   arah kolom agar item tidak bergandengan */
+@media (max-width: 640px) {
+  .hero-section {
+    padding-top: calc(var(--navbar-height) + 3rem);
+  }
+
+  .live-status-card {
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: var(--radius-lg);
+    width: calc(100% - 2rem);
+    max-width: 100%;
+  }
+
+  /* Sembunyikan divider vertikal di layar kecil */
+  .status-divider {
+    display: none;
+  }
+
+  .trust-logos {
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+
+  .trust-item {
+    justify-content: center;
+  }
+}
+
+/* Pastikan section tidak ada overflow horizontal */
+.hero-section,
+.trust-bar {
+  overflow-x: hidden;
 }

@@ -109,9 +109,9 @@
    section yang jadi target anchor link.
    ============================================================ */
 
-/* Default (desktop) navbar height */
+/* Default (desktop) navbar height — top:16px + content ≈ 64px + buffer */
 :root {
-  --navbar-height: 80px;
+  --navbar-height: 96px;
 }
 
 .navbar {
@@ -212,9 +212,9 @@
 }
 
 @media (max-width: 768px) {
-  /* Override navbar height untuk mobile — konten nav sedikit lebih kecil */
+  /* Override navbar height untuk mobile */
   :root {
-    --navbar-height: 72px;
+    --navbar-height: 80px;
   }
 
   .nav-links {

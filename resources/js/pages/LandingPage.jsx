@@ -389,7 +389,7 @@ export default function LandingPage() {
               )}
             </div>
 
-            <div style={{ height: '40px', width: '1px', backgroundColor: 'var(--color-border)' }} />
+            <div className="status-divider" />
 
             {/* Status Wilayah */}
             <div>
@@ -406,7 +406,7 @@ export default function LandingPage() {
               )}
             </div>
 
-            <div style={{ height: '40px', width: '1px', backgroundColor: 'var(--color-border)' }} />
+            <div className="status-divider" />
 
             {/* Pembaruan */}
             <div>
@@ -480,7 +480,7 @@ export default function LandingPage() {
             Sistem peringatan dini yang dirancang khusus untuk kondisi geografis Indonesia —
             memberikan informasi vital dengan visualisasi modern saat waktu sangat berharga.
           </p>
-          <div className="grid md:grid-cols-2 gap-10 items-center">
+          <div className="about-grid">
             <div className="mini-map-preview-card">
               <div className="mini-map-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -516,7 +516,7 @@ export default function LandingPage() {
                 </Link>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="about-features-grid">
               {[
                 { icon: <Activity size={40} color="var(--color-primary)" />, shadow: '0 4px 8px rgba(14,42,92,0.3)', title: 'Data Real-time', desc: 'Terhubung langsung dengan API BMKG tanpa latensi.' },
                 { icon: <Bell size={40} color="var(--color-standby)" />, shadow: '0 4px 8px rgba(74,144,217,0.3)', title: 'Peringatan Dini', desc: 'Notifikasi instan untuk wilayah Anda dalam hitungan detik.' },

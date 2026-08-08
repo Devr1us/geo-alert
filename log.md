@@ -291,3 +291,67 @@
 - **TLDR AI agents done:** Sudah dikonfirmasi 100%! Baik **`.gitignore`** maupun **`node_modules`** **TIDAK MASUK** (telah dihapus dari *tracking*) di repositori GitHu...
 - **file changed:**
   - `log.md`
+
+---
+
+### Timestamp: 2026-08-08 13:34:38
+
+- **Model used:** Claude Sonnet 4.6 (Thinking)
+- **Human Prompt:** `perbaiki ui nya agar tidak bergandengan dan usahakan ketika zoom 100% ui dari landing page tsb kelihatan berlaku untuk semua di landing page termasuk hero section`
+- **TLDR AI agents done:** Memperbaiki padding-top pada hero-section, flex-wrap pada live-status-card, dan variabel --navbar-height agar UI landing page tampil penuh dan tidak tertutup navbar pada zoom 100%.
+- **file changed:**
+  - `resources/css/LandingPage.css`
+  - `resources/css/components.css`
+  - `resources/js/pages/LandingPage.jsx`
+
+---
+
+### Timestamp: 2026-08-08 13:41:39
+
+- **Model used:** Claude Sonnet 4.6 (Thinking)
+- **Human Prompt:** `jangan terlalu mepet ini nya apakah bisa?? kasih jarak atau padding untuk button itu`
+- **TLDR AI agents done:** Menambah posisi bottom dan padding pada tombol "Buka Peta Interaktif Penuh" (.mini-map-cta) agar lebih lapang dan tidak mepet ke tepi bawah.
+- **file changed:**
+  - `resources/css/LandingPage.css`
+
+---
+
+### Timestamp: 2026-08-08 13:42:53
+
+- **Model used:** Claude Sonnet 4.6 (Thinking)
+- **Human Prompt:** `peta nya masih berdempetan, beri jarak dengan kolom nya agar terlihat rapih`
+- **TLDR AI agents done:** Menambahkan utility class gap-8, gap-10, dan gap-12 di index.css untuk memberikan jarak antar kolom.
+- **file changed:**
+  - `resources/css/index.css`
+
+---
+
+### Timestamp: 2026-08-08 13:45:53
+
+- **Model used:** Gemini 3.6 Flash (High)
+- **Human Prompt:** `yang di beri jarak yang ini sectionnya agar tidak berdempetan.`
+- **TLDR AI agents done:** Membuat class CSS khusus .about-grid dan .about-features-grid dengan gap 4.5rem hingga 5.5rem antara Peta Live Indonesia dan kartu fitur.
+- **file changed:**
+  - `resources/css/LandingPage.css`
+  - `resources/js/pages/LandingPage.jsx`
+
+---
+
+### Timestamp: 2026-08-08 13:47:03
+
+- **Model used:** Gemini 3.6 Flash (High)
+- **Human Prompt:** `masih seperti ini.`
+- **TLDR AI agents done:** Melakukan kompilasi aset statis Vite (npm run build) dan mengaktifkan Vite dev server agar perubahan CSS/JS langsung ter-load oleh browser.
+- **file changed:**
+  - `public/build/*`
+  - `public/hot`
+
+---
+
+### Timestamp: 2026-08-08 13:50:25
+
+- **Model used:** Gemini 3.6 Flash (High)
+- **Human Prompt:** `masukkan prompt ke log.md jangan lupa hrs ada model ai dan timestamp nya`
+- **TLDR AI agents done:** Menambahkan catatan seluruh riwayat prompt terbaru, model AI yang digunakan, dan timestamp ke dalam log.md.
+- **file changed:**
+  - `log.md`
