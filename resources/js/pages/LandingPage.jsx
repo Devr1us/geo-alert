@@ -145,9 +145,17 @@ async function fetchBmkgEvents() {
       location: g.Wilayah || '',
       lat: isNaN(lat) ? -2.5 : lat,
       lng: isNaN(lng) ? 117.5 : lng,
+      // Bug fix 2: tambahkan field time dari Tanggal + Jam (mengikuti pola MapPage.jsx)
+      time: g.Tanggal && g.Jam ? `${g.Tanggal} ${g.Jam}` : '—',
       risk,
       magnitude: g.Magnitude,
-      province: (g.Wilayah || '').split(',').pop()?.trim() || '',
+      // Bug fix 3: format Wilayah BMKG adalah "10 km BaratLaut KOTA-PROVINSI"
+      // bukan CSV — split koma salah. Ambil bagian setelah tanda "-" terakhir.
+      province: (() => {
+        const wilayah = g.Wilayah || '';
+        const lastDash = wilayah.lastIndexOf('-');
+        return lastDash !== -1 ? wilayah.slice(lastDash + 1).trim() : wilayah.trim();
+      })(),
     };
   });
 }

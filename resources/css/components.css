@@ -103,7 +103,17 @@
   color: var(--color-status-safe);
 }
 
-/* Navbar */
+/* ============================================================
+   Navbar — sticky, tinggi aktual ±71px desktop / ±64px mobile
+   --navbar-height dipakai sebagai scroll-margin-top pada semua
+   section yang jadi target anchor link.
+   ============================================================ */
+
+/* Default (desktop) navbar height */
+:root {
+  --navbar-height: 71px;
+}
+
 .navbar {
   position: sticky;
   top: 0;
@@ -157,6 +167,11 @@
 }
 
 @media (max-width: 768px) {
+  /* Override navbar height untuk mobile — konten nav sedikit lebih kecil */
+  :root {
+    --navbar-height: 64px;
+  }
+
   .nav-links {
     display: none;
   }
@@ -175,6 +190,25 @@
   .nav-toggle {
     display: block;
   }
+}
+
+/* ============================================================
+   Scroll-anchor fix — semua section yang jadi target anchor
+   link di Navbar.jsx (#tentang, #cara-penggunaan, #tanya-ai)
+   dan Footer.jsx (#kontak) mendapat scroll-margin-top sebesar
+   tinggi navbar agar konten tidak tertutup saat scroll-to-anchor
+   (baik via klik link maupun URL hash langsung / bookmark).
+
+   Nilai mengikuti --navbar-height yang berubah per breakpoint,
+   tanpa JavaScript — konsisten dengan scroll-behavior: smooth
+   yang sudah ada di index.css.
+   ============================================================ */
+
+#tentang,
+#cara-penggunaan,
+#tanya-ai,
+#kontak {
+  scroll-margin-top: var(--navbar-height);
 }
 
 /* Footer */
