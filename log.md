@@ -501,3 +501,20 @@ Yang Diminta:
   - `resources/js/components/AIChat.jsx`
   - `log.md`
   - `public/build/*`
+
+---
+
+### Timestamp: 2026-08-09 00:50:50
+
+- **Model used:** Gemini 3.6 Flash (High)
+- **Human Prompt:** `Fix & Redesign — Hapus 3D, Redesign Hero Section, Fix Navbar Background Bug (Recurring)`
+- **TLDR AI agents done:** Menghapus seluruh aset & komponen model 3D (`HeroModel3D.jsx`, `public/models/`, serta dependency `three`, `@react-three/fiber`, `@react-three/drei` dari `package.json`). Meredesain Hero Section dengan animasi urutan teks bertahap (*sequential typography animation*) yang santai & tenang (Judul → Subtitle → Deskripsi → CTA → Live Status Card). Memperbaiki *Navbar Background Bug* secara permanen dengan mengidentifikasi akar masalah (`paddingTop` global `<main>` di `App.jsx` yang memotong background hero di `y = 96px`), menghapus `paddingTop` pada `<main>`, serta mengatur `.hero-section` membentang mulus dari `y = 0` di belakang navbar melayang.
+- **file changed:**
+  - `package.json`
+  - `resources/js/App.jsx`
+  - `resources/js/pages/LandingPage.jsx`
+  - `resources/css/LandingPage.css`
+  - `resources/css/MapPage.css`
+  - `resources/js/pages/PrivacyPage.jsx`
+  - `resources/js/pages/TermsPage.jsx`
+  - `public/build/*`
