@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, AlertTriangle, RefreshCw, Activity, Droplets, Wind, Mountain, Bot, Map as MapIcon, Info } from 'lucide-react';
+import { Search, AlertTriangle, RefreshCw, Activity, Droplets, Wind, Mountain, Bot, Map as MapIcon, Info, X } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -105,10 +105,7 @@ function ChangeView({ center, zoom }) {
   return null;
 }
 
-// =============================================================
-// Poin 5: Nominatim geocoding untuk search bar
-// Dengan debounce 600ms untuk menghindari terlalu banyak request
-// =============================================================
+// Nominatim geocoding untuk search bar
 async function geocodeLocation(query) {
   const encoded = encodeURIComponent(query);
   const url = `https://nominatim.openstreetmap.org/search?q=${encoded}&countrycodes=id&format=json&limit=1&accept-language=id`;
@@ -137,10 +134,11 @@ export default function MapPage() {
   const [mapCenter, setMapCenter] = useState(INDONESIA_CENTER);
   const [mapZoom, setMapZoom] = useState(5);
   const [sidebarTab, setSidebarTab] = useState('map');
+  const [noticeDismissed, setNoticeDismissed] = useState(false);
 
-  // Poin 5: geocoding search state
+  // Geocoding search state
   const [geocodeLoading, setGeocodeLoading] = useState(false);
-  const [geocodeResult, setGeocodeResult] = useState(null); // { displayName, lat, lng } | null
+  const [geocodeResult, setGeocodeResult] = useState(null);
   const searchDebounceRef = useRef(null);
 
   const fetchData = async () => {
@@ -198,13 +196,11 @@ export default function MapPage() {
         };
       });
 
-      // Gabungkan dengan data banjir & longsor (contoh) — selalu ditampilkan dengan label jelas
       setData([...formattedData, ...SAMPLE_FLOOD_LANDSLIDE]);
       setLastUpdate(new Date());
     } catch (err) {
       console.error('[GeoAlert] Gagal mengambil data BMKG:', err.message);
       setError(`Gagal memuat data BMKG: ${err.message}. Menampilkan contoh tampilan data.`);
-      // Fallback ke data sample (gempa + banjir + longsor)
       setData([
         { id: 's1', type: 'Gempa Bumi', location: 'Selatan Jawa Barat', lat: -7.5, lng: 107.0, time: '(contoh data)', risk: 'danger', magnitude: '5.2', depth: '10 km', step: 'Berlindung di bawah meja kuat.', isSample: true },
         { id: 's4', type: 'Gempa Bumi', location: 'Palu, Sulawesi Tengah', lat: -0.9, lng: 119.87, time: '(contoh data)', risk: 'standby', magnitude: '4.1', depth: '30 km', step: 'Tetap tenang.', isSample: true },
@@ -222,39 +218,31 @@ export default function MapPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // =============================================================
-  // Poin 5: Geocoding saat user berhenti mengetik (debounce 600ms)
-  // =============================================================
+  // Geocoding saat user berhenti mengetik (debounce 600ms)
   useEffect(() => {
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     setGeocodeResult(null);
 
     if (search.trim().length < 3) return;
 
-    // Cek dulu apakah ada item yang cocok dari data lokal
     const localMatch = data.find(item =>
       item.location.toLowerCase().includes(search.toLowerCase())
     );
-    if (localMatch) {
-      // Ada di data — tidak perlu geocode, filter sudah cukup
-      return;
-    }
+    if (localMatch) return;
 
-    // Tidak ada di data → geocode via Nominatim
     searchDebounceRef.current = setTimeout(async () => {
       setGeocodeLoading(true);
       try {
         const result = await geocodeLocation(search.trim());
         setGeocodeResult(result);
       } catch (e) {
-        // Geocoding gagal — diam saja, filter teks masih berjalan
+        // Geocoding fail silent fallback
       } finally {
         setGeocodeLoading(false);
       }
     }, 600);
   }, [search, data]);
 
-  // Pan peta ke hasil geocoding
   const handleGeocodePan = () => {
     if (!geocodeResult) return;
     setMapCenter([geocodeResult.lat, geocodeResult.lng]);
@@ -287,327 +275,324 @@ export default function MapPage() {
 
   return (
     <>
-      <div className="map-page-container">
-      {/* Injected marker animation styles */}
-      <style>{`
-        @keyframes marker-pulse {
-          0%   { transform: scale(1); opacity: 1; }
-          70%  { transform: scale(1); opacity: 1; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        @keyframes marker-ring {
-          0%   { transform: scale(1); opacity: 0.5; }
-          100% { transform: scale(2.5); opacity: 0; }
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-      `}</style>
+      <div className="map-page-wrapper">
+        {/* Injected marker animation styles */}
+        <style>{`
+          @keyframes marker-pulse {
+            0%   { transform: scale(1); opacity: 1; }
+            70%  { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+          }
+          @keyframes marker-ring {
+            0%   { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(2.5); opacity: 0; }
+          }
+          @keyframes spin { 100% { transform: rotate(360deg); } }
+        `}</style>
 
-      {/* Main Map Area */}
-      <div className="map-main">
-        {/* Map header */}
-        <div className="map-header">
-          {/* Poin 5: Search bar dengan geocoding */}
-          <div style={{ position: 'relative', flexGrow: 1 }}>
-            <div className="search-bar">
-              <Search size={20} color="var(--color-text-muted)" />
-              <input
-                type="text"
-                placeholder="Cari kota atau provinsi (geocoding aktif)..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                aria-label="Cari lokasi"
-              />
-              {geocodeLoading && (
-                <RefreshCw size={14} color="var(--color-text-muted)" style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
+        <div className="map-page-container">
+          {/* Main Map Card */}
+          <div className="map-main-card">
+            {/* Floating Toolbar Overlay */}
+            <div className="map-toolbar-floating">
+              {/* Search bar dengan geocoding */}
+              <div style={{ position: 'relative', flexGrow: 1, maxWidth: '400px' }}>
+                <div className="search-bar-pill">
+                  <Search size={18} color="var(--color-primary)" />
+                  <input
+                    type="text"
+                    placeholder="Cari lokasi atau wilayah..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    aria-label="Cari lokasi"
+                  />
+                  {geocodeLoading && (
+                    <RefreshCw size={14} color="var(--color-primary)" style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
+                  )}
+                </div>
+                {/* Geocoding result suggestion */}
+                {geocodeResult && !geocodeLoading && (
+                  <button
+                    onClick={handleGeocodePan}
+                    style={{
+                      position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 1001,
+                      background: 'white', border: '1px solid var(--color-border)',
+                      borderRadius: 'var(--radius-md)', padding: '10px 14px',
+                      textAlign: 'left', cursor: 'pointer', fontSize: '0.85rem',
+                      boxShadow: 'var(--shadow-md)',
+                      display: 'flex', alignItems: 'center', gap: '8px',
+                    }}
+                  >
+                    <Search size={14} color="var(--color-primary)" />
+                    <span>
+                      <strong>Pergi ke:</strong> {geocodeResult.displayName.split(',').slice(0, 3).join(', ')}
+                    </span>
+                  </button>
+                )}
+              </div>
+
+              {/* Filter chips pills */}
+              <div className="filter-chips-pill">
+                {['Semua', 'Gempa', 'Banjir', 'Cuaca Ekstrem', 'Longsor'].map(chip => (
+                  <button
+                    key={chip}
+                    className={`chip-pill ${activeFilter === chip ? 'active' : ''}`}
+                    onClick={() => setActiveFilter(chip)}
+                    aria-pressed={activeFilter === chip}
+                  >
+                    {chip}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Floating Notice Toast */}
+            {!noticeDismissed && (hasSampleItems || error) && (
+              <div className="map-notice-toast">
+                <Info size={16} color="var(--color-standby)" style={{ flexShrink: 0 }} />
+                <div style={{ flex: 1 }}>
+                  {error ? (
+                    <span>{error}</span>
+                  ) : (
+                    <span>
+                      Data banjir &amp; longsor: <strong>contoh tampilan data</strong> — API resmi BNPB belum publik.
+                    </span>
+                  )}
+                </div>
+                <button
+                  className="map-notice-toast-close"
+                  onClick={() => setNoticeDismissed(true)}
+                  title="Tutup pemberitahuan"
+                  aria-label="Tutup"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
+
+            {/* Leaflet Map Container */}
+            <div className="map-container">
+              <MapContainer
+                center={INDONESIA_CENTER}
+                zoom={5}
+                style={{ height: '100%', width: '100%' }}
+                maxBounds={INDONESIA_BOUNDS}
+                maxBoundsViscosity={1.0}
+                minZoom={4}
+              >
+                <SetBounds />
+                <ChangeView center={mapCenter} zoom={mapZoom} />
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+
+                {!loading && filteredData.map(item => (
+                  <Marker
+                    key={item.id}
+                    position={[item.lat, item.lng]}
+                    icon={createCustomIcon(item.risk)}
+                  >
+                    <Popup maxWidth={300}>
+                      <div style={{ minWidth: '240px', fontFamily: 'Inter, sans-serif' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                          <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1rem' }}>
+                            {getIcon(item.type)} {item.type}
+                          </strong>
+                          {getRiskLabel(item.risk)}
+                        </div>
+                        <div style={{ fontSize: '0.875rem', marginBottom: '6px' }}>
+                          <strong>Lokasi:</strong> {item.location}
+                        </div>
+                        <div style={{ fontFamily: 'Fira Code, monospace', fontSize: '0.8rem', color: '#777', marginBottom: '8px' }}>
+                          {item.time}
+                        </div>
+                        {item.isSample && (
+                          <div style={{
+                            background: 'rgba(74,144,217,0.1)', borderRadius: '4px',
+                            padding: '4px 8px', fontSize: '0.72rem', color: '#4A90D9',
+                            marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px',
+                          }}>
+                            <Info size={11} /> contoh tampilan data
+                          </div>
+                        )}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
+                          <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>Magnitudo</div>
+                            <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.1rem', color: '#0E2A5C' }}>{item.magnitude}</div>
+                          </div>
+                          <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>Kedalaman</div>
+                            <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.1rem', color: '#0E2A5C' }}>{item.depth}</div>
+                          </div>
+                        </div>
+                        <div style={{ fontSize: '0.85rem', padding: '10px', background: 'rgba(192,73,43,0.08)', borderRadius: '8px', borderLeft: '3px solid #C0492B', lineHeight: '1.5' }}>
+                          <strong>⚠️ Rekomendasi:</strong><br />{item.step}
+                        </div>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
+
+              {loading && (
+                <div style={{
+                  position: 'absolute', inset: 0, zIndex: 1000,
+                  background: 'rgba(247,242,234,0.85)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  gap: '16px', borderRadius: 'var(--radius-xl)'
+                }}>
+                  <RefreshCw size={32} color="var(--color-primary)" style={{ animation: 'spin 1s linear infinite' }} />
+                  <p style={{ color: 'var(--color-primary)', fontWeight: '600' }}>Memuat data BMKG…</p>
+                </div>
               )}
             </div>
-            {/* Geocoding result suggestion */}
-            {geocodeResult && !geocodeLoading && (
-              <button
-                onClick={handleGeocodePan}
-                style={{
-                  position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 1000,
-                  background: 'white', border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-sm)', padding: '10px 14px',
-                  textAlign: 'left', cursor: 'pointer', fontSize: '0.85rem',
-                  boxShadow: 'var(--shadow-md)',
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                }}
-              >
-                <Search size={13} color="var(--color-primary)" />
-                <span>
-                  <strong>Pergi ke:</strong> {geocodeResult.displayName.split(',').slice(0, 3).join(', ')}
-                </span>
-              </button>
-            )}
           </div>
 
-          <div className="filter-chips">
-            {['Semua', 'Gempa', 'Banjir', 'Cuaca Ekstrem', 'Longsor'].map(chip => (
-              <button
-                key={chip}
-                className={`chip ${activeFilter === chip ? 'active' : ''}`}
-                onClick={() => setActiveFilter(chip)}
-                aria-pressed={activeFilter === chip}
-              >
-                {chip}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Error Banner */}
-        {error && (
-          <div style={{
-            background: 'rgba(192,73,43,0.1)', borderLeft: '4px solid var(--color-alert)',
-            padding: '10px 16px', fontSize: '0.875rem',
-            color: 'var(--color-alert)', display: 'flex', gap: '8px', alignItems: 'center',
-          }}>
-            <AlertTriangle size={16} />
-            {error}
-            {isSampleData && <em style={{ color: 'var(--color-text-muted)' }}>(contoh tampilan data)</em>}
-          </div>
-        )}
-
-        {/* Banner: data banjir/longsor selalu tampil sebagai label jelas */}
-        {hasSampleItems && !isSampleData && (
-          <div style={{
-            background: 'rgba(74,144,217,0.08)', borderLeft: '4px solid var(--color-standby)',
-            padding: '8px 16px', fontSize: '0.8rem',
-            color: 'var(--color-standby)', display: 'flex', gap: '8px', alignItems: 'center',
-          }}>
-            <Info size={14} />
-            Data banjir &amp; longsor: <strong>contoh tampilan data</strong> — API publik BNPB/InaRISK belum tersedia tanpa autentikasi resmi.
-          </div>
-        )}
-
-        {/* Leaflet Map */}
-        <div className="map-container">
-          <MapContainer
-            center={INDONESIA_CENTER}
-            zoom={5}
-            style={{ height: '100%', width: '100%' }}
-            maxBounds={INDONESIA_BOUNDS}
-            maxBoundsViscosity={1.0}
-            minZoom={4}
-          >
-            <SetBounds />
-            <ChangeView center={mapCenter} zoom={mapZoom} />
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-
-            {!loading && filteredData.map(item => (
-              <Marker
-                key={item.id}
-                position={[item.lat, item.lng]}
-                icon={createCustomIcon(item.risk)}
-              >
-                <Popup maxWidth={300}>
-                  <div style={{ minWidth: '240px', fontFamily: 'Inter, sans-serif' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                      <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1rem' }}>
-                        {getIcon(item.type)} {item.type}
-                      </strong>
-                      {getRiskLabel(item.risk)}
-                    </div>
-                    <div style={{ fontSize: '0.875rem', marginBottom: '6px' }}>
-                      <strong>Lokasi:</strong> {item.location}
-                    </div>
-                    <div style={{ fontFamily: 'Fira Code, monospace', fontSize: '0.8rem', color: '#777', marginBottom: '8px' }}>
-                      {item.time}
-                    </div>
-                    {/* Label contoh data di popup */}
-                    {item.isSample && (
-                      <div style={{
-                        background: 'rgba(74,144,217,0.1)', borderRadius: '4px',
-                        padding: '4px 8px', fontSize: '0.72rem', color: '#4A90D9',
-                        marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px',
-                      }}>
-                        <Info size={11} /> contoh tampilan data
-                      </div>
-                    )}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
-                      <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>Magnitudo</div>
-                        <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.1rem', color: '#0E2A5C' }}>{item.magnitude}</div>
-                      </div>
-                      <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>Kedalaman</div>
-                        <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.1rem', color: '#0E2A5C' }}>{item.depth}</div>
-                      </div>
-                    </div>
-                    <div style={{ fontSize: '0.85rem', padding: '10px', background: 'rgba(192,73,43,0.08)', borderRadius: '8px', borderLeft: '3px solid #C0492B', lineHeight: '1.5' }}>
-                      <strong>⚠️ Rekomendasi:</strong><br />{item.step}
-                    </div>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
-
-          {loading && (
-            <div style={{
-              position: 'absolute', inset: 0, zIndex: 1000,
-              background: 'rgba(247,242,234,0.85)',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              gap: '16px',
-            }}>
-              <RefreshCw size={32} color="var(--color-primary)" style={{ animation: 'spin 1s linear infinite' }} />
-              <p style={{ color: 'var(--color-primary)', fontWeight: '600' }}>Memuat data BMKG…</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Sidebar — Map Info */}
-      <div className="map-sidebar">
-        {/* Tab switcher / shortcut */}
-        <div style={{
-          display: 'flex', borderBottom: '1px solid var(--color-border)',
-          background: 'var(--color-white)', flexShrink: 0,
-        }}>
-          <button
-            style={{
-              flex: 1, padding: '14px', border: 'none', fontWeight: '600',
-              fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-              background: 'var(--color-bg)',
-              color: 'var(--color-primary)',
-              borderBottom: '3px solid var(--color-primary)',
-            }}
-          >
-            <MapIcon size={16} /> Peta &amp; Legenda
-          </button>
-          <button
-            onClick={() => {
-              document.getElementById('tanya-ai')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            style={{
-              flex: 1, padding: '14px', border: 'none', cursor: 'pointer', fontWeight: '600',
-              fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-              background: 'var(--color-white)',
-              color: 'var(--color-primary)',
-              borderBottom: '3px solid transparent',
-              transition: 'all 0.2s',
-            }}
-            title="Ke Section Tanya AI di Bawah"
-          >
-            <Bot size={16} /> Tanya AI ↓
-          </button>
-        </div>
-
-        {/* Sidebar Content: Map Info */}
-        <div className="sidebar-header">
-          <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Legenda Risiko</h3>
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--color-alert)' }}></div> Bahaya Tinggi</div>
-            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--color-status-warning)' }}></div> Waspada</div>
-            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--color-standby)' }}></div> Siaga</div>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--color-border)' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-              <span className="mono">{lastUpdate.toLocaleTimeString('id-ID')}</span>
-              {isSampleData && <em> (contoh tampilan data)</em>}
-            </span>
-            <button
-              onClick={fetchData}
-              style={{ display: 'flex', gap: '4px', alignItems: 'center', padding: '4px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', background: 'transparent', cursor: 'pointer', fontSize: '0.75rem', color: 'var(--color-primary)' }}
-            >
-              <RefreshCw size={12} /> Segarkan
-            </button>
-          </div>
-        </div>
-
-        <div className="sidebar-content">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <h4 style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Log Peringatan Aktif</h4>
-          </div>
-
-          {/* Label: data contoh banjir/longsor di sidebar */}
-          {hasSampleItems && (
-            <div style={{
-              background: 'rgba(74,144,217,0.06)', border: '1px solid rgba(74,144,217,0.2)',
-              borderRadius: 'var(--radius-sm)', padding: '6px 10px',
-              fontSize: '0.75rem', color: 'var(--color-standby)', marginBottom: '10px',
-              display: 'flex', alignItems: 'center', gap: '6px',
-            }}>
-              <Info size={12} /> Item berlabel "(contoh data)" adalah ilustrasi tampilan — bukan kejadian nyata
-            </div>
-          )}
-
-          {loading
-            ? [1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: '80px', marginBottom: '12px', borderRadius: 'var(--radius-md)' }} />)
-            : filteredData.length > 0
-              ? filteredData.map(item => (
-                <div
-                  key={item.id}
-                  className="alert-log-item"
-                  onClick={() => { setMapCenter([item.lat, item.lng]); setMapZoom(9); }}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`Lihat ${item.type} di ${item.location}`}
+          {/* Sidebar Floating Card Panel */}
+          <div className="map-sidebar-card">
+            {/* Segmented Control Header */}
+            <div className="sidebar-segmented-header">
+              <div className="segmented-control">
+                <button
+                  className={`segmented-tab ${sidebarTab === 'map' ? 'active' : ''}`}
+                  onClick={() => setSidebarTab('map')}
                 >
-                  <div className="alert-log-header">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600', fontSize: '0.9rem' }}>
-                      {getIcon(item.type)} {item.type}
-                      {item.isSample && (
-                        <span style={{ fontSize: '0.65rem', color: 'var(--color-standby)', fontWeight: '400', background: 'rgba(74,144,217,0.1)', padding: '1px 5px', borderRadius: '3px' }}>
-                          contoh data
-                        </span>
-                      )}
-                    </div>
-                    {getRiskLabel(item.risk)}
-                  </div>
-                  <div style={{ fontSize: '0.875rem', marginBottom: '4px', color: 'var(--color-text-main)' }}>{item.location}</div>
-                  <div style={{ fontSize: '0.8rem' }}>
-                    <span className="mono" style={{ color: 'var(--color-text-muted)' }}>{item.time}</span>
-                    {item.magnitude && item.magnitude !== '-' && !item.isSample && (
-                      <span className="mono" style={{ marginLeft: '8px', color: 'var(--color-primary)', fontWeight: '600' }}>M {item.magnitude}</span>
-                    )}
-                  </div>
-                </div>
-              ))
-              : <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: '2rem 0' }}>Tidak ada data sesuai filter.</p>
-          }
-        </div>
-      </div>
-    </div>
+                  <MapIcon size={15} /> Peta &amp; Legenda
+                </button>
+                <button
+                  className={`segmented-tab ${sidebarTab === 'ai' ? 'active' : ''}`}
+                  onClick={() => {
+                    setSidebarTab('ai');
+                    document.getElementById('tanya-ai')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  <Bot size={15} /> Tanya AI ↓
+                </button>
+              </div>
+            </div>
 
-    {/* =================== SECTION: TANYA ASISTEN AI =================== */}
-    <section id="tanya-ai" style={{ background: 'var(--color-bg)', padding: '4rem 0 5rem', borderTop: '1px solid var(--color-border)' }}>
-      <div className="container">
-        <div className="ask-ai-section" style={{ margin: 0 }}>
-          <div style={{ padding: '0 clamp(1rem, 3vw, 2rem)', position: 'relative', zIndex: 1 }}>
-            <div className="grid md:grid-cols-2 gap-10 items-center">
-              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <div style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '8px',
-                  background: 'rgba(255,255,255,0.12)', color: 'white',
-                  padding: '0.5rem 1rem', borderRadius: 'var(--radius-full)',
-                  marginBottom: '1.25rem', fontWeight: '600', letterSpacing: '0.05em',
-                  width: 'fit-content', fontSize: '0.85rem'
+            {/* Sidebar Legend Card */}
+            <div className="sidebar-legend-card">
+              <div className="sidebar-section-label">Legenda Risiko</div>
+              <div className="legend-chips-group">
+                <div className="legend-chip danger">
+                  <span className="legend-chip-dot"></span> Bahaya Tinggi
+                </div>
+                <div className="legend-chip warning">
+                  <span className="legend-chip-dot"></span> Waspada
+                </div>
+                <div className="legend-chip standby">
+                  <span className="legend-chip-dot"></span> Siaga
+                </div>
+              </div>
+
+              <div className="sidebar-status-bar">
+                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                  Diperbarui: <span className="mono">{lastUpdate.toLocaleTimeString('id-ID')}</span>
+                </span>
+                <button
+                  onClick={fetchData}
+                  style={{
+                    display: 'flex', gap: '4px', alignItems: 'center',
+                    padding: '4px 10px', borderRadius: 'var(--radius-full)',
+                    border: '1px solid var(--color-border)', background: 'white',
+                    cursor: 'pointer', fontSize: '0.75rem', color: 'var(--color-primary)',
+                    fontWeight: '600', boxShadow: 'var(--shadow-sm)'
+                  }}
+                >
+                  <RefreshCw size={12} /> Segarkan
+                </button>
+              </div>
+            </div>
+
+            {/* Log Peringatan Container */}
+            <div className="sidebar-log-container">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span className="sidebar-section-label">Log Peringatan Aktif</span>
+                <span style={{
+                  fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-primary)',
+                  background: 'rgba(14,42,92,0.06)', padding: '2px 8px', borderRadius: 'var(--radius-full)'
                 }}>
-                  <Bot size={18} /> ASISTEN PANDUAN
-                </div>
-                <h2 style={{ color: 'white', marginBottom: '1.25rem', fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)' }}>
-                  Tanya Asisten Panduan
-                </h2>
-                <p style={{ color: 'rgba(255,255,255,0.85)', marginBottom: '2rem', fontSize: '1.05rem', lineHeight: '1.6' }}>
-                  Dapatkan jawaban cepat seputar kesiapsiagaan bencana, prosedur evakuasi, dan pertolongan pertama langsung dari asisten berbasis panduan resmi BMKG &amp; BNPB.
-                </p>
+                  {filteredData.length} Bencana
+                </span>
               </div>
 
-              {/* Full section AI chat */}
-              <div className="glass-dark" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', height: '440px' }}>
-                <AIChat isFloating={false} />
-              </div>
+              {loading
+                ? [1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: '84px', borderRadius: 'var(--radius-lg)' }} />)
+                : filteredData.length > 0
+                  ? filteredData.map(item => (
+                    <div
+                      key={item.id}
+                      className="alert-log-card"
+                      onClick={() => { setMapCenter([item.lat, item.lng]); setMapZoom(9); }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Lihat ${item.type} di ${item.location}`}
+                    >
+                      <div className="alert-log-card-header">
+                        <div className="alert-type-title">
+                          {getIcon(item.type)} {item.type}
+                          {item.isSample && (
+                            <span style={{ fontSize: '0.65rem', color: 'var(--color-standby)', fontWeight: '500', background: 'rgba(74,144,217,0.1)', padding: '1px 6px', borderRadius: 'var(--radius-full)' }}>
+                              contoh data
+                            </span>
+                          )}
+                        </div>
+                        {getRiskLabel(item.risk)}
+                      </div>
+                      <div style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '4px', color: 'var(--color-text-main)' }}>
+                        {item.location}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span className="mono" style={{ color: 'var(--color-text-muted)' }}>{item.time}</span>
+                        {item.magnitude && item.magnitude !== '-' && !item.isSample && (
+                          <span className="mono" style={{ color: 'var(--color-primary)', fontWeight: '700', background: 'rgba(14,42,92,0.05)', padding: '2px 6px', borderRadius: '4px' }}>
+                            M {item.magnitude}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                  : <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: '2rem 0' }}>Tidak ada data sesuai filter.</p>
+              }
             </div>
           </div>
         </div>
       </div>
-    </section>
-  </>
-);
+
+      {/* SECTION: TANYA ASISTEN AI */}
+      <section id="tanya-ai" style={{ background: 'var(--color-bg)', padding: '4rem 0 5rem', borderTop: '1px solid var(--color-border)' }}>
+        <div className="container">
+          <div className="ask-ai-section" style={{ margin: 0 }}>
+            <div style={{ padding: '0 clamp(1rem, 3vw, 2rem)', position: 'relative', zIndex: 1 }}>
+              <div className="grid md:grid-cols-2 gap-10 items-center">
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <div style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '8px',
+                    background: 'rgba(255,255,255,0.12)', color: 'white',
+                    padding: '0.5rem 1rem', borderRadius: 'var(--radius-full)',
+                    marginBottom: '1.25rem', fontWeight: '600', letterSpacing: '0.05em',
+                    width: 'fit-content', fontSize: '0.85rem'
+                  }}>
+                    <Bot size={18} /> ASISTEN PANDUAN
+                  </div>
+                  <h2 style={{ color: 'white', marginBottom: '1.25rem', fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)' }}>
+                    Tanya Asisten Panduan
+                  </h2>
+                  <p style={{ color: 'rgba(255,255,255,0.85)', marginBottom: '2rem', fontSize: '1.05rem', lineHeight: '1.6' }}>
+                    Dapatkan jawaban cepat seputar kesiapsiagaan bencana, prosedur evakuasi, dan pertolongan pertama langsung dari asisten berbasis panduan resmi BMKG &amp; BNPB.
+                  </p>
+                </div>
+
+                <div className="glass-dark" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', height: '440px' }}>
+                  <AIChat isFloating={false} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
 }
