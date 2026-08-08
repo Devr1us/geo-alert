@@ -1,74 +1,48 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Activity, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isHidden, setIsHidden] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const location = useLocation();
 
   const toggleMenu = () => {
-    if (!isOpen) {
-      setIsHidden(false);
-    }
     setIsOpen(!isOpen);
   };
 
   useEffect(() => {
     let lastScrollY = window.scrollY || document.documentElement.scrollTop || 0;
-    let ticking = false;
 
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    const handleScroll = (e) => {
+      let currentScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
 
-      // Scrolled state: aktif jika scrollY > 20px
-      setIsScrolled(currentScrollY > 20);
-
-      // Di dekat/paling atas halaman (scrollY <= 15), navbar selalu dimunculkan
-      if (currentScrollY <= 15) {
-        setIsHidden(false);
-      } else if (!isOpen) {
-        // Hitung selisih scroll untuk menentukan arah
-        const diff = currentScrollY - lastScrollY;
-
-        if (diff > 5 && currentScrollY > 60) {
-          // Scroll ke BAWAH -> sembunyikan navbar
-          setIsHidden(true);
-        } else if (diff < -5) {
-          // Scroll ke ATAS -> munculkan navbar kembali
-          setIsHidden(false);
-        }
+      if (e && e.target && e.target !== document && e.target !== window && typeof e.target.scrollTop === 'number') {
+        currentScrollY = e.target.scrollTop;
       }
 
-      lastScrollY = currentScrollY > 0 ? currentScrollY : 0;
-      ticking = false;
-    };
-
-    const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(handleScroll);
-        ticking = true;
+      if (currentScrollY <= 20) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY + 5) {
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY - 5) {
+        setIsVisible(true);
       }
+
+      lastScrollY = currentScrollY;
     };
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    document.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
+    return () => window.removeEventListener('scroll', handleScroll, { capture: true });
+  }, []);
 
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      document.removeEventListener('scroll', onScroll);
-    };
-  }, [isOpen]);
-
-  const navClass = `navbar ${isScrolled ? 'navbar-scrolled' : ''} ${isHidden && !isOpen ? 'navbar-hidden' : ''}`;
+  const navClass = `navbar ${!isVisible && !isOpen ? 'navbar-hidden' : ''}`;
 
   return (
     <nav className={navClass}>
       <div className="container">
-        <Link to="/" className="nav-brand">
-          <Activity size={28} color="var(--color-primary)" />
-          GeoAlert
+        <Link to="/" className="nav-brand" aria-label="GeoAlert">
+          <img src="/logo-geoalert.svg" alt="GeoAlert" className="nav-logo" />
         </Link>
         
         <div className={`nav-links ${isOpen ? 'active' : ''}`}>

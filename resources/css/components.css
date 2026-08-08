@@ -111,36 +111,34 @@
 
 /* Default (desktop) navbar height */
 :root {
-  --navbar-height: 71px;
+  --navbar-height: 80px;
 }
 
 .navbar {
   position: fixed;
-  top: 0;
+  top: 16px;
   left: 0;
   right: 0;
-  width: 100%;
+  margin: 0 auto;
+  width: calc(100% - 32px);
+  max-width: 1100px;
   z-index: 1000;
-  background: rgba(247, 242, 234, 0.75);
+  background: rgba(247, 242, 234, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(224, 217, 205, 0.6);
-  padding: var(--spacing-3) 0;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s ease, background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-  will-change: transform, padding, box-shadow;
-}
-
-.navbar.navbar-scrolled {
-  padding: var(--spacing-2) 0;
-  background: rgba(247, 242, 234, 0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 4px 20px rgba(14, 42, 92, 0.1);
-  border-bottom-color: rgba(224, 217, 205, 0.85);
+  border: 1px solid rgba(224, 217, 205, 0.7);
+  border-radius: 9999px;
+  padding: 0.65rem 1.5rem;
+  box-shadow: 0 10px 30px rgba(14, 42, 92, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  opacity: 1;
+  will-change: transform, opacity;
 }
 
 .navbar.navbar-hidden {
-  transform: translateY(-100%) !important;
+  transform: translateY(-150%) !important;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .navbar .container {
@@ -159,6 +157,12 @@
   gap: var(--spacing-2);
 }
 
+.nav-logo {
+  height: 30px;
+  width: auto;
+  object-fit: contain;
+}
+
 .nav-links {
   display: flex;
   gap: var(--spacing-4);
@@ -169,10 +173,34 @@
   font-weight: 500;
   color: var(--color-text-main);
   transition: color var(--transition-fast);
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 2px;
+  background-color: var(--color-primary);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.25s ease;
+}
+
+.nav-link:hover::after {
+  transform: scaleX(1);
 }
 
 .nav-link:hover {
   color: var(--color-primary);
+}
+
+.navbar .btn-primary {
+  border-radius: 9999px;
+  padding: 0.6rem 1.4rem;
 }
 
 .nav-toggle {
@@ -186,7 +214,7 @@
 @media (max-width: 768px) {
   /* Override navbar height untuk mobile — konten nav sedikit lebih kecil */
   :root {
-    --navbar-height: 64px;
+    --navbar-height: 72px;
   }
 
   .nav-links {
@@ -196,13 +224,16 @@
     display: flex;
     flex-direction: column;
     position: absolute;
-    top: 100%;
+    top: calc(100% + 12px);
     left: 0;
     right: 0;
-    background: var(--color-bg);
+    background: rgba(247, 242, 234, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     padding: var(--spacing-4);
-    border-bottom: 1px solid var(--color-border);
-    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(224, 217, 205, 0.8);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
   }
   .nav-toggle {
     display: block;

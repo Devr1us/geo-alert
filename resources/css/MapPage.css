@@ -3,7 +3,8 @@
 .map-page-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 70px); /* Adjust based on navbar height */
+  /* Navbar floating: tinggi (--navbar-height) + top offset 16px */
+  height: calc(100vh - var(--navbar-height) - 16px);
   overflow: hidden;
 }
 
