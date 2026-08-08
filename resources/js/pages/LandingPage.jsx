@@ -386,32 +386,31 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* =================== TRUST BAR =================== */}
-      <div className="trust-bar glass">
-        <div className="container">
-          <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: '600' }}>
-            Terhubung dengan sumber data resmi
-          </span>
-          <div className="trust-logos">
-            <a href="https://www.bmkg.go.id" target="_blank" rel="noopener noreferrer" className="trust-item">
-              <span className="trust-badge trust-bmkg">BMKG</span>
-              <span style={{ fontSize: '0.95rem' }}>Badan Meteorologi, Klimatologi, &amp; Geofisika</span>
-            </a>
-            <a href="https://www.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item">
-              <span className="trust-badge trust-bnpb">BNPB</span>
-              <span style={{ fontSize: '0.95rem' }}>Badan Penanggulangan Bencana</span>
-            </a>
-            <a href="https://inarisk.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item">
-              <span className="trust-badge trust-inarisk">InaRISK</span>
-              <span style={{ fontSize: '0.95rem' }}>Portal Risiko Bencana</span>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* =================== STATS — poin 4 =================== */}
+      {/* =================== STATS + TRUST BAR (gabungan) =================== */}
       <RevealSection className="stats-section">
         <div className="container">
+          {/* Trust Bar — di dalam navy */}
+          <div className="trust-bar-inline">
+            <span className="trust-bar-label">
+              Terhubung dengan sumber data resmi
+            </span>
+            <div className="trust-logos-inline">
+              <a href="https://www.bmkg.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
+                <span className="trust-badge-inline trust-bmkg-inline">BMKG</span>
+                <span>Badan Meteorologi, Klimatologi, &amp; Geofisika</span>
+              </a>
+              <a href="https://www.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
+                <span className="trust-badge-inline trust-bnpb-inline">BNPB</span>
+                <span>Badan Penanggulangan Bencana</span>
+              </a>
+              <a href="https://inarisk.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
+                <span className="trust-badge-inline trust-inarisk-inline">InaRISK</span>
+                <span>Portal Risiko Bencana</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
               {

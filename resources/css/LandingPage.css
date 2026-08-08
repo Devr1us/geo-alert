@@ -417,6 +417,75 @@
   overflow: hidden;
 }
 
+/* Trust Bar Inline (di dalam stats navy) */
+.trust-bar-inline {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.trust-bar-label {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.trust-logos-inline {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  row-gap: 0.75rem;
+}
+
+.trust-item-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.trust-item-inline:hover {
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.trust-badge-inline {
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.trust-bmkg-inline {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.trust-bnpb-inline {
+  background: rgba(192, 73, 43, 0.3);
+  color: #ffb89e;
+  border: 1px solid rgba(192, 73, 43, 0.4);
+}
+
+.trust-inarisk-inline {
+  background: rgba(74, 144, 217, 0.25);
+  color: #9ecfff;
+  border: 1px solid rgba(74, 144, 217, 0.35);
+}
+
 .stat-item {
   text-align: center;
 }
@@ -745,40 +814,38 @@
 @media (min-width: 992px) {
   .about-hero-box {
     display: block;
-    min-height: 360px;
+    min-height: 380px;
   }
 }
 
-/* Wide Rectangular Map Container (Persegi Panjang Melintang) */
+/* Wide Rectangular Map Container — 60% lebar halaman, kiri */
 .about-map-container {
   background: #F4EFE6;
-  border-radius: 28px;
-  padding: 20px; /* Jarak/margin 20px dari gambar */
+  border-radius: 24px;
+  padding: 20px;
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(224, 215, 198, 0.7);
-  width: fit-content;
-  height: fit-content;
 }
 
 @media (min-width: 992px) {
   .about-map-container {
-    width: fit-content;
-    height: fit-content;
-    padding: 20px; /* Jarak tetap 20px dari gambar di desktop */
+    width: 62%;
+    padding: 24px;
+    border-radius: 28px;
   }
 }
 
-/* Wide Rectangular Map Image (Membentang Horizontal di Kiri & Tengah) */
+/* Map Image — membentang penuh di dalam container */
 .about-map-img {
   width: 100%;
-  max-width: 520px; /* Anda cukup mengatur nilai max-width ini untuk mengatur besar/kecil container */
   height: auto;
   display: block;
   object-fit: contain;
+  border-radius: 16px;
   filter: drop-shadow(0 10px 20px rgba(14, 42, 92, 0.08));
 }
 
@@ -821,7 +888,7 @@
   }
 }
 
-/* Floating Card Overlapping Right Side */
+/* Floating Card Overlapping Right Side of Map */
 .about-floating-card {
   background: #FFFFFF;
   border-radius: 24px;
@@ -839,8 +906,8 @@
     right: 0;
     top: 50%;
     transform: translateY(-50%);
-    width: 440px;
-    max-width: 45%;
+    width: 420px;
+    max-width: 42%;
     margin-top: 0;
     padding: 2.75rem 2.5rem;
   }
