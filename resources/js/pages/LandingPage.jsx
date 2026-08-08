@@ -389,27 +389,6 @@ export default function LandingPage() {
       {/* =================== STATS + TRUST BAR (gabungan) =================== */}
       <RevealSection className="stats-section">
         <div className="container">
-          {/* Trust Bar — di dalam navy */}
-          <div className="trust-bar-inline">
-            <span className="trust-bar-label">
-              Terhubung dengan sumber data resmi
-            </span>
-            <div className="trust-logos-inline">
-              <a href="https://www.bmkg.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
-                <span className="trust-badge-inline trust-bmkg-inline">BMKG</span>
-                <span>Badan Meteorologi, Klimatologi, &amp; Geofisika</span>
-              </a>
-              <a href="https://www.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
-                <span className="trust-badge-inline trust-bnpb-inline">BNPB</span>
-                <span>Badan Penanggulangan Bencana</span>
-              </a>
-              <a href="https://inarisk.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
-                <span className="trust-badge-inline trust-inarisk-inline">InaRISK</span>
-                <span>Portal Risiko Bencana</span>
-              </a>
-            </div>
-          </div>
-
           {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
@@ -434,6 +413,27 @@ export default function LandingPage() {
                 )}
               </div>
             ))}
+          </div>
+
+          {/* Trust Bar — di dalam navy */}
+          <div className="trust-bar-inline">
+            <span className="trust-bar-label">
+              Terhubung dengan sumber data resmi
+            </span>
+            <div className="trust-logos-inline">
+              <a href="https://www.bmkg.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
+                <span className="trust-badge-inline trust-bmkg-inline">BMKG</span>
+                <span>Badan Meteorologi, Klimatologi, &amp; Geofisika</span>
+              </a>
+              <a href="https://www.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
+                <span className="trust-badge-inline trust-bnpb-inline">BNPB</span>
+                <span>Badan Penanggulangan Bencana</span>
+              </a>
+              <a href="https://inarisk.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
+                <span className="trust-badge-inline trust-inarisk-inline">InaRISK</span>
+                <span>Portal Risiko Bencana</span>
+              </a>
+            </div>
           </div>
         </div>
       </RevealSection>
@@ -529,8 +529,8 @@ export default function LandingPage() {
       <RevealSection id="cara-penggunaan" className="section">
         <div className="container">
           <h2 className="section-title">Cara Menggunakan GeoAlert</h2>
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
+          <div className="grid md:grid-cols-2 gap-12 items-start" style={{ marginTop: '4rem' }}>
+            <div className="vertical-timeline-flow">
               {[
                 { n: '1', title: 'Pilih Lokasi Anda', desc: 'Izinkan akses lokasi atau cari kota Anda secara manual di peta interaktif.', action: null },
                 { n: '2', title: 'Lihat Status Bencana', desc: 'Periksa indikator warna untuk mengetahui tingkat risiko di sekitar Anda.', action: null },
