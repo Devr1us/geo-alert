@@ -47,7 +47,7 @@ export default function Footer() {
         <div className="footer-grid">
           <div>
             <div className="nav-brand" style={{ color: 'white', marginBottom: '1rem' }}>
-              <Activity size={28} color="var(--color-alert)" />
+              <Activity size={28} color="var(--color-standby)" />
               GeoAlert
             </div>
             <p style={{ color: 'rgba(255,255,255,0.8)', marginBottom: '1.5rem' }}>
