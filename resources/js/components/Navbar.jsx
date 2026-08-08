@@ -67,7 +67,7 @@ export default function Navbar() {
     <nav className={navClass}>
       <div className="container">
         <Link to="/" className="nav-brand">
-          <Activity size={28} color="var(--color-alert)" />
+          <Activity size={28} color="var(--color-primary)" />
           GeoAlert
         </Link>
         
@@ -76,10 +76,29 @@ export default function Navbar() {
           <Link to="/#tentang" className="nav-link" onClick={() => setIsOpen(false)}>Tentang</Link>
           <Link to="/#cara-penggunaan" className="nav-link" onClick={() => setIsOpen(false)}>Cara Penggunaan</Link>
           <Link to="/peta#tanya-ai" className="nav-link" onClick={() => setIsOpen(false)}>Tanya AI</Link>
-          <Link to="/peta" className="nav-link" onClick={() => setIsOpen(false)}>Peta Bencana</Link>
+          <Link
+            to="/peta"
+            className="nav-link"
+            onClick={() => {
+              setIsOpen(false);
+              window.scrollTo(0, 0);
+              if (document.documentElement) document.documentElement.scrollTop = 0;
+            }}
+          >
+            Peta Bencana
+          </Link>
           <a href="#kontak" className="nav-link" onClick={() => setIsOpen(false)}>Kontak</a>
           
-          <Link to="/peta" className="btn btn-primary" style={{ marginLeft: '1rem' }}>
+          <Link
+            to="/peta"
+            className="btn btn-primary"
+            style={{ marginLeft: '1rem' }}
+            onClick={() => {
+              setIsOpen(false);
+              window.scrollTo(0, 0);
+              if (document.documentElement) document.documentElement.scrollTop = 0;
+            }}
+          >
             Pantau Sekarang
           </Link>
         </div>

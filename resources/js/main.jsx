@@ -10,6 +10,16 @@ import '../css/components.css';
 // sebelumnya bahkan selama jeda singkat sebelum hydration selesai.
 window.history.scrollRestoration = 'manual';
 
+// Hapus Service Worker lama di lingkungan pengujian lokal (127.0.0.1 / localhost)
+// untuk mencegah masalah white screen akibat cache Service Worker yang kadaluarsa saat rebuild asset.
+if ('serviceWorker' in navigator && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (let registration of registrations) {
+      registration.unregister();
+    }
+  });
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>

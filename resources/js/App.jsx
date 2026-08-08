@@ -51,8 +51,10 @@ function ScrollController() {
 
       requestAnimationFrame(scrollToHash);
     } else {
-      // Tidak ada hash — selalu mulai dari atas.
+      // Tidak ada hash — selalu paksa scroll ke paling atas (0, 0)
       window.scrollTo(0, 0);
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
     }
   }, [pathname, hash]); // Ulang setiap kali pathname ATAU hash berubah
 

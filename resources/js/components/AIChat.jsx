@@ -78,7 +78,7 @@ function MessageBubble({ msg }) {
         padding: '12px 16px',
         borderRadius: msg.role === 'user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
         background: msg.role === 'user'
-          ? 'linear-gradient(135deg, var(--color-alert), #A33A1F)'
+          ? 'linear-gradient(135deg, var(--color-primary), #1e5bb8)'
           : 'var(--color-white)',
         color: msg.role === 'user' ? 'white' : 'var(--color-text-main)',
         boxShadow: 'var(--shadow-sm)',
@@ -239,7 +239,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
           <button onClick={sendMessage} disabled={!input.trim()} aria-label="Kirim pesan"
             style={{
               width: '44px', height: '44px', borderRadius: '50%', border: 'none',
-              background: input.trim() ? 'var(--color-alert)' : 'var(--color-border)',
+              background: input.trim() ? 'var(--color-primary)' : 'var(--color-border)',
               color: 'white', cursor: input.trim() ? 'pointer' : 'default',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'all 0.2s', flexShrink: 0,
@@ -295,7 +295,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
         <button onClick={sendMessage} disabled={!input.trim()} aria-label="Kirim pesan"
           style={{
             width: '48px', height: '48px', borderRadius: '50%', border: 'none',
-            background: input.trim() ? 'var(--color-alert)' : 'rgba(255,255,255,0.2)',
+            background: input.trim() ? 'var(--color-primary)' : 'rgba(255,255,255,0.2)',
             color: 'white', cursor: input.trim() ? 'pointer' : 'default',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'all 0.2s', flexShrink: 0,

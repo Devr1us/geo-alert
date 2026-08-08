@@ -26,6 +26,40 @@ function useCountUp(end, duration = 2000) {
   return count;
 }
 
+// Reveal Section Component (IntersectionObserver)
+function RevealSection({ children, className = '', id = '' }) {
+  const ref = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.12 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      id={id}
+      className={`reveal-on-scroll ${isVisible ? 'is-visible' : ''} ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
 // FAQ data
 const FAQ_DATA = [
   {
@@ -52,10 +86,10 @@ const FAQ_DATA = [
 
 // Education content
 const EDUCATION_DATA = [
-  { icon: <Activity size={32} color="var(--color-alert)" />, bg: 'rgba(192, 73, 43, 0.1)', title: 'Gempa Bumi', desc: 'Getaran atau guncangan di permukaan bumi akibat pelepasan energi dari dalam secara tiba-tiba. Indonesia rawan gempa karena berada di Cincin Api Pasifik, pertemuan tiga lempeng tektonik besar dunia.' },
-  { icon: <Mountain size={32} color="var(--color-status-warning)" />, bg: 'rgba(245, 124, 0, 0.1)', title: 'Tanah Longsor', desc: 'Perpindahan massa tanah, batuan, atau material campuran yang bergerak ke bawah lereng. Sering dipicu oleh curah hujan tinggi atau gempa. Kawasan rawan: Jawa Barat, Sumatra, Sulawesi.' },
-  { icon: <Droplets size={32} color="var(--color-standby)" />, bg: 'rgba(74, 144, 217, 0.1)', title: 'Banjir', desc: 'Terbenamnya daratan karena volume air yang melebihi kapasitas drainase. Banjir bandang sangat berbahaya karena bergerak cepat dengan membawa lumpur dan material berbahaya.' },
-  { icon: <Wind size={32} color="var(--color-primary)" />, bg: 'rgba(14, 42, 92, 0.1)', title: 'Cuaca Ekstrem', desc: 'Kondisi cuaca berbahaya seperti puting beliung, hujan es, atau badai tropis. Berpotensi merusak infrastruktur dan membahayakan keselamatan jiwa, terutama di wilayah pesisir dan perbukitan.' },
+  { icon: <Activity size={32} color="var(--color-alert)" />, bg: 'rgba(192, 73, 43, 0.1)', accentColor: 'var(--color-alert)', title: 'Gempa Bumi', desc: 'Getaran atau guncangan di permukaan bumi akibat pelepasan energi dari dalam secara tiba-tiba. Indonesia rawan gempa karena berada di Cincin Api Pasifik, pertemuan tiga lempeng tektonik besar dunia.' },
+  { icon: <Mountain size={32} color="var(--color-status-warning)" />, bg: 'rgba(245, 124, 0, 0.1)', accentColor: 'var(--color-status-warning)', title: 'Tanah Longsor', desc: 'Perpindahan massa tanah, batuan, atau material campuran yang bergerak ke bawah lereng. Sering dipicu oleh curah hujan tinggi atau gempa. Kawasan rawan: Jawa Barat, Sumatra, Sulawesi.' },
+  { icon: <Droplets size={32} color="var(--color-standby)" />, bg: 'rgba(74, 144, 217, 0.1)', accentColor: 'var(--color-standby)', title: 'Banjir', desc: 'Terbenamnya daratan karena volume air yang melebihi kapasitas drainase. Banjir bandang sangat berbahaya karena bergerak cepat dengan membawa lumpur dan material berbahaya.' },
+  { icon: <Wind size={32} color="var(--color-primary)" />, bg: 'rgba(14, 42, 92, 0.1)', accentColor: 'var(--color-primary)', title: 'Cuaca Ekstrem', desc: 'Kondisi cuaca berbahaya seperti puting beliung, hujan es, atau badai tropis. Berpotensi merusak infrastruktur dan membahayakan keselamatan jiwa, terutama di wilayah pesisir dan perbukitan.' },
 ];
 
 // ============================================================
@@ -392,21 +426,24 @@ export default function LandingPage() {
             Terhubung dengan sumber data resmi
           </span>
           <div className="trust-logos">
-            <a href="https://www.bmkg.go.id" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'inherit', textDecoration: 'none' }}>
-              <Shield size={18} /> BMKG
+            <a href="https://www.bmkg.go.id" target="_blank" rel="noopener noreferrer" className="trust-item">
+              <span className="trust-badge trust-bmkg">BMKG</span>
+              <span style={{ fontSize: '0.95rem' }}>Badan Meteorologi, Klimatologi, &amp; Geofisika</span>
             </a>
-            <a href="https://www.bnpb.go.id" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'inherit', textDecoration: 'none' }}>
-              <Shield size={18} /> BNPB
+            <a href="https://www.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item">
+              <span className="trust-badge trust-bnpb">BNPB</span>
+              <span style={{ fontSize: '0.95rem' }}>Badan Penanggulangan Bencana</span>
             </a>
-            <a href="https://inarisk.bnpb.go.id" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'inherit', textDecoration: 'none' }}>
-              <Shield size={18} /> InaRISK
+            <a href="https://inarisk.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item">
+              <span className="trust-badge trust-inarisk">InaRISK</span>
+              <span style={{ fontSize: '0.95rem' }}>Portal Risiko Bencana</span>
             </a>
           </div>
         </div>
       </div>
 
       {/* =================== STATS — poin 4 =================== */}
-      <section className="stats-section">
+      <RevealSection className="stats-section">
         <div className="container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
@@ -433,28 +470,55 @@ export default function LandingPage() {
             ))}
           </div>
         </div>
-      </section>
+      </RevealSection>
 
       {/* =================== ABOUT =================== */}
-      <section id="tentang" className="section bg-white">
+      <RevealSection id="tentang" className="section bg-white">
         <div className="container">
-          <div className="text-center" style={{ marginBottom: '4rem' }}>
-            <h2 style={{ fontSize: '2.5rem' }}>Mengapa Memilih GeoAlert?</h2>
-            <p className="text-muted" style={{ maxWidth: '650px', margin: '1.5rem auto 0', fontSize: '1.125rem' }}>
-              Sistem peringatan dini yang dirancang khusus untuk kondisi geografis Indonesia —
-              memberikan informasi vital dengan visualisasi modern saat waktu sangat berharga.
-            </p>
-          </div>
+          <h2 className="section-title">Mengapa Memilih GeoAlert?</h2>
+          <p className="section-subtitle">
+            Sistem peringatan dini yang dirancang khusus untuk kondisi geografis Indonesia —
+            memberikan informasi vital dengan visualisasi modern saat waktu sangat berharga.
+          </p>
           <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div style={{ background: 'linear-gradient(135deg, #F7F2EA, #E0D9CD)', borderRadius: 'var(--radius-xl)', padding: 'clamp(1.5rem, 4vw, 3rem)', minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div className="glass" style={{ textAlign: 'center', padding: 'clamp(1.5rem, 4vw, 3rem)', borderRadius: '50%', boxShadow: 'var(--shadow-lg)', animation: 'float 8s ease-in-out infinite' }}>
-                <Map size={80} color="var(--color-primary)" style={{ margin: '0 auto 1rem' }} />
-                <p style={{ fontWeight: '600', color: 'var(--color-primary)' }}>Peta Interaktif Indonesia</p>
+            <div className="mini-map-preview-card">
+              <div className="mini-map-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="live-dot" />
+                  <span style={{ fontWeight: '700', fontSize: '0.85rem', color: 'var(--color-primary)' }}>PETA LIVE INDONESIA</span>
+                </div>
+                <span className="mono" style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>BMKG Real-time</span>
+              </div>
+
+              <div className="mini-map-graphic">
+                <img
+                  src="/images/indonesia-map-preview.png"
+                  alt="Peta Live Indonesia"
+                  className="mini-map-bg-image"
+                />
+                <div className="mini-map-grid-pattern" />
+
+                <div className="mini-map-pin" style={{ top: '64%', left: '30%' }}>
+                  <span className="pin-pulse pin-danger" />
+                  <div className="pin-tooltip">Jawa Barat • M 5.2</div>
+                </div>
+                <div className="mini-map-pin" style={{ top: '52%', left: '54%' }}>
+                  <span className="pin-pulse pin-warning" />
+                  <div className="pin-tooltip">Palu • Waspada</div>
+                </div>
+                <div className="mini-map-pin" style={{ top: '36%', left: '17%' }}>
+                  <span className="pin-pulse pin-safe" />
+                  <div className="pin-tooltip">Sumatra • Siaga</div>
+                </div>
+
+                <Link to="/peta" className="mini-map-cta btn btn-primary">
+                  <Map size={18} /> Buka Peta Interaktif Penuh
+                </Link>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-6">
               {[
-                { icon: <Activity size={40} color="var(--color-alert)" />, shadow: '0 4px 8px rgba(192,73,43,0.3)', title: 'Data Real-time', desc: 'Terhubung langsung dengan API BMKG tanpa latensi.' },
+                { icon: <Activity size={40} color="var(--color-primary)" />, shadow: '0 4px 8px rgba(14,42,92,0.3)', title: 'Data Real-time', desc: 'Terhubung langsung dengan API BMKG tanpa latensi.' },
                 { icon: <Bell size={40} color="var(--color-standby)" />, shadow: '0 4px 8px rgba(74,144,217,0.3)', title: 'Peringatan Dini', desc: 'Notifikasi instan untuk wilayah Anda dalam hitungan detik.' },
                 { icon: <Bot size={40} color="var(--color-primary)" />, shadow: '0 4px 8px rgba(14,42,92,0.3)', title: 'AI Assistant', desc: 'Panduan berbasis SOP resmi BMKG & BNPB saat kondisi darurat.' },
                 { icon: <Map size={40} color="var(--color-status-safe)" />, shadow: '0 4px 8px rgba(46,125,50,0.3)', title: 'Peta Interaktif', desc: 'Visualisasi tingkat risiko berbasis lokasi berakurasi tinggi.' },
@@ -468,12 +532,12 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-      </section>
+      </RevealSection>
 
       {/* =================== HOW TO USE — poin 2 (notifikasi) =================== */}
-      <section id="cara-penggunaan" className="section">
+      <RevealSection id="cara-penggunaan" className="section">
         <div className="container">
-          <h2 className="text-center" style={{ marginBottom: '4rem', fontSize: '2.5rem' }}>Cara Menggunakan GeoAlert</h2>
+          <h2 className="section-title">Cara Menggunakan GeoAlert</h2>
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               {[
@@ -532,10 +596,10 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-      </section>
+      </RevealSection>
 
       {/* =================== RECENT DISASTERS =================== */}
-      <section className="section bg-white">
+      <RevealSection className="section bg-white">
         <div className="container">
           <div className="flex justify-between items-center" style={{ marginBottom: '3rem' }}>
             <h2 style={{ fontSize: '2.5rem' }}>Kejadian Terkini</h2>
@@ -543,89 +607,97 @@ export default function LandingPage() {
               Lihat Peta Penuh <ChevronRight size={18} />
             </Link>
           </div>
-          <div style={{ overflowX: 'auto', padding: '1rem', margin: '-1rem' }}>
-            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px', textAlign: 'left' }}>
-              <thead>
-                <tr>
-                  {['Waktu', 'Jenis Bencana', 'Lokasi', 'Status'].map(h => (
-                    <th key={h} style={{ padding: '0 1rem 1rem', color: 'var(--color-text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.8rem' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {eventsLoading
-                  ? [1, 2, 3].map(i => (
-                    <tr key={i}>
-                      <td colSpan={4} style={{ padding: '0 0 8px' }}>
-                        <div style={{ height: '52px', background: 'var(--color-border)', borderRadius: '8px', animation: 'pulse 1.5s ease-in-out infinite' }} />
-                      </td>
-                    </tr>
-                  ))
-                  : events.slice(0, 5).map((ev, i) => {
-                    const riskBadge = {
-                      danger: <span className="badge badge-danger">BAHAYA</span>,
-                      warning: <span className="badge badge-warning">WASPADA</span>,
-                      standby: <span className="badge badge-standby">SIAGA</span>,
-                    }[ev.risk] || <span className="badge badge-standby">SIAGA</span>;
-                    return (
-                      <tr key={ev.id || i} className="recent-table-row">
-                        <td className="mono" style={{ color: 'var(--color-primary)', fontWeight: '500' }}>
-                          {ev.time || '—'}
+          <div className="recent-disasters-glass-card glass">
+            <div className="recent-table-wrapper">
+              <table className="recent-table">
+                <thead>
+                  <tr>
+                    {['Waktu', 'Jenis Bencana', 'Lokasi', 'Status'].map(h => (
+                      <th key={h}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {eventsLoading
+                    ? [1, 2, 3].map(i => (
+                      <tr key={i}>
+                        <td colSpan={4}>
+                          <div className="skeleton" style={{ height: '48px', margin: '4px 0' }} />
                         </td>
-                        <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontWeight: '600' }}>
-                            <div style={{ background: 'rgba(192,73,43,0.1)', padding: '8px', borderRadius: '50%' }}>
-                              <Activity size={18} color="var(--color-alert)" />
-                            </div>
-                            {ev.type}
-                          </div>
-                        </td>
-                        <td style={{ fontWeight: '500' }}>{ev.location}</td>
-                        <td>{riskBadge}</td>
                       </tr>
-                    );
-                  })
-                }
-              </tbody>
-            </table>
-            {!eventsLoading && events.length === 0 && (
-              <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: '2rem 0' }}>
-                Tidak ada kejadian aktif saat ini.
-              </p>
-            )}
+                    ))
+                    : events.slice(0, 5).map((ev, i) => {
+                      const riskBadge = {
+                        danger: <span className="badge badge-danger">BAHAYA</span>,
+                        warning: <span className="badge badge-warning">WASPADA</span>,
+                        standby: <span className="badge badge-standby">SIAGA</span>,
+                      }[ev.risk] || <span className="badge badge-standby">SIAGA</span>;
+                      return (
+                        <tr key={ev.id || i} className="recent-table-row">
+                          <td className="mono" style={{ color: 'var(--color-primary)', fontWeight: '600' }}>
+                            {ev.time || '—'}
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: '600' }}>
+                              <div style={{ background: 'rgba(14,42,92,0.08)', padding: '6px', borderRadius: '50%' }}>
+                                <Activity size={16} color="var(--color-primary)" />
+                              </div>
+                              {ev.type}
+                            </div>
+                          </td>
+                          <td style={{ fontWeight: '500' }}>{ev.location}</td>
+                          <td>{riskBadge}</td>
+                        </tr>
+                      );
+                    })
+                  }
+                </tbody>
+              </table>
+              {!eventsLoading && events.length === 0 && (
+                <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: '2rem 0' }}>
+                  Tidak ada kejadian aktif saat ini.
+                </p>
+              )}
+            </div>
           </div>
         </div>
-      </section>
+      </RevealSection>
 
       {/* =================== EDUCATION =================== */}
-      <section className="section">
+      <RevealSection className="section">
         <div className="container">
-          <div className="text-center" style={{ marginBottom: '4rem' }}>
-            <h2 style={{ fontSize: '2.5rem' }}>Edukasi Bencana</h2>
-            <p className="text-muted" style={{ maxWidth: '650px', margin: '1.5rem auto 0', fontSize: '1.125rem' }}>
-              Kenali jenis-jenis bencana alam yang sering terjadi di Indonesia agar Anda dan keluarga lebih siap.
-            </p>
-          </div>
+          <h2 className="section-title">Edukasi Bencana</h2>
+          <p className="section-subtitle">
+            Kenali jenis-jenis bencana alam yang sering terjadi di Indonesia agar Anda dan keluarga lebih siap.
+          </p>
           <div className="grid md:grid-cols-2 gap-8">
             {EDUCATION_DATA.map((e, i) => (
-              <div key={i} className="card" style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
-                <div style={{ background: e.bg, padding: '1rem', borderRadius: 'var(--radius-md)', flexShrink: 0 }}>
-                  {e.icon}
-                </div>
-                <div>
-                  <h4 style={{ marginBottom: '0.75rem', fontSize: '1.2rem' }}>{e.title}</h4>
-                  <p className="text-muted" style={{ fontSize: '0.95rem', lineHeight: '1.6' }}>{e.desc}</p>
+              <div key={i} className="card-education glass" style={{ borderLeft: `4px solid ${e.accentColor}` }}>
+                <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start' }}>
+                  <div style={{ background: e.bg, padding: '1rem', borderRadius: 'var(--radius-md)', flexShrink: 0 }}>
+                    {e.icon}
+                  </div>
+                  <div>
+                    <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '4px', background: e.bg, color: e.accentColor, fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', marginBottom: '6px' }}>
+                      Karakteristik Bencana
+                    </span>
+                    <h4 style={{ marginBottom: '0.5rem', fontSize: '1.25rem' }}>{e.title}</h4>
+                    <p className="text-muted" style={{ fontSize: '0.95rem', lineHeight: '1.6' }}>{e.desc}</p>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </section>
+      </RevealSection>
 
       {/* =================== MITIGATION =================== */}
-      <section className="section bg-white">
+      <RevealSection className="section bg-white">
         <div className="container">
-          <h2 className="text-center" style={{ marginBottom: '4rem', fontSize: '2.5rem' }}>Panduan Mitigasi Instan</h2>
+          <h2 className="section-title">Panduan Mitigasi Instan</h2>
+          <p className="section-subtitle">
+            Langkah taktis yang dapat Anda ambil sebelum, saat, dan sesudah bencana terjadi.
+          </p>
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { key: 'gempa', icon: <Activity size={48} color="var(--color-alert)" />, title: 'Gempa Bumi', desc: 'Jangan panik. Berlindung di bawah meja yang kuat, jauhi kaca dan perabotan berat. Jika di pesisir, waspadai tsunami setelah guncangan kuat.' },
@@ -647,14 +719,12 @@ export default function LandingPage() {
             ))}
           </div>
         </div>
-      </section>
-
-
+      </RevealSection>
 
       {/* =================== FAQ =================== */}
-      <section className="section bg-white">
+      <RevealSection className="section bg-white">
         <div className="container" style={{ maxWidth: '800px' }}>
-          <h2 className="text-center" style={{ marginBottom: '4rem', fontSize: '2.5rem' }}>Pertanyaan Umum</h2>
+          <h2 className="section-title">Pertanyaan Umum</h2>
           {FAQ_DATA.map((item, i) => (
             <div key={i} className="faq-item">
               <button
@@ -674,20 +744,20 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
-      </section>
+      </RevealSection>
 
       {/* =================== FINAL CTA =================== */}
-      <section className="section text-center" style={{ padding: '6rem 0 8rem' }}>
+      <RevealSection className="section section-lg text-center">
         <div className="container">
-          <h2 style={{ marginBottom: '1.5rem', fontSize: '3rem' }}>Jangan Tunggu Sampai Terlambat</h2>
-          <p className="text-muted" style={{ maxWidth: '650px', margin: '0 auto 3rem', fontSize: '1.25rem', lineHeight: '1.6' }}>
+          <h2 className="section-title" style={{ marginBottom: '1.5rem', fontSize: 'clamp(2.2rem, 4vw, 3rem)' }}>Jangan Tunggu Sampai Terlambat</h2>
+          <p className="section-subtitle">
             Pantau kondisi lingkungan Anda dan jadilah selangkah lebih maju dalam menghadapi potensi bencana. Keselamatan Anda adalah prioritas utama.
           </p>
           <Link to="/peta" className="btn btn-primary" style={{ padding: '1.25rem 3rem', fontSize: '1.25rem', borderRadius: 'var(--radius-full)' }}>
             Pantau Wilayah Saya Sekarang
           </Link>
         </div>
-      </section>
+      </RevealSection>
 
       {/* Mitigation Modal */}
       {modal && <MitigationModal type={modal} onClose={() => setModal(null)} />}
