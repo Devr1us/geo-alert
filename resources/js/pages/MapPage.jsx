@@ -562,34 +562,10 @@ export default function MapPage() {
       </div>
 
       {/* SECTION: TANYA ASISTEN AI */}
-      <section id="tanya-ai" style={{ background: 'var(--color-bg)', padding: '4rem 0 5rem', borderTop: '1px solid var(--color-border)' }}>
-        <div className="container">
-          <div className="ask-ai-section" style={{ margin: 0 }}>
-            <div style={{ padding: '0 clamp(1rem, 3vw, 2rem)', position: 'relative', zIndex: 1 }}>
-              <div className="grid md:grid-cols-2 gap-10 items-center">
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  <div style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '8px',
-                    background: 'rgba(255,255,255,0.12)', color: 'white',
-                    padding: '0.5rem 1rem', borderRadius: 'var(--radius-full)',
-                    marginBottom: '1.25rem', fontWeight: '600', letterSpacing: '0.05em',
-                    width: 'fit-content', fontSize: '0.85rem'
-                  }}>
-                    <Bot size={18} /> ASISTEN PANDUAN
-                  </div>
-                  <h2 style={{ color: 'white', marginBottom: '1.25rem', fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)' }}>
-                    Tanya Asisten Panduan
-                  </h2>
-                  <p style={{ color: 'rgba(255,255,255,0.85)', marginBottom: '2rem', fontSize: '1.05rem', lineHeight: '1.6' }}>
-                    Dapatkan jawaban cepat seputar kesiapsiagaan bencana, prosedur evakuasi, dan pertolongan pertama langsung dari asisten berbasis panduan resmi BMKG &amp; BNPB.
-                  </p>
-                </div>
-
-                <div className="glass-dark" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', height: '440px' }}>
-                  <AIChat isFloating={false} />
-                </div>
-              </div>
-            </div>
+      <section id="tanya-ai" style={{ background: '#040D1F', padding: '3.5rem 0 5rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+        <div className="container" style={{ maxWidth: '1140px' }}>
+          <div style={{ borderRadius: '24px', overflow: 'hidden', height: '680px', boxShadow: '0 25px 60px rgba(0,0,0,0.6)' }}>
+            <AIChat isFloating={false} />
           </div>
         </div>
       </section>
