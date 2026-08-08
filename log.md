@@ -355,3 +355,34 @@
 - **TLDR AI agents done:** Menambahkan catatan seluruh riwayat prompt terbaru, model AI yang digunakan, dan timestamp ke dalam log.md.
 - **file changed:**
   - `log.md`
+
+---
+
+### Timestamp: 2026-08-08 14:12:15
+
+- **Model used:** Claude Sonnet 4.6 (Thinking)
+- **Human Prompt:** `saat di run blank putih saja websitenya`
+- **TLDR AI agents done:** Ditemukan file `public/hot` yang ter-commit ke git (berisi `http://[::1]:5173`) sehingga Laravel mencoba load asset dari Vite dev server yang tidak berjalan, menyebabkan halaman putih kosong. Fix: hapus `public/hot` agar Laravel menggunakan build production dari `public/build/`. Juga diverifikasi bahwa `public/hot` sudah ada di `.gitignore` (tapi terlanjur ter-track git).
+- **file changed:**
+  - `public/hot` (dihapus)
+
+---
+
+### Timestamp: 2026-08-08 14:17:12
+
+- **Model used:** Claude Sonnet 4.6 (Thinking)
+- **Human Prompt:** `ketika navbar bagian peta bencana di tekan tampilan masuk ke tampilan map dan ketika navbar tanya ai di tekan tampilannya ke chat ai karena ketika navbar peta bencana ditekan malah ke scroll down ke chat ai`
+- **TLDR AI agents done:** Bug navigasi navbar: klik "Peta Bencana" saat sudah di `/peta#tanya-ai` tidak scroll ke atas karena React Router tidak re-navigate (pathname sama). Fix: ganti `<Link>` dengan `useNavigate` + handler `goToMap` yang pakai `navigate('/peta', { replace: true })` dan `setTimeout(scrollTop, 0)`. Handler `goToAIChat` juga diperbaiki: jika sudah di `/peta`, langsung `scrollIntoView('#tanya-ai')`; jika dari halaman lain, navigate ke `/peta#tanya-ai`. Diikuti `npm install` (karena node_modules dihapus git pull) dan `npm run build`.
+- **file changed:**
+  - `resources/js/components/Navbar.jsx`
+
+---
+
+### Timestamp: 2026-08-08 14:21:17
+
+- **Model used:** Claude Sonnet 4.6 (Thinking)
+- **Human Prompt:** `ada problem ketika saya scroll down di beranda dan saya memencet navbar bagian peta bencana user masuk ke tampilan baru tetapi tampilannya bukan bencana tapi malah ke chat ai nya`
+- **TLDR AI agents done:** Root cause: MapPage memuat Leaflet + banyak komponen berat secara async. `setTimeout(..., 0)` terlalu cepat — scroll-to-top kalah dari render akhir MapPage yang mendorong scroll ke posisi yang kebetulan ada di area `#tanya-ai`. Fix di dua tempat: (1) `goToMap` di Navbar.jsx diganti dengan `forceScrollTop()` yang memanggil scroll ke atas 5x berurutan (0ms, 0ms, 50ms, 150ms, 300ms); (2) `ScrollController` di App.jsx ditambah retry scroll-to-top untuk kasus tanpa hash (50ms, 150ms, 300ms). Kemudian `npm run build` ulang.
+- **file changed:**
+  - `resources/js/components/Navbar.jsx`
+  - `resources/js/App.jsx`
