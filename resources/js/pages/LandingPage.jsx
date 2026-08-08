@@ -6,7 +6,6 @@ import {
 } from 'lucide-react';
 import '../../css/LandingPage.css';
 import MitigationModal from '../components/MitigationModal';
-import AIChat from '../components/AIChat';
 
 // Count-up hook
 function useCountUp(end, duration = 2000) {
@@ -447,8 +446,8 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div style={{ background: 'linear-gradient(135deg, #F7F2EA, #E0D9CD)', borderRadius: 'var(--radius-xl)', padding: '3rem', minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div className="glass" style={{ textAlign: 'center', padding: '3rem', borderRadius: '50%', boxShadow: 'var(--shadow-lg)', animation: 'float 8s ease-in-out infinite' }}>
+            <div style={{ background: 'linear-gradient(135deg, #F7F2EA, #E0D9CD)', borderRadius: 'var(--radius-xl)', padding: 'clamp(1.5rem, 4vw, 3rem)', minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="glass" style={{ textAlign: 'center', padding: 'clamp(1.5rem, 4vw, 3rem)', borderRadius: '50%', boxShadow: 'var(--shadow-lg)', animation: 'float 8s ease-in-out infinite' }}>
                 <Map size={80} color="var(--color-primary)" style={{ margin: '0 auto 1rem' }} />
                 <p style={{ fontWeight: '600', color: 'var(--color-primary)' }}>Peta Interaktif Indonesia</p>
               </div>
@@ -521,7 +520,7 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-            <div style={{ background: 'linear-gradient(135deg, var(--color-primary), #1e5bb8)', borderRadius: 'var(--radius-xl)', padding: '4rem 3rem', color: 'white', boxShadow: 'var(--shadow-lg)', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: 'linear-gradient(135deg, var(--color-primary), #1e5bb8)', borderRadius: 'var(--radius-xl)', padding: 'clamp(2rem, 4vw, 4rem) clamp(1.5rem, 3vw, 3rem)', color: 'white', boxShadow: 'var(--shadow-lg)', display: 'flex', flexDirection: 'column' }}>
               <Shield size={48} color="var(--color-standby)" style={{ marginBottom: '2rem' }} />
               <h3 style={{ color: 'white', marginBottom: '1rem', fontSize: '2rem' }}>Siaga Kapan Saja</h3>
               <p style={{ color: 'rgba(255,255,255,0.8)', marginBottom: '2.5rem', fontSize: '1.125rem', lineHeight: '1.6' }}>
@@ -650,32 +649,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* =================== ASK AI =================== */}
-      <section id="tanya-ai" className="container">
-        <div className="ask-ai-section">
-          <div style={{ padding: '0 2rem 0', position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'grid' }} className="grid md:grid-cols-2 gap-12 items-stretch">
-              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.1)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-full)', marginBottom: '1.5rem', fontWeight: '600', letterSpacing: '0.05em', width: 'fit-content' }}>
-                  <Bot size={18} /> FITUR
-                </div>
-                <h2 style={{ color: 'white', marginBottom: '1.5rem', fontSize: '2.5rem' }}>Tanya Asisten Panduan</h2>
-                <p style={{ color: 'rgba(255,255,255,0.8)', marginBottom: '2rem', fontSize: '1.125rem', lineHeight: '1.6' }}>
-                  Dapatkan jawaban cepat seputar kesiapsiagaan bencana dan prosedur evakuasi berdasarkan panduan resmi BMKG &amp; BNPB.
-                </p>
-                <Link to="/peta" className="btn btn-primary" style={{ alignSelf: 'flex-start', padding: '0.75rem 1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Map size={20} /> Buka Peta + AI <ArrowRight size={18} />
-                </Link>
-              </div>
 
-              {/* Inline functional AI chat */}
-              <div className="glass-dark" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', minHeight: '460px' }}>
-                <AIChat isFloating={false} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* =================== FAQ =================== */}
       <section className="section bg-white">

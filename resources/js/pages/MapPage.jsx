@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import '../../css/MapPage.css';
+import '../../css/LandingPage.css';
 import AIChat from '../components/AIChat';
 
 // Fix for default leaflet icons in React
@@ -285,7 +286,8 @@ export default function MapPage() {
   const hasSampleItems = filteredData.some(item => item.isSample);
 
   return (
-    <div className="map-page-container">
+    <>
+      <div className="map-page-container">
       {/* Injected marker animation styles */}
       <style>{`
         @keyframes marker-pulse {
@@ -459,128 +461,153 @@ export default function MapPage() {
         </div>
       </div>
 
-      {/* Sidebar — Map Info + AI Chat */}
+      {/* Sidebar — Map Info */}
       <div className="map-sidebar">
-        {/* Tab switcher */}
+        {/* Tab switcher / shortcut */}
         <div style={{
           display: 'flex', borderBottom: '1px solid var(--color-border)',
           background: 'var(--color-white)', flexShrink: 0,
         }}>
           <button
-            onClick={() => setSidebarTab('map')}
             style={{
-              flex: 1, padding: '14px', border: 'none', cursor: 'pointer', fontWeight: '600',
+              flex: 1, padding: '14px', border: 'none', fontWeight: '600',
               fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-              background: sidebarTab === 'map' ? 'var(--color-bg)' : 'var(--color-white)',
-              color: sidebarTab === 'map' ? 'var(--color-primary)' : 'var(--color-text-muted)',
-              borderBottom: sidebarTab === 'map' ? '3px solid var(--color-primary)' : '3px solid transparent',
-              transition: 'all 0.2s',
+              background: 'var(--color-bg)',
+              color: 'var(--color-primary)',
+              borderBottom: '3px solid var(--color-primary)',
             }}
           >
             <MapIcon size={16} /> Peta &amp; Legenda
           </button>
           <button
-            onClick={() => setSidebarTab('ai')}
+            onClick={() => {
+              document.getElementById('tanya-ai')?.scrollIntoView({ behavior: 'smooth' });
+            }}
             style={{
               flex: 1, padding: '14px', border: 'none', cursor: 'pointer', fontWeight: '600',
               fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-              background: sidebarTab === 'ai' ? 'var(--color-bg)' : 'var(--color-white)',
-              color: sidebarTab === 'ai' ? 'var(--color-primary)' : 'var(--color-text-muted)',
-              borderBottom: sidebarTab === 'ai' ? '3px solid var(--color-primary)' : '3px solid transparent',
+              background: 'var(--color-white)',
+              color: 'var(--color-primary)',
+              borderBottom: '3px solid transparent',
               transition: 'all 0.2s',
             }}
+            title="Ke Section Tanya AI di Bawah"
           >
-            <Bot size={16} /> Tanya AI
+            <Bot size={16} /> Tanya AI ↓
           </button>
         </div>
 
-        {/* Tab: Map Info */}
-        {sidebarTab === 'map' && (
-          <>
-            <div className="sidebar-header">
-              <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Legenda Risiko</h3>
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--color-alert)' }}></div> Bahaya Tinggi</div>
-                <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--color-status-warning)' }}></div> Waspada</div>
-                <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--color-standby)' }}></div> Siaga</div>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--color-border)' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                  <span className="mono">{lastUpdate.toLocaleTimeString('id-ID')}</span>
-                  {isSampleData && <em> (contoh tampilan data)</em>}
-                </span>
-                <button
-                  onClick={fetchData}
-                  style={{ display: 'flex', gap: '4px', alignItems: 'center', padding: '4px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', background: 'transparent', cursor: 'pointer', fontSize: '0.75rem', color: 'var(--color-primary)' }}
-                >
-                  <RefreshCw size={12} /> Segarkan
-                </button>
-              </div>
-            </div>
-
-            <div className="sidebar-content">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <h4 style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Log Peringatan Aktif</h4>
-              </div>
-
-              {/* Label: data contoh banjir/longsor di sidebar */}
-              {hasSampleItems && (
-                <div style={{
-                  background: 'rgba(74,144,217,0.06)', border: '1px solid rgba(74,144,217,0.2)',
-                  borderRadius: 'var(--radius-sm)', padding: '6px 10px',
-                  fontSize: '0.75rem', color: 'var(--color-standby)', marginBottom: '10px',
-                  display: 'flex', alignItems: 'center', gap: '6px',
-                }}>
-                  <Info size={12} /> Item berlabel "(contoh data)" adalah ilustrasi tampilan — bukan kejadian nyata
-                </div>
-              )}
-
-              {loading
-                ? [1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: '80px', marginBottom: '12px', borderRadius: 'var(--radius-md)' }} />)
-                : filteredData.length > 0
-                  ? filteredData.map(item => (
-                    <div
-                      key={item.id}
-                      className="alert-log-item"
-                      onClick={() => { setMapCenter([item.lat, item.lng]); setMapZoom(9); }}
-                      role="button"
-                      tabIndex={0}
-                      aria-label={`Lihat ${item.type} di ${item.location}`}
-                    >
-                      <div className="alert-log-header">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600', fontSize: '0.9rem' }}>
-                          {getIcon(item.type)} {item.type}
-                          {item.isSample && (
-                            <span style={{ fontSize: '0.65rem', color: 'var(--color-standby)', fontWeight: '400', background: 'rgba(74,144,217,0.1)', padding: '1px 5px', borderRadius: '3px' }}>
-                              contoh data
-                            </span>
-                          )}
-                        </div>
-                        {getRiskLabel(item.risk)}
-                      </div>
-                      <div style={{ fontSize: '0.875rem', marginBottom: '4px', color: 'var(--color-text-main)' }}>{item.location}</div>
-                      <div style={{ fontSize: '0.8rem' }}>
-                        <span className="mono" style={{ color: 'var(--color-text-muted)' }}>{item.time}</span>
-                        {item.magnitude && item.magnitude !== '-' && !item.isSample && (
-                          <span className="mono" style={{ marginLeft: '8px', color: 'var(--color-primary)', fontWeight: '600' }}>M {item.magnitude}</span>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                  : <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: '2rem 0' }}>Tidak ada data sesuai filter.</p>
-              }
-            </div>
-          </>
-        )}
-
-        {/* Tab: AI Chat */}
-        {sidebarTab === 'ai' && (
-          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <AIChat isFloating={true} />
+        {/* Sidebar Content: Map Info */}
+        <div className="sidebar-header">
+          <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Legenda Risiko</h3>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--color-alert)' }}></div> Bahaya Tinggi</div>
+            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--color-status-warning)' }}></div> Waspada</div>
+            <div className="legend-item"><div className="legend-color" style={{ backgroundColor: 'var(--color-standby)' }}></div> Siaga</div>
           </div>
-        )}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--color-border)' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+              <span className="mono">{lastUpdate.toLocaleTimeString('id-ID')}</span>
+              {isSampleData && <em> (contoh tampilan data)</em>}
+            </span>
+            <button
+              onClick={fetchData}
+              style={{ display: 'flex', gap: '4px', alignItems: 'center', padding: '4px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', background: 'transparent', cursor: 'pointer', fontSize: '0.75rem', color: 'var(--color-primary)' }}
+            >
+              <RefreshCw size={12} /> Segarkan
+            </button>
+          </div>
+        </div>
+
+        <div className="sidebar-content">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <h4 style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Log Peringatan Aktif</h4>
+          </div>
+
+          {/* Label: data contoh banjir/longsor di sidebar */}
+          {hasSampleItems && (
+            <div style={{
+              background: 'rgba(74,144,217,0.06)', border: '1px solid rgba(74,144,217,0.2)',
+              borderRadius: 'var(--radius-sm)', padding: '6px 10px',
+              fontSize: '0.75rem', color: 'var(--color-standby)', marginBottom: '10px',
+              display: 'flex', alignItems: 'center', gap: '6px',
+            }}>
+              <Info size={12} /> Item berlabel "(contoh data)" adalah ilustrasi tampilan — bukan kejadian nyata
+            </div>
+          )}
+
+          {loading
+            ? [1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: '80px', marginBottom: '12px', borderRadius: 'var(--radius-md)' }} />)
+            : filteredData.length > 0
+              ? filteredData.map(item => (
+                <div
+                  key={item.id}
+                  className="alert-log-item"
+                  onClick={() => { setMapCenter([item.lat, item.lng]); setMapZoom(9); }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Lihat ${item.type} di ${item.location}`}
+                >
+                  <div className="alert-log-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600', fontSize: '0.9rem' }}>
+                      {getIcon(item.type)} {item.type}
+                      {item.isSample && (
+                        <span style={{ fontSize: '0.65rem', color: 'var(--color-standby)', fontWeight: '400', background: 'rgba(74,144,217,0.1)', padding: '1px 5px', borderRadius: '3px' }}>
+                          contoh data
+                        </span>
+                      )}
+                    </div>
+                    {getRiskLabel(item.risk)}
+                  </div>
+                  <div style={{ fontSize: '0.875rem', marginBottom: '4px', color: 'var(--color-text-main)' }}>{item.location}</div>
+                  <div style={{ fontSize: '0.8rem' }}>
+                    <span className="mono" style={{ color: 'var(--color-text-muted)' }}>{item.time}</span>
+                    {item.magnitude && item.magnitude !== '-' && !item.isSample && (
+                      <span className="mono" style={{ marginLeft: '8px', color: 'var(--color-primary)', fontWeight: '600' }}>M {item.magnitude}</span>
+                    )}
+                  </div>
+                </div>
+              ))
+              : <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: '2rem 0' }}>Tidak ada data sesuai filter.</p>
+          }
+        </div>
       </div>
     </div>
-  );
+
+    {/* =================== SECTION: TANYA ASISTEN AI =================== */}
+    <section id="tanya-ai" style={{ background: 'var(--color-bg)', padding: '4rem 0 5rem', borderTop: '1px solid var(--color-border)' }}>
+      <div className="container">
+        <div className="ask-ai-section" style={{ margin: 0 }}>
+          <div style={{ padding: '0 clamp(1rem, 3vw, 2rem)', position: 'relative', zIndex: 1 }}>
+            <div className="grid md:grid-cols-2 gap-10 items-center">
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  background: 'rgba(255,255,255,0.12)', color: 'white',
+                  padding: '0.5rem 1rem', borderRadius: 'var(--radius-full)',
+                  marginBottom: '1.25rem', fontWeight: '600', letterSpacing: '0.05em',
+                  width: 'fit-content', fontSize: '0.85rem'
+                }}>
+                  <Bot size={18} /> ASISTEN PANDUAN
+                </div>
+                <h2 style={{ color: 'white', marginBottom: '1.25rem', fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)' }}>
+                  Tanya Asisten Panduan
+                </h2>
+                <p style={{ color: 'rgba(255,255,255,0.85)', marginBottom: '2rem', fontSize: '1.05rem', lineHeight: '1.6' }}>
+                  Dapatkan jawaban cepat seputar kesiapsiagaan bencana, prosedur evakuasi, dan pertolongan pertama langsung dari asisten berbasis panduan resmi BMKG &amp; BNPB.
+                </p>
+              </div>
+
+              {/* Full section AI chat */}
+              <div className="glass-dark" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', height: '440px' }}>
+                <AIChat isFloating={false} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </>
+);
 }

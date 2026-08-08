@@ -115,15 +115,32 @@
 }
 
 .navbar {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: 1000;
-  background: rgba(247, 242, 234, 0.7);
+  background: rgba(247, 242, 234, 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(224, 217, 205, 0.6);
   padding: var(--spacing-3) 0;
-  transition: all var(--transition-normal);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s ease, background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  will-change: transform, padding, box-shadow;
+}
+
+.navbar.navbar-scrolled {
+  padding: var(--spacing-2) 0;
+  background: rgba(247, 242, 234, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 20px rgba(14, 42, 92, 0.1);
+  border-bottom-color: rgba(224, 217, 205, 0.85);
+}
+
+.navbar.navbar-hidden {
+  transform: translateY(-100%) !important;
 }
 
 .navbar .container {
@@ -209,6 +226,14 @@
 #tanya-ai,
 #kontak {
   scroll-margin-top: var(--navbar-height);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar,
+  .navbar.navbar-hidden {
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
 /* Footer */
