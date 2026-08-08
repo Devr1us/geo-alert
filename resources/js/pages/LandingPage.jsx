@@ -490,7 +490,7 @@ export default function LandingPage() {
             {/* Map Canvas Background Container */}
             <div className="about-map-container">
               <img
-                src="/images/indonesia-map-preview-PersegiPanjang - Copy.png"
+                src="/images/INDONESIAN.png"
                 alt="Peta Indonesia GeoAlert"
                 className="about-map-img"
               />
