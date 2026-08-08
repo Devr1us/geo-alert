@@ -52,9 +52,7 @@ function ScrollController() {
       requestAnimationFrame(scrollToHash);
     } else {
       // Tidak ada hash — selalu mulai dari atas.
-      // Gunakan 'instant' (bukan 'smooth') agar saat route berganti
-      // tidak tampak scroll panjang dari posisi sebelumnya.
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      window.scrollTo(0, 0);
     }
   }, [pathname, hash]); // Ulang setiap kali pathname ATAU hash berubah
 
