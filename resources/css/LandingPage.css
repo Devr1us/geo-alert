@@ -27,17 +27,22 @@
   z-index: 1;
 }
 
-.hero-title {
+/* Hero title — override inline style via higher specificity so clamp() is applied responsively */
+.hero-section .hero-title {
   margin-bottom: var(--spacing-4);
-  background: linear-gradient(135deg, var(--color-primary), #1e5bb8);
+  font-size: clamp(2.5rem, 7vw, 5rem) !important;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--color-primary) 0%, #1e5bb8 60%, #3a7fc1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 4px 24px rgba(14, 42, 92, 0.1);
+  line-height: 1.1;
 }
 
-.hero-subtitle {
-  font-size: 1.25rem;
-  color: var(--color-text-muted);
+.hero-section .hero-subtitle {
+  font-size: clamp(1.05rem, 2.5vw, 1.5rem) !important;
+  line-height: 1.55;
+  color: var(--color-primary);
+  font-weight: 500;
   max-width: 600px;
   margin: 0 auto var(--spacing-6);
 }
@@ -57,7 +62,8 @@
   gap: var(--spacing-3);
   padding: var(--spacing-3) var(--spacing-5);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(14, 42, 92, 0.1) !important;
   margin-top: var(--spacing-4);
   animation: float 6s ease-in-out infinite;
   max-width: 720px;
@@ -140,15 +146,16 @@
   background: var(--color-white);
   border-radius: var(--radius-lg);
   padding: var(--spacing-5);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
   transition: all var(--transition-normal);
   position: relative;
   overflow: hidden;
+  border: 1px solid rgba(224, 217, 205, 0.5);
 }
 
 .card-education:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-card-hover);
 }
 
 /* About Section Grid Layout */
@@ -316,11 +323,12 @@
 }
 
 .stat-number {
-  font-size: 3.5rem;
+  font-size: clamp(2.5rem, 4vw, 3.5rem);
   font-family: var(--font-heading);
-  color: var(--color-alert);
+  color: rgba(255, 255, 255, 0.95);
   margin-bottom: var(--spacing-2);
-  text-shadow: 0 0 20px rgba(192, 73, 43, 0.4);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 .timeline-step {
@@ -334,7 +342,7 @@
   font-family: var(--font-heading);
   font-size: 1.5rem;
   color: var(--color-white);
-  background: linear-gradient(135deg, var(--color-standby), #2974c4);
+  background: linear-gradient(135deg, var(--color-primary), #1e5bb8);
   width: 48px;
   height: 48px;
   display: flex;
@@ -343,7 +351,7 @@
   border-radius: 50%;
   font-weight: 700;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(74, 144, 217, 0.3);
+  box-shadow: 0 4px 12px rgba(14, 42, 92, 0.35);
 }
 
 .ask-ai-section {
@@ -426,50 +434,11 @@
   background: rgba(255, 255, 255, 0.15);
 }
 
-.faq-item {
-  border-bottom: 1px solid rgba(224, 217, 205, 0.5);
-  padding: var(--spacing-5) 0;
-  transition: background-color var(--transition-fast);
-}
+/* FAQ styles — see updated rules below near reveal-on-scroll section */
 
-.faq-item:hover {
-  background-color: rgba(255, 255, 255, 0.5);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-5) var(--spacing-4);
-  margin: 0 calc(var(--spacing-4) * -1);
-}
 
-.faq-question {
-  font-weight: 600;
-  font-size: 1.125rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  color: var(--color-primary);
-}
+/* Table row base — see updated rules in Recent Disasters section below */
 
-.faq-answer {
-  margin-top: var(--spacing-3);
-  color: var(--color-text-muted);
-  line-height: 1.6;
-}
-
-/* Enhancing Tables */
-.recent-table-row {
-  transition: all var(--transition-fast);
-}
-
-.recent-table-row:hover {
-  background-color: var(--color-white);
-  transform: scale(1.01);
-  box-shadow: var(--shadow-sm);
-  border-radius: var(--radius-md);
-}
-
-.recent-table-row td {
-  padding: 1.25rem 1rem;
-}
 
 /* Recent Disasters Glass Card */
 .recent-disasters-glass-card {
@@ -501,14 +470,16 @@
 
 .recent-table-row {
   background: var(--color-white);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
   border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
+  transition: all var(--transition-normal);
+  border-left: 3px solid transparent;
 }
 
 .recent-table-row:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-card-hover);
+  border-left-color: var(--color-primary);
 }
 
 .recent-table-row td {
@@ -523,8 +494,10 @@
 /* Reveal on Scroll */
 .reveal-on-scroll {
   opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(32px);
+  transition:
+    opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity, transform;
 }
 
@@ -539,6 +512,57 @@
     transform: none !important;
     transition: none !important;
   }
+}
+
+/* ============================================================
+   FAQ Accordion — smooth animated open/close
+   The JSX conditionally renders .faq-answer when open, so we
+   animate the entry only (fade-in-up is already defined globally).
+   For smooth exit we keep overflow hidden & max-height approach
+   on the animation itself.
+   ============================================================ */
+.faq-item {
+  border-bottom: 1px solid rgba(224, 217, 205, 0.5);
+  padding: var(--spacing-4) 0;
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-normal), padding var(--transition-normal);
+}
+
+.faq-item:hover {
+  background-color: rgba(255, 255, 255, 0.6);
+  padding: var(--spacing-4) var(--spacing-3);
+  margin: 0 calc(var(--spacing-3) * -1);
+}
+
+.faq-question {
+  font-weight: 600;
+  font-size: 1.125rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  color: var(--color-primary);
+  letter-spacing: -0.005em;
+  transition: color var(--transition-fast);
+}
+
+.faq-question:focus-visible {
+  outline: 2px solid rgba(14, 42, 92, 0.3);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.faq-answer {
+  margin-top: var(--spacing-3);
+  color: var(--color-text-muted);
+  line-height: 1.65;
+  animation: faq-slide-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: top center;
+}
+
+@keyframes faq-slide-in {
+  0%   { opacity: 0; transform: translateY(-8px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 /* ============================================================
@@ -584,7 +608,7 @@
 /* =================== ABOUT CUSTOM SECTION (NEW DESIGN) =================== */
 .about-custom-section {
   background-color: #FAF6F0;
-  padding: 4rem 0;
+  padding: var(--spacing-12) 0; /* harmonized with .section = 6rem 0 */
   position: relative;
 }
 
@@ -745,16 +769,16 @@
   background: #FFFFFF;
   border-radius: 20px;
   padding: 2rem 1.6rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+  box-shadow: var(--shadow-card);
   border: 1px solid rgba(230, 225, 215, 0.6);
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
 }
 
 .about-feature-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.07);
+  box-shadow: var(--shadow-card-hover);
 }
 
 .feature-icon-wrapper {
@@ -788,18 +812,25 @@
 }
 
 .feature-link {
-  color: #D97706;
+  color: var(--color-primary);
   font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: gap 0.2s ease, color 0.2s ease;
+  transition: gap var(--transition-fast), color var(--transition-fast);
+  outline: none;
 }
 
 .feature-link:hover {
-  color: #B45309;
+  color: #1e5bb8;
   gap: 10px;
+}
+
+.feature-link:focus-visible {
+  outline: 2px solid rgba(14, 42, 92, 0.3);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 

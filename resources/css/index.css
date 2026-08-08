@@ -1,6 +1,7 @@
 :root {
   /* Colors */
   --color-primary: #0E2A5C;
+  --color-primary-hover: #0a1f44;
   --color-alert: #C0492B;
   --color-bg: #F7F2EA;
   --color-standby: #4A90D9;
@@ -39,11 +40,13 @@
   --shadow-sm: 0 2px 8px rgba(14, 42, 92, 0.04);
   --shadow-md: 0 8px 24px rgba(14, 42, 92, 0.08);
   --shadow-lg: 0 20px 40px rgba(14, 42, 92, 0.12);
-  --shadow-glow: 0 0 20px rgba(192, 73, 43, 0.5); /* Terracotta glow */
+  --shadow-card: 0 2px 12px rgba(14, 42, 92, 0.06), 0 0 0 1px rgba(224, 217, 205, 0.5);
+  --shadow-card-hover: 0 12px 32px rgba(14, 42, 92, 0.12), 0 0 0 1px rgba(14, 42, 92, 0.1);
+  --shadow-glow: 0 8px 24px rgba(14, 42, 92, 0.4); /* Navy glow — used by btn-primary hover */
   
   /* Transitions */
   --transition-fast: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 350ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* CSS Reset */
@@ -90,11 +93,15 @@ h1, h2, h3, h4 {
   font-family: var(--font-heading);
   font-weight: 700;
   color: var(--color-primary);
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
-h1 { font-size: 2.5rem; }
-h2 { font-size: 2rem; }
+h3, h4 {
+  line-height: 1.25;
+}
+
+h1 { font-size: 2.5rem; letter-spacing: -0.02em; }
+h2 { font-size: 2rem;   letter-spacing: -0.01em; }
 h3 { font-size: 1.5rem; }
 h4 { font-size: 1.25rem; }
 
@@ -219,12 +226,30 @@ h4 { font-size: 1.25rem; }
 }
 
 @keyframes fade-in-up {
-  0% { transform: translateY(20px); opacity: 0; }
+  0% { transform: translateY(24px); opacity: 0; }
   100% { transform: translateY(0); opacity: 1; }
 }
 
+/* Skeleton shimmer — premium loading effect */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(224, 217, 205, 0.5) 25%,
+    rgba(247, 242, 234, 0.9) 50%,
+    rgba(224, 217, 205, 0.5) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
 .animate-fade-in-up {
-  animation: fade-in-up 0.6s ease-out forwards;
+  animation: fade-in-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -233,5 +258,9 @@ h4 { font-size: 1.25rem; }
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  .skeleton {
+    animation: none !important;
+    background: rgba(224, 217, 205, 0.5);
   }
 }

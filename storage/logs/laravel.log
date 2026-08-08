@@ -827,3 +827,22 @@
 #41 C:/Users/Stefano/Geo-Alert/artisan(16): Illuminate/Foundation/Application->handleCommand(Object(Symfony/Component/Console/Input/ArgvInput))
 #42 {main}
 "} 
+[2026-08-08 12:19:37] local.ERROR: The [pcntl] extension is required to run Pail. {"exception":"[object] (RuntimeException(code: 0): The [pcntl] extension is required to run Pail. at C:/Users/Stefano/Geo-Alert/vendor/laravel/pail/src/Guards/EnsurePcntlIsAvailable.php:15)
+[stacktrace]
+#0 C:/Users/Stefano/Geo-Alert/vendor/laravel/pail/src/Console/Commands/PailCommand.php(46): Laravel/Pail/Guards/EnsurePcntlIsAvailable::check()
+#1 C:/Users/Stefano/Geo-Alert/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Laravel/Pail/Console/Commands/PailCommand->handle(Object(Laravel/Pail/ProcessFactory))
+#2 C:/Users/Stefano/Geo-Alert/vendor/laravel/framework/src/Illuminate/Container/Util.php(43): Illuminate/Container/BoundMethod::{closure:Illuminate/Container/BoundMethod::call():35}()
+#3 C:/Users/Stefano/Geo-Alert/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(96): Illuminate/Container/Util::unwrapIfClosure(Object(Closure))
+#4 C:/Users/Stefano/Geo-Alert/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate/Container/BoundMethod::callBoundMethod(Object(Illuminate/Foundation/Application), Array, Object(Closure))
+#5 C:/Users/Stefano/Geo-Alert/vendor/laravel/framework/src/Illuminate/Container/Container.php(800): Illuminate/Container/BoundMethod::call(Object(Illuminate/Foundation/Application), Array, Array, NULL)
+#6 C:/Users/Stefano/Geo-Alert/vendor/laravel/framework/src/Illuminate/Console/Command.php(280): Illuminate/Container/Container->call(Array)
+#7 C:/Users/Stefano/Geo-Alert/vendor/symfony/console/Command/Command.php(284): Illuminate/Console/Command->execute(Object(Symfony/Component/Console/Input/ArgvInput), Object(Laravel/Pao/Laravel/PaoOutputStyle))
+#8 C:/Users/Stefano/Geo-Alert/vendor/laravel/framework/src/Illuminate/Console/Command.php(249): Symfony/Component/Console/Command/Command->run(Object(Symfony/Component/Console/Input/ArgvInput), Object(Laravel/Pao/Laravel/PaoOutputStyle))
+#9 C:/Users/Stefano/Geo-Alert/vendor/symfony/console/Application.php(1144): Illuminate/Console/Command->run(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#10 C:/Users/Stefano/Geo-Alert/vendor/symfony/console/Application.php(379): Symfony/Component/Console/Application->doRunCommand(Object(Laravel/Pail/Console/Commands/PailCommand), Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#11 C:/Users/Stefano/Geo-Alert/vendor/symfony/console/Application.php(218): Symfony/Component/Console/Application->doRun(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#12 C:/Users/Stefano/Geo-Alert/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(198): Symfony/Component/Console/Application->run(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#13 C:/Users/Stefano/Geo-Alert/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1242): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#14 C:/Users/Stefano/Geo-Alert/artisan(16): Illuminate/Foundation/Application->handleCommand(Object(Symfony/Component/Console/Input/ArgvInput))
+#15 {main}
+"} 
