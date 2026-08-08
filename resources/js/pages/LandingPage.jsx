@@ -311,19 +311,19 @@ export default function LandingPage() {
     <div>
       {/* =================== HERO =================== */}
       <section className="hero-section">
-        <div className="container animate-fade-in-up">
-          <h1 className="hero-title" style={{ fontSize: '4rem', fontWeight: '900', letterSpacing: '-0.02em' }}>
+        <div className="container">
+          <h1 className="hero-title hero-title-animated" style={{ fontSize: '4rem', fontWeight: '900' }}>
             GeoAlert
           </h1>
-          <p className="hero-subtitle" style={{ fontSize: '1.5rem', fontWeight: '500', color: 'var(--color-primary)' }}>
+          <p className="hero-subtitle hero-subtitle-animated" style={{ fontSize: '1.5rem', fontWeight: '500', color: 'var(--color-primary)' }}>
             Deteksi Dini, Lindungi Diri
           </p>
-          <p style={{ maxWidth: '700px', margin: '0 auto 2.5rem', color: 'var(--color-text-muted)', fontSize: '1.125rem', lineHeight: '1.7' }}>
+          <p className="hero-desc-animated" style={{ maxWidth: '700px', margin: '0 auto 2.5rem', color: 'var(--color-text-muted)', fontSize: '1.125rem', lineHeight: '1.7' }}>
             Pantau informasi bencana alam di seluruh Indonesia secara real-time.
             Dapatkan panduan mitigasi instan dan peringatan dini langsung dari sumber resmi.
           </p>
 
-          <div className="hero-actions">
+          <div className="hero-actions hero-actions-animated">
             <Link to="/peta" className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.125rem' }}>
               <Map size={24} /> Cek Bencana Terdekat
             </Link>
@@ -333,7 +333,7 @@ export default function LandingPage() {
           </div>
 
           {/* ---- Live Status Card — poin 1 ---- */}
-          <div className="live-status-card glass" style={{ marginTop: '3rem', border: '1px solid rgba(14,42,92,0.1)' }}>
+          <div className="live-status-card glass hero-status-card-animated" style={{ marginTop: '3rem', border: '1px solid rgba(14,42,92,0.1)' }}>
             {/* Lokasi */}
             <div>
               <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Lokasi Anda</div>

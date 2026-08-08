@@ -4,7 +4,7 @@ import { FileText, ArrowLeft } from 'lucide-react';
 
 export default function TermsPage() {
   return (
-    <div style={{ minHeight: '80vh', background: 'var(--color-bg)', padding: '4rem 0' }}>
+    <div style={{ minHeight: '80vh', background: 'var(--color-bg)', padding: 'calc(var(--navbar-height) + 2rem) 0 4rem' }}>
       <div className="container" style={{ maxWidth: '800px' }}>
         {/* Back nav */}
         <Link

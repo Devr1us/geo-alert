@@ -74,7 +74,7 @@ function App() {
     <div className="app-container">
       <ScrollController />
       <Navbar />
-      <main style={{ paddingTop: 'var(--navbar-height)' }}>
+      <main className="main-content">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/peta" element={<MapPage />} />

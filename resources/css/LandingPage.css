@@ -1,12 +1,12 @@
 /* LandingPage.css */
 
 .hero-section {
-  /* padding-top harus lebih besar dari tinggi navbar (fixed + top:16px + tinggi ~56px) ≈ 96px,
-     tambah buffer agar konten tidak tertutup navbar di zoom 100% */
-  padding: calc(var(--navbar-height) + 4rem) 0 var(--spacing-12);
-  background: radial-gradient(circle at top right, rgba(14, 42, 92, 0.08), transparent 40%),
-              radial-gradient(circle at bottom left, rgba(192, 73, 43, 0.05), transparent 40%),
+  padding: calc(var(--navbar-height) + 2.5rem) 0 var(--spacing-12);
+  background: radial-gradient(circle at 75% 20%, rgba(14, 42, 92, 0.09), transparent 45%),
+              radial-gradient(circle at 25% 80%, rgba(192, 73, 43, 0.06), transparent 45%),
               var(--color-bg);
+  background-size: 120% 120%;
+  animation: heroBgShift 14s ease-in-out infinite alternate;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -16,10 +16,11 @@
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-image: radial-gradient(rgba(14, 42, 92, 0.1) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(14, 42, 92, 0.12) 1.2px, transparent 1.2px);
   background-size: 24px 24px;
-  opacity: 0.5;
+  opacity: 0.55;
   z-index: 0;
+  pointer-events: none;
 }
 
 .hero-section > * {
@@ -27,7 +28,7 @@
   z-index: 1;
 }
 
-/* Hero title — override inline style via higher specificity so clamp() is applied responsively */
+/* ── Hero Title ─────────────────────────────────────────────────── */
 .hero-section .hero-title {
   margin-bottom: var(--spacing-4);
   font-size: clamp(2.5rem, 7vw, 5rem) !important;
@@ -36,6 +37,104 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   line-height: 1.1;
+}
+
+/* ── Sequential Animated Text (Tranquil & Elegant Sequence) ──────── */
+.hero-title-animated {
+  opacity: 0;
+  animation: heroTitleReveal 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+}
+
+.hero-subtitle-animated {
+  opacity: 0;
+  animation: heroSubtitleReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards;
+}
+
+.hero-desc-animated {
+  opacity: 0;
+  animation: heroFadeRise 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.3s forwards;
+}
+
+.hero-actions-animated {
+  opacity: 0;
+  animation: heroFadeRise 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.9s forwards;
+}
+
+.hero-status-card-animated {
+  opacity: 0;
+  animation: heroCardReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 2.5s forwards;
+}
+
+/* ── Hero Keyframe Animations ────────────────────────────────────── */
+@keyframes heroBgShift {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
+@keyframes heroTitleReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+    filter: blur(8px);
+    letter-spacing: 0.08em;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+    letter-spacing: -0.03em;
+  }
+}
+
+@keyframes heroSubtitleReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes heroFadeRise {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroCardReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-title-animated,
+  .hero-subtitle-animated,
+  .hero-desc-animated,
+  .hero-actions-animated,
+  .hero-status-card-animated {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  .hero-section {
+    animation: none !important;
+  }
 }
 
 .hero-section .hero-subtitle {
@@ -597,6 +696,7 @@
   .trust-item {
     justify-content: center;
   }
+
 }
 
 /* Pastikan section tidak ada overflow horizontal */
