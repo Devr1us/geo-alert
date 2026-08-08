@@ -1,0 +1,1 @@
+Buatkan website sistem peringatan dini bencana alam Indonesia bernama GeoAlert, dengan 2 halaman utama: Landing Page dan Halaman Peta Bencana.

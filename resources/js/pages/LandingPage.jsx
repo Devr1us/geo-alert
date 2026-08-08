@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Map, Bell, Bot, Shield, ChevronRight, Activity, ArrowRight,
-  Wind, Droplets, Mountain, ChevronDown, ChevronUp, MapPin, BellOff,
+  Wind, Droplets, Mountain, ChevronDown, ChevronUp, MapPin, BellOff, RefreshCw,
 } from 'lucide-react';
 import '../../css/LandingPage.css';
 import MitigationModal from '../components/MitigationModal';
@@ -389,7 +389,7 @@ export default function LandingPage() {
               )}
             </div>
 
-            <div style={{ height: '40px', width: '1px', backgroundColor: 'var(--color-border)' }} />
+            <div className="status-divider" />
 
             {/* Status Wilayah */}
             <div>
@@ -406,7 +406,7 @@ export default function LandingPage() {
               )}
             </div>
 
-            <div style={{ height: '40px', width: '1px', backgroundColor: 'var(--color-border)' }} />
+            <div className="status-divider" />
 
             {/* Pembaruan */}
             <div>
@@ -472,63 +472,88 @@ export default function LandingPage() {
         </div>
       </RevealSection>
 
-      {/* =================== ABOUT =================== */}
-      <RevealSection id="tentang" className="section bg-white">
+      {/* =================== ABOUT (MENGAPA MEMILIH GEOALERT) =================== */}
+      <RevealSection id="tentang" className="about-custom-section">
         <div className="container">
-          <h2 className="section-title">Mengapa Memilih GeoAlert?</h2>
-          <p className="section-subtitle">
-            Sistem peringatan dini yang dirancang khusus untuk kondisi geografis Indonesia —
-            memberikan informasi vital dengan visualisasi modern saat waktu sangat berharga.
-          </p>
-          <div className="grid md:grid-cols-2 items-center" style={{ gap: '20px' }}>
-            <div className="mini-map-preview-card">
-              <div className="mini-map-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span className="live-dot" />
-                  <span style={{ fontWeight: '700', fontSize: '0.85rem', color: 'var(--color-primary)' }}>PETA LIVE INDONESIA</span>
-                </div>
-                <span className="mono" style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>BMKG Real-time</span>
-              </div>
-
-              <div className="mini-map-graphic">
-                <img
-                  src="/images/indonesia-map-preview.png"
-                  alt="Peta Live Indonesia"
-                  className="mini-map-bg-image"
-                />
-                <div className="mini-map-grid-pattern" />
-
-                <div className="mini-map-pin" style={{ top: '64%', left: '30%' }}>
-                  <span className="pin-pulse pin-danger" />
-                  <div className="pin-tooltip">Jawa Barat • M 5.2</div>
-                </div>
-                <div className="mini-map-pin" style={{ top: '52%', left: '54%' }}>
-                  <span className="pin-pulse pin-warning" />
-                  <div className="pin-tooltip">Palu • Waspada</div>
-                </div>
-                <div className="mini-map-pin" style={{ top: '36%', left: '17%' }}>
-                  <span className="pin-pulse pin-safe" />
-                  <div className="pin-tooltip">Sumatra • Siaga</div>
-                </div>
-
-                <Link to="/peta" className="mini-map-cta btn btn-primary">
-                  <Map size={18} /> Buka Peta Interaktif Penuh
-                </Link>
-              </div>
+          {/* Header Tag on Top Right */}
+          <div className="about-top-tag">
+            <span className="about-tag-text">TENTANG KAMI</span>
+            <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+              <span className="about-dot" style={{ background: '#2563EB' }} />
+              <span className="about-dot" style={{ background: '#EA580C' }} />
+              <span className="about-dot" style={{ background: '#DC2626' }} />
             </div>
-            <div className="grid grid-cols-2 gap-6">
-              {[
-                { icon: <Activity size={40} color="var(--color-primary)" />, shadow: '0 4px 8px rgba(14,42,92,0.3)', title: 'Data Real-time', desc: 'Terhubung langsung dengan API BMKG tanpa latensi.' },
-                { icon: <Bell size={40} color="var(--color-standby)" />, shadow: '0 4px 8px rgba(74,144,217,0.3)', title: 'Peringatan Dini', desc: 'Notifikasi instan untuk wilayah Anda dalam hitungan detik.' },
-                { icon: <Bot size={40} color="var(--color-primary)" />, shadow: '0 4px 8px rgba(14,42,92,0.3)', title: 'AI Assistant', desc: 'Panduan berbasis SOP resmi BMKG & BNPB saat kondisi darurat.' },
-                { icon: <Map size={40} color="var(--color-status-safe)" />, shadow: '0 4px 8px rgba(46,125,50,0.3)', title: 'Peta Interaktif', desc: 'Visualisasi tingkat risiko berbasis lokasi berakurasi tinggi.' },
-              ].map((f, i) => (
-                <div key={i} className="card">
-                  <div style={{ filter: `drop-shadow(${f.shadow})`, marginBottom: '1.5rem' }}>{f.icon}</div>
-                  <h4 style={{ fontSize: '1.25rem' }}>{f.title}</h4>
-                  <p className="text-muted" style={{ fontSize: '0.9rem', marginTop: '0.5rem', lineHeight: '1.6' }}>{f.desc}</p>
-                </div>
-              ))}
+          </div>
+
+          {/* Hero Banner Box: Map Canvas + Floating Overlap Card */}
+          <div className="about-hero-box">
+            {/* Map Canvas Background Container */}
+            <div className="about-map-container">
+              <img
+                src="/images/indonesia-map-preview-PersegiPanjang - Copy.png"
+                alt="Peta Indonesia GeoAlert"
+                className="about-map-img"
+              />
+              {/* Radar pulse ripples on key locations */}
+              <div className="map-radar-pulse pulse-sumatra" />
+              <div className="map-radar-pulse pulse-jawa" />
+              <div className="map-radar-pulse pulse-sulawesi" />
+              <div className="map-radar-pulse pulse-papua" />
+            </div>
+
+            {/* Floating Overlap Card */}
+            <div className="about-floating-card">
+              <h2 className="about-card-title">Apa itu GeoAlert?</h2>
+              <p className="about-card-desc">
+                Platform cerdas yang menggabungkan data otoritatif dengan kecerdasan buatan untuk memberikan peringatan yang cepat, akurat, dan dapat ditindaklanjuti.
+              </p>
+            </div>
+          </div>
+
+          {/* 4 Feature Cards Grid below */}
+          <div className="about-features-grid">
+            <div className="about-feature-card">
+              <div className="feature-icon-wrapper icon-blue">
+                <RefreshCw size={22} />
+              </div>
+              <h4 className="feature-title">Data Real-time</h4>
+              <p className="feature-desc">Terintegrasi dengan sumber data resmi BMKG & BNPB.</p>
+              <Link to="/peta" className="feature-link">
+                Selengkapnya <span>→</span>
+              </Link>
+            </div>
+
+            <div className="about-feature-card">
+              <div className="feature-icon-wrapper icon-orange">
+                <Bell size={22} />
+              </div>
+              <h4 className="feature-title">Peringatan Dini</h4>
+              <p className="feature-desc">Notifikasi instan berbasis lokasi untuk kesiapsiagaan Anda.</p>
+              <Link to="/peta" className="feature-link">
+                Selengkapnya <span>→</span>
+              </Link>
+            </div>
+
+            <div className="about-feature-card">
+              <div className="feature-icon-wrapper icon-sky">
+                <Bot size={22} />
+              </div>
+              <h4 className="feature-title">AI Assistant</h4>
+              <p className="feature-desc">Asisten cerdas menjawab seputar mitigasi & prosedur darurat.</p>
+              <Link to="/peta" className="feature-link">
+                Selengkapnya <span>→</span>
+              </Link>
+            </div>
+
+            <div className="about-feature-card">
+              <div className="feature-icon-wrapper icon-red">
+                <Map size={22} />
+              </div>
+              <h4 className="feature-title">Peta Interaktif</h4>
+              <p className="feature-desc">Visualisasi sebaran ancaman bencana di seluruh Indonesia.</p>
+              <Link to="/peta" className="feature-link">
+                Selengkapnya <span>→</span>
+              </Link>
             </div>
           </div>
         </div>

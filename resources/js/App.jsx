@@ -51,10 +51,18 @@ function ScrollController() {
 
       requestAnimationFrame(scrollToHash);
     } else {
-      // Tidak ada hash — selalu paksa scroll ke paling atas (0, 0)
-      window.scrollTo(0, 0);
-      if (document.documentElement) document.documentElement.scrollTop = 0;
-      if (document.body) document.body.scrollTop = 0;
+      // Tidak ada hash — paksa scroll ke paling atas (0, 0)
+      // Dipanggil berulang karena halaman berat (MapPage + Leaflet) bisa
+      // menggeser scroll setelah React commit render pertama.
+      const top = () => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        if (document.documentElement) document.documentElement.scrollTop = 0;
+        if (document.body) document.body.scrollTop = 0;
+      };
+      top();
+      setTimeout(top, 50);
+      setTimeout(top, 150);
+      setTimeout(top, 300);
     }
   }, [pathname, hash]); // Ulang setiap kali pathname ATAU hash berubah
 

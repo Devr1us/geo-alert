@@ -1,7 +1,9 @@
 /* LandingPage.css */
 
 .hero-section {
-  padding: calc(var(--spacing-12) * 1.5) 0 var(--spacing-12);
+  /* padding-top harus lebih besar dari tinggi navbar (fixed + top:16px + tinggi ~56px) ≈ 96px,
+     tambah buffer agar konten tidak tertutup navbar di zoom 100% */
+  padding: calc(var(--navbar-height) + 4rem) 0 var(--spacing-12);
   background: radial-gradient(circle at top right, rgba(14, 42, 92, 0.08), transparent 40%),
               radial-gradient(circle at bottom left, rgba(192, 73, 43, 0.05), transparent 40%),
               var(--color-bg);
@@ -49,19 +51,30 @@
 
 .live-status-card {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--spacing-4);
-  padding: var(--spacing-3) var(--spacing-6);
-  border-radius: var(--radius-full);
+  justify-content: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-5);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
   margin-top: var(--spacing-4);
   animation: float 6s ease-in-out infinite;
+  max-width: 720px;
+  row-gap: var(--spacing-2);
 }
 
 @keyframes float {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
   100% { transform: translateY(0px); }
+}
+
+.status-divider {
+  height: 40px;
+  width: 1px;
+  background-color: var(--color-border);
+  flex-shrink: 0;
 }
 
 .trust-bar {
@@ -76,9 +89,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: var(--spacing-6);
+  gap: var(--spacing-4);
   margin-top: var(--spacing-3);
   flex-wrap: wrap;
+  row-gap: var(--spacing-2);
 }
 
 .trust-item {
@@ -135,6 +149,40 @@
 .card-education:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-md);
+}
+
+/* About Section Grid Layout */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .about-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 4.5rem; /* Jarak luas dan rapi antara peta dan kartu fitur */
+  }
+}
+
+@media (min-width: 1280px) {
+  .about-grid {
+    gap: 5.5rem; /* Jarak ekstra di monitor besar */
+  }
+}
+
+.about-features-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+}
+
+@media (min-width: 576px) {
+  .about-features-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
 }
 
 /* Mini Map Preview Card */
@@ -248,9 +296,11 @@
 
 .mini-map-cta {
   position: absolute;
-  bottom: 20px;
+  bottom: 28px;
   z-index: 5;
   box-shadow: var(--shadow-lg);
+  padding: 0.85rem 2rem;    /* lebih lapang secara horizontal & vertikal */
+  font-size: 1rem;
 }
 
 .stats-section {
@@ -490,3 +540,266 @@
     transition: none !important;
   }
 }
+
+/* ============================================================
+   Responsive fixes — hero, live-status-card, trust bar
+   ============================================================ */
+
+/* Pada layar ≤ 640px, buat live-status-card full-width dengan
+   arah kolom agar item tidak bergandengan */
+@media (max-width: 640px) {
+  .hero-section {
+    padding-top: calc(var(--navbar-height) + 3rem);
+  }
+
+  .live-status-card {
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: var(--radius-lg);
+    width: calc(100% - 2rem);
+    max-width: 100%;
+  }
+
+  /* Sembunyikan divider vertikal di layar kecil */
+  .status-divider {
+    display: none;
+  }
+
+  .trust-logos {
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+
+  .trust-item {
+    justify-content: center;
+  }
+}
+
+/* Pastikan section tidak ada overflow horizontal */
+.hero-section,
+.trust-bar {
+  overflow-x: hidden;
+}
+
+/* =================== ABOUT CUSTOM SECTION (NEW DESIGN) =================== */
+.about-custom-section {
+  background-color: #FAF6F0;
+  padding: 4rem 0;
+  position: relative;
+}
+
+.about-top-tag {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.about-tag-text {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #B4623D;
+  text-transform: uppercase;
+}
+
+.about-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.about-hero-box {
+  position: relative;
+  margin-bottom: 3.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 992px) {
+  .about-hero-box {
+    display: block;
+    min-height: 360px;
+  }
+}
+
+/* Wide Rectangular Map Container (Persegi Panjang Melintang) */
+.about-map-container {
+  background: #F4EFE6;
+  border-radius: 28px;
+  padding: 20px; /* Jarak/margin 20px dari gambar */
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(224, 215, 198, 0.7);
+  width: fit-content;
+  height: fit-content;
+}
+
+@media (min-width: 992px) {
+  .about-map-container {
+    width: fit-content;
+    height: fit-content;
+    padding: 20px; /* Jarak tetap 20px dari gambar di desktop */
+  }
+}
+
+/* Wide Rectangular Map Image (Membentang Horizontal di Kiri & Tengah) */
+.about-map-img {
+  width: 100%;
+  max-width: 520px; /* Anda cukup mengatur nilai max-width ini untuk mengatur besar/kecil container */
+  height: auto;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 20px rgba(14, 42, 92, 0.08));
+}
+
+.map-radar-pulse {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid rgba(74, 144, 217, 0.6);
+  transform: translate(-50%, -50%);
+  animation: radar-ripple 2.5s infinite ease-out;
+  pointer-events: none;
+}
+
+.map-radar-pulse::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px; height: 8px;
+  background: #4A90E2;
+  border-radius: 50%;
+}
+
+.pulse-sumatra { top: 52%; left: 18%; animation-delay: 0s; }
+.pulse-jawa { top: 72%; left: 32%; animation-delay: 0.6s; }
+.pulse-sulawesi { top: 48%; left: 54%; animation-delay: 1.2s; }
+.pulse-papua { top: 54%; left: 82%; animation-delay: 1.8s; }
+
+@keyframes radar-ripple {
+  0% {
+    width: 12px;
+    height: 12px;
+    opacity: 1;
+  }
+  100% {
+    width: 60px;
+    height: 60px;
+    opacity: 0;
+  }
+}
+
+/* Floating Card Overlapping Right Side */
+.about-floating-card {
+  background: #FFFFFF;
+  border-radius: 24px;
+  padding: 2.25rem 2rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.07);
+  border: 1px solid rgba(230, 225, 215, 0.8);
+  margin-top: -3rem;
+  position: relative;
+  z-index: 5;
+}
+
+@media (min-width: 992px) {
+  .about-floating-card {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 440px;
+    max-width: 45%;
+    margin-top: 0;
+    padding: 2.75rem 2.5rem;
+  }
+}
+
+/* Features Grid */
+.about-features-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .about-features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .about-features-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.about-feature-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 2rem 1.6rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(230, 225, 215, 0.6);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.07);
+}
+
+.feature-icon-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.icon-blue { background: #EEF2FF; color: #2563EB; }
+.icon-orange { background: #FFF7ED; color: #EA580C; }
+.icon-sky { background: #F0F9FF; color: #0284C7; }
+.icon-red { background: #FFF1F2; color: #E11D48; }
+
+.feature-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0E2A5C;
+  margin-bottom: 0.6rem;
+}
+
+.feature-desc {
+  font-size: 0.875rem;
+  color: #64748B;
+  line-height: 1.6;
+  flex: 1;
+  margin-bottom: 1.75rem;
+}
+
+.feature-link {
+  color: #D97706;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: gap 0.2s ease, color 0.2s ease;
+}
+
+.feature-link:hover {
+  color: #B45309;
+  gap: 10px;
+}
+
