@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import '../../css/MapPage.css';
 import '../../css/LandingPage.css';
 import AIChat from '../components/AIChat';
+import RevealSection from '../components/RevealSection';
 
 // Fix for default leaflet icons in React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -562,13 +563,13 @@ export default function MapPage() {
       </div>
 
       {/* SECTION: TANYA ASISTEN AI */}
-      <section id="tanya-ai" style={{ background: '#040D1F', padding: '3.5rem 0 5rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+      <RevealSection id="tanya-ai" animation="glow-in" className="tanya-ai-section">
         <div className="container" style={{ maxWidth: '1140px' }}>
-          <div style={{ borderRadius: '24px', overflow: 'hidden', height: '680px', boxShadow: '0 25px 60px rgba(0,0,0,0.6)' }}>
+          <div style={{ borderRadius: '24px', overflow: 'hidden', height: '680px', boxShadow: 'var(--shadow-lg)' }}>
             <AIChat isFloating={false} />
           </div>
         </div>
-      </section>
+      </RevealSection>
     </>
   );
 }

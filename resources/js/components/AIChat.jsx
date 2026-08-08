@@ -80,6 +80,21 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
   
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
+  const containerRef = useRef(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setInView(entry.isIntersecting);
+      },
+      { threshold: 0.15 }
+    );
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
 
   // Time-of-day greeting
   const getGreeting = () => {
@@ -134,26 +149,29 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
   const activePrompts = PROMPT_SETS[promptSetIndex];
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      minHeight: messages.length === 0 ? '600px' : '550px',
-      background: 'radial-gradient(circle at 50% 20%, #0E2A5C 0%, #081A3A 60%, #040D1F 100%)',
-      color: '#FFFFFF',
-      fontFamily: "'Inter', sans-serif",
-      position: 'relative',
-      overflow: 'hidden',
-      borderRadius: '24px',
-      border: '1px solid rgba(255, 255, 255, 0.12)',
-      boxShadow: '0 20px 50px rgba(4, 13, 31, 0.5)'
-    }}>
+    <div
+      ref={containerRef}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        minHeight: messages.length === 0 ? '600px' : '550px',
+        background: 'linear-gradient(135deg, #0E2A5C 0%, #0a1f44 60%, #061530 100%)',
+        color: '#FFFFFF',
+        fontFamily: "'Inter', sans-serif",
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: '24px',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        boxShadow: '0 20px 50px rgba(14, 42, 92, 0.25)'
+      }}
+    >
 
       {/* Top Header Bar */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        justify: 'space-between',
+        justifyContent: 'space-between',
         padding: '16px 24px',
         borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
         background: 'rgba(14, 42, 92, 0.3)',
@@ -175,7 +193,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
           </span>
           <span style={{
             display: 'inline-flex', alignItems: 'center', gap: '5px',
-            padding: '2px 8px', borderRadius: '12px',
+            padding: '2px 10px', borderRadius: '20px',
             background: 'rgba(46, 125, 50, 0.2)', border: '1px solid rgba(46, 125, 50, 0.4)',
             fontSize: '0.72rem', color: '#4CAF50', fontWeight: '600'
           }}>
@@ -204,7 +222,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
       </div>
 
       {/* Main Content Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', position: 'relative', zIndex: 1 }}>
+      <div className="ai-chat-scroll-area dark-scroll" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', position: 'relative', zIndex: 1 }}>
 
         {/* INITIAL DASHBOARD MODE (ThinkAI Style) */}
         {messages.length === 0 ? (
@@ -214,7 +232,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
             padding: '2.5rem 1.5rem 1.5rem', textAlign: 'center'
           }}>
             {/* Center 3D Glowing Orb */}
-            <div style={{ position: 'relative', marginBottom: '2rem' }}>
+            <div className={`ai-orb-wrapper ${inView ? 'animate-orb-enter' : ''}`} style={{ position: 'relative', marginBottom: '2rem' }}>
               {/* Outer Pulse Ring */}
               <div style={{
                 position: 'absolute', inset: '-12px', borderRadius: '50%',
@@ -234,20 +252,20 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
             </div>
 
             {/* Hero Greeting Typography */}
-            <h2 style={{
+            <h2 className={`ai-greeting-title ${inView ? 'animate-greeting-enter' : ''}`} style={{
               fontSize: 'clamp(1.75rem, 3.5vw, 2.3rem)', fontWeight: '700',
               lineHeight: '1.25', color: '#FFFFFF', marginBottom: '0.5rem',
               letterSpacing: '-0.02em', textShadow: '0 4px 20px rgba(0,0,0,0.3)'
             }}>
               {getGreeting()}, Pengunjung
             </h2>
-            <p style={{
+            <p className={`ai-greeting-sub ${inView ? 'animate-sub-enter' : ''}`} style={{
               fontSize: 'clamp(1.1rem, 2.2vw, 1.4rem)', fontWeight: '500',
               color: 'rgba(255, 255, 255, 0.9)', marginBottom: '0.75rem'
             }}>
               Ada yang bisa GeoAlert AI bantu hari ini?
             </p>
-            <p style={{
+            <p className={`ai-greeting-sub ${inView ? 'animate-sub-enter' : ''}`} style={{
               fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.6)',
               maxWidth: '520px', marginBottom: '2.5rem', lineHeight: '1.5'
             }}>
@@ -263,7 +281,8 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
               {activePrompts.map((p, idx) => (
                 <button
                   key={idx}
-                  className="thinkai-prompt-card"
+                  className={`thinkai-prompt-card ${inView ? 'animate-card-stagger' : ''}`}
+                  style={{ animationDelay: `${idx * 100 + 200}ms` }}
                   onClick={() => handleSend(p.text)}
                 >
                   <span style={{ fontSize: '0.85rem', fontWeight: '500', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
@@ -317,7 +336,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                 <div style={{
                   maxWidth: '82%',
                   padding: '14px 18px',
-                  borderRadius: msg.role === 'user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                  borderRadius: '20px',
                   background: msg.role === 'user'
                     ? 'linear-gradient(135deg, #0E2A5C 0%, #1e5bb8 100%)'
                     : 'rgba(14, 42, 92, 0.45)',
@@ -344,7 +363,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                   <Bot size={20} color="#FFFFFF" />
                 </div>
                 <div style={{
-                  padding: '12px 18px', borderRadius: '20px 20px 20px 4px',
+                  padding: '12px 18px', borderRadius: '20px',
                   background: 'rgba(14, 42, 92, 0.45)', border: '1px solid rgba(255, 255, 255, 0.12)',
                   display: 'flex', gap: '6px', alignItems: 'center'
                 }}>
@@ -364,7 +383,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
       </div>
 
       {/* THINKAI BOTTOM CHAT BOX CONTAINER */}
-      <div style={{
+      <div className={`thinkai-bottom-container ${inView ? 'animate-input-enter' : ''}`} style={{
         padding: '0 1.5rem 1.25rem',
         maxWidth: '860px', width: '100%', margin: '0 auto',
         position: 'relative', zIndex: 10
@@ -394,7 +413,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                 onClick={() => setShowModelDropdown(!showModelDropdown)}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: '6px',
-                  padding: '5px 12px', borderRadius: '16px',
+                  padding: '5px 12px', borderRadius: '20px',
                   background: 'rgba(255, 255, 255, 0.08)',
                   border: '1px solid rgba(255, 255, 255, 0.15)',
                   color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.78rem',
@@ -410,7 +429,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                 <div style={{
                   position: 'absolute', bottom: 'calc(100% + 8px)', left: 0,
                   background: '#0E2A5C', border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: '12px', padding: '6px', width: '220px',
+                  borderRadius: '16px', padding: '6px', width: '220px',
                   boxShadow: '0 10px 30px rgba(0,0,0,0.5)', zIndex: 50
                 }}>
                   {[
@@ -423,7 +442,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                       onClick={() => { setSelectedModel(m.split(' — ')[0]); setShowModelDropdown(false); }}
                       style={{
                         width: '100%', textAlign: 'left', padding: '8px 12px',
-                        borderRadius: '8px', background: 'transparent', border: 'none',
+                        borderRadius: '10px', background: 'transparent', border: 'none',
                         color: '#FFFFFF', fontSize: '0.78rem', cursor: 'pointer',
                         transition: 'background 0.2s'
                       }}

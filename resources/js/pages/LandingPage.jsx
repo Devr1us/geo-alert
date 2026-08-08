@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import '../../css/LandingPage.css';
 import MitigationModal from '../components/MitigationModal';
+import RevealSection from '../components/RevealSection';
 
 // Count-up hook
 function useCountUp(end, duration = 2000) {
@@ -24,40 +25,6 @@ function useCountUp(end, duration = 2000) {
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [end, duration]);
   return count;
-}
-
-// Reveal Section Component (IntersectionObserver)
-function RevealSection({ children, className = '', id = '' }) {
-  const ref = useRef(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.12 }
-    );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      id={id}
-      className={`reveal-on-scroll ${isVisible ? 'is-visible' : ''} ${className}`}
-    >
-      {children}
-    </div>
-  );
 }
 
 // FAQ data

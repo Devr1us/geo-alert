@@ -355,3 +355,171 @@
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.875rem;
 }
+
+/* ============================================================
+   AI Chat Section & Staggered Entrance Animations
+   ============================================================ */
+
+.tanya-ai-section {
+  background-color: var(--color-bg);
+  padding: 4rem 0 6rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.reveal-on-scroll.reveal-glow-in {
+  transform: scale(0.96) translateY(24px);
+  box-shadow: none;
+}
+.reveal-on-scroll.reveal-glow-in.is-visible {
+  transform: scale(1) translateY(0);
+  box-shadow: 0 20px 40px rgba(14, 42, 92, 0.15);
+}
+
+/* AIChat Internal Elements & Animations */
+.ai-orb-wrapper {
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ai-orb-wrapper.animate-orb-enter {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ai-greeting-title {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.12s, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.12s;
+}
+.ai-greeting-title.animate-greeting-enter {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ai-greeting-sub {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+}
+.ai-greeting-sub.animate-sub-enter {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.thinkai-prompt-card {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 14px 16px;
+  text-align: left;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: background 0.25s, border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  opacity: 0;
+  transform: translateY(20px) scale(0.96);
+}
+.thinkai-prompt-card.animate-card-stagger {
+  animation: card-stagger-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.thinkai-prompt-card:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(0, 210, 255, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes card-stagger-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.thinkai-bottom-container {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.45s, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.45s;
+}
+.thinkai-bottom-container.animate-input-enter {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.thinkai-input-box {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 14px 18px 12px;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+.thinkai-input-box:focus-within {
+  border-color: rgba(0, 210, 255, 0.5);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);
+}
+
+.thinkai-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.thinkai-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-orb-wrapper,
+  .ai-greeting-title,
+  .ai-greeting-sub,
+  .thinkai-prompt-card,
+  .thinkai-bottom-container {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Custom Scrollbar for Dark Containers (AIChat, Modals, Dropdowns) */
+.ai-chat-scroll-area::-webkit-scrollbar,
+.dark-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.ai-chat-scroll-area::-webkit-scrollbar-track,
+.dark-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ai-chat-scroll-area::-webkit-scrollbar-thumb,
+.dark-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+}
+.ai-chat-scroll-area::-webkit-scrollbar-thumb:hover,
+.dark-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+.ai-chat-scroll-area,
+.dark-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
