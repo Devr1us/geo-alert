@@ -445,7 +445,7 @@ export default function LandingPage() {
               memberikan informasi vital dengan visualisasi modern saat waktu sangat berharga.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 gap-10 items-center">
+          <div className="grid md:grid-cols-2 items-center" style={{ gap: '20px' }}>
             <div style={{ background: 'linear-gradient(135deg, #F7F2EA, #E0D9CD)', borderRadius: 'var(--radius-xl)', padding: 'clamp(1.5rem, 4vw, 3rem)', minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <div className="glass" style={{ textAlign: 'center', padding: 'clamp(1.5rem, 4vw, 3rem)', borderRadius: '50%', boxShadow: 'var(--shadow-lg)', animation: 'float 8s ease-in-out infinite' }}>
                 <Map size={80} color="var(--color-primary)" style={{ margin: '0 auto 1rem' }} />
