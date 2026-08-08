@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, AlertTriangle, RefreshCw, Activity, Droplets, Wind, Mountain, Bot, Map as MapIcon } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, AlertTriangle, RefreshCw, Activity, Droplets, Wind, Mountain, Bot, Map as MapIcon, Info } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -54,13 +54,37 @@ const INDONESIA_BOUNDS = L.latLngBounds(
 );
 const INDONESIA_CENTER = [-2.5, 117.5];
 
-// Sample data fallback
-const sampleData = [
-  { id: 's1', type: 'Gempa Bumi', location: 'Selatan Jawa Barat', lat: -7.5, lng: 107.0, time: '10:45 WIB', risk: 'danger', magnitude: '5.2', depth: '10 km', step: 'Berlindung di bawah meja kuat. Jauhi jendela dan perabotan berat. Waspada tsunami jika di pesisir.' },
-  { id: 's2', type: 'Banjir', location: 'Jakarta Timur', lat: -6.2, lng: 106.9, time: '15:20 WIB', risk: 'standby', magnitude: 'Ketinggian 50 cm', depth: '-', step: 'Matikan arus listrik. Evakuasi ke lantai atas. Hubungi BPBD.' },
-  { id: 's3', type: 'Cuaca Ekstrem', location: 'Surabaya', lat: -7.25, lng: 112.75, time: '12:00 WIB', risk: 'warning', magnitude: 'Angin 80 km/jam', depth: '-', step: 'Hindari pohon besar dan tiang listrik. Segera masuk bangunan kokoh.' },
-  { id: 's4', type: 'Gempa Bumi', location: 'Palu, Sulawesi Tengah', lat: -0.9, lng: 119.87, time: '08:10 WIB', risk: 'standby', magnitude: '4.1', depth: '30 km', step: 'Tetap tenang. Pantau informasi BMKG. Gempa kecil ini tidak berpotensi tsunami.' },
-  { id: 's5', type: 'Longsor', location: 'Bogor, Jawa Barat', lat: -6.6, lng: 106.8, time: 'Kemarin', risk: 'warning', magnitude: 'Volume sedang', depth: '-', step: 'Jauhi area lereng. Evakuasi ke dataran rendah yang aman. Pantau perkembangan.' },
+// =============================================================
+// Sample data — BANJIR & LONGSOR
+// Catatan: Data banjir dan longsor tidak tersedia via API publik
+// resmi BNPB/InaRISK tanpa autentikasi. Ditampilkan sebagai
+// contoh tampilan data saja.
+// =============================================================
+const SAMPLE_FLOOD_LANDSLIDE = [
+  {
+    id: 'sample-banjir-1',
+    type: 'Banjir',
+    location: 'Jakarta Timur',
+    lat: -6.2, lng: 106.9,
+    time: '(contoh data)',
+    risk: 'standby',
+    magnitude: 'Ketinggian 50 cm',
+    depth: '-',
+    step: 'Matikan arus listrik. Evakuasi ke lantai atas. Hubungi BPBD.',
+    isSample: true,
+  },
+  {
+    id: 'sample-longsor-1',
+    type: 'Longsor',
+    location: 'Bogor, Jawa Barat',
+    lat: -6.6, lng: 106.8,
+    time: '(contoh data)',
+    risk: 'warning',
+    magnitude: 'Volume sedang',
+    depth: '-',
+    step: 'Jauhi area lereng. Evakuasi ke dataran rendah yang aman. Pantau perkembangan.',
+    isSample: true,
+  },
 ];
 
 function SetBounds() {
@@ -80,6 +104,27 @@ function ChangeView({ center, zoom }) {
   return null;
 }
 
+// =============================================================
+// Poin 5: Nominatim geocoding untuk search bar
+// Dengan debounce 600ms untuk menghindari terlalu banyak request
+// =============================================================
+async function geocodeLocation(query) {
+  const encoded = encodeURIComponent(query);
+  const url = `https://nominatim.openstreetmap.org/search?q=${encoded}&countrycodes=id&format=json&limit=1&accept-language=id`;
+  const res = await fetch(url, {
+    headers: { 'User-Agent': 'GeoAlert/1.0 (+https://geoalert.id)' },
+  });
+  const results = await res.json();
+  if (results.length > 0) {
+    return {
+      lat: parseFloat(results[0].lat),
+      lng: parseFloat(results[0].lon),
+      displayName: results[0].display_name,
+    };
+  }
+  return null;
+}
+
 export default function MapPage() {
   const [activeFilter, setActiveFilter] = useState('Semua');
   const [search, setSearch] = useState('');
@@ -89,7 +134,13 @@ export default function MapPage() {
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [isSampleData, setIsSampleData] = useState(false);
   const [mapCenter, setMapCenter] = useState(INDONESIA_CENTER);
-  const [sidebarTab, setSidebarTab] = useState('map'); // 'map' or 'ai'
+  const [mapZoom, setMapZoom] = useState(5);
+  const [sidebarTab, setSidebarTab] = useState('map');
+
+  // Poin 5: geocoding search state
+  const [geocodeLoading, setGeocodeLoading] = useState(false);
+  const [geocodeResult, setGeocodeResult] = useState(null); // { displayName, lat, lng } | null
+  const searchDebounceRef = useRef(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -97,7 +148,6 @@ export default function MapPage() {
     setIsSampleData(false);
 
     try {
-      // Use our own Laravel proxy — fetched server-side (no CORS issues)
       const [resTerkini, resDirasakan] = await Promise.all([
         fetch('/api/bmkg/gempa-terkini'),
         fetch('/api/bmkg/gempa-dirasakan'),
@@ -143,15 +193,22 @@ export default function MapPage() {
             : mag >= 5
             ? 'Berlindung di bawah meja kuat. Jauhi kaca dan perabotan. Waspada gempa susulan.'
             : 'Tetap tenang. Pantau informasi resmi BMKG. Tidak berpotensi tsunami.',
+          isSample: false,
         };
       });
 
-      setData(formattedData);
+      // Gabungkan dengan data banjir & longsor (contoh) — selalu ditampilkan dengan label jelas
+      setData([...formattedData, ...SAMPLE_FLOOD_LANDSLIDE]);
       setLastUpdate(new Date());
     } catch (err) {
       console.error('[GeoAlert] Gagal mengambil data BMKG:', err.message);
       setError(`Gagal memuat data BMKG: ${err.message}. Menampilkan contoh tampilan data.`);
-      setData(sampleData);
+      // Fallback ke data sample (gempa + banjir + longsor)
+      setData([
+        { id: 's1', type: 'Gempa Bumi', location: 'Selatan Jawa Barat', lat: -7.5, lng: 107.0, time: '(contoh data)', risk: 'danger', magnitude: '5.2', depth: '10 km', step: 'Berlindung di bawah meja kuat.', isSample: true },
+        { id: 's4', type: 'Gempa Bumi', location: 'Palu, Sulawesi Tengah', lat: -0.9, lng: 119.87, time: '(contoh data)', risk: 'standby', magnitude: '4.1', depth: '30 km', step: 'Tetap tenang.', isSample: true },
+        ...SAMPLE_FLOOD_LANDSLIDE,
+      ]);
       setIsSampleData(true);
     } finally {
       setLoading(false);
@@ -163,6 +220,47 @@ export default function MapPage() {
     const interval = setInterval(fetchData, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // =============================================================
+  // Poin 5: Geocoding saat user berhenti mengetik (debounce 600ms)
+  // =============================================================
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    setGeocodeResult(null);
+
+    if (search.trim().length < 3) return;
+
+    // Cek dulu apakah ada item yang cocok dari data lokal
+    const localMatch = data.find(item =>
+      item.location.toLowerCase().includes(search.toLowerCase())
+    );
+    if (localMatch) {
+      // Ada di data — tidak perlu geocode, filter sudah cukup
+      return;
+    }
+
+    // Tidak ada di data → geocode via Nominatim
+    searchDebounceRef.current = setTimeout(async () => {
+      setGeocodeLoading(true);
+      try {
+        const result = await geocodeLocation(search.trim());
+        setGeocodeResult(result);
+      } catch (e) {
+        // Geocoding gagal — diam saja, filter teks masih berjalan
+      } finally {
+        setGeocodeLoading(false);
+      }
+    }, 600);
+  }, [search, data]);
+
+  // Pan peta ke hasil geocoding
+  const handleGeocodePan = () => {
+    if (!geocodeResult) return;
+    setMapCenter([geocodeResult.lat, geocodeResult.lng]);
+    setMapZoom(11);
+    setGeocodeResult(null);
+    setSearch('');
+  };
 
   const getRiskLabel = (risk) => {
     if (risk === 'danger') return <span className="badge badge-danger">BAHAYA</span>;
@@ -184,6 +282,8 @@ export default function MapPage() {
     return matchesFilter && matchesSearch;
   });
 
+  const hasSampleItems = filteredData.some(item => item.isSample);
+
   return (
     <div className="map-page-container">
       {/* Injected marker animation styles */}
@@ -197,21 +297,47 @@ export default function MapPage() {
           0%   { transform: scale(1); opacity: 0.5; }
           100% { transform: scale(2.5); opacity: 0; }
         }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
       `}</style>
 
       {/* Main Map Area */}
       <div className="map-main">
         {/* Map header */}
         <div className="map-header">
-          <div className="search-bar">
-            <Search size={20} color="var(--color-text-muted)" />
-            <input
-              type="text"
-              placeholder="Cari kota atau provinsi..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              aria-label="Cari lokasi"
-            />
+          {/* Poin 5: Search bar dengan geocoding */}
+          <div style={{ position: 'relative', flexGrow: 1 }}>
+            <div className="search-bar">
+              <Search size={20} color="var(--color-text-muted)" />
+              <input
+                type="text"
+                placeholder="Cari kota atau provinsi (geocoding aktif)..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                aria-label="Cari lokasi"
+              />
+              {geocodeLoading && (
+                <RefreshCw size={14} color="var(--color-text-muted)" style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
+              )}
+            </div>
+            {/* Geocoding result suggestion */}
+            {geocodeResult && !geocodeLoading && (
+              <button
+                onClick={handleGeocodePan}
+                style={{
+                  position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 1000,
+                  background: 'white', border: '1px solid var(--color-border)',
+                  borderRadius: 'var(--radius-sm)', padding: '10px 14px',
+                  textAlign: 'left', cursor: 'pointer', fontSize: '0.85rem',
+                  boxShadow: 'var(--shadow-md)',
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                }}
+              >
+                <Search size={13} color="var(--color-primary)" />
+                <span>
+                  <strong>Pergi ke:</strong> {geocodeResult.displayName.split(',').slice(0, 3).join(', ')}
+                </span>
+              </button>
+            )}
           </div>
 
           <div className="filter-chips">
@@ -233,11 +359,23 @@ export default function MapPage() {
           <div style={{
             background: 'rgba(192,73,43,0.1)', borderLeft: '4px solid var(--color-alert)',
             padding: '10px 16px', fontSize: '0.875rem',
-            color: 'var(--color-alert)', display: 'flex', gap: '8px', alignItems: 'center'
+            color: 'var(--color-alert)', display: 'flex', gap: '8px', alignItems: 'center',
           }}>
             <AlertTriangle size={16} />
             {error}
             {isSampleData && <em style={{ color: 'var(--color-text-muted)' }}>(contoh tampilan data)</em>}
+          </div>
+        )}
+
+        {/* Banner: data banjir/longsor selalu tampil sebagai label jelas */}
+        {hasSampleItems && !isSampleData && (
+          <div style={{
+            background: 'rgba(74,144,217,0.08)', borderLeft: '4px solid var(--color-standby)',
+            padding: '8px 16px', fontSize: '0.8rem',
+            color: 'var(--color-standby)', display: 'flex', gap: '8px', alignItems: 'center',
+          }}>
+            <Info size={14} />
+            Data banjir &amp; longsor: <strong>contoh tampilan data</strong> — API publik BNPB/InaRISK belum tersedia tanpa autentikasi resmi.
           </div>
         )}
 
@@ -252,7 +390,7 @@ export default function MapPage() {
             minZoom={4}
           >
             <SetBounds />
-            <ChangeView center={mapCenter} zoom={5} />
+            <ChangeView center={mapCenter} zoom={mapZoom} />
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -278,6 +416,16 @@ export default function MapPage() {
                     <div style={{ fontFamily: 'Fira Code, monospace', fontSize: '0.8rem', color: '#777', marginBottom: '8px' }}>
                       {item.time}
                     </div>
+                    {/* Label contoh data di popup */}
+                    {item.isSample && (
+                      <div style={{
+                        background: 'rgba(74,144,217,0.1)', borderRadius: '4px',
+                        padding: '4px 8px', fontSize: '0.72rem', color: '#4A90D9',
+                        marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px',
+                      }}>
+                        <Info size={11} /> contoh tampilan data
+                      </div>
+                    )}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
                       <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
                         <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>Magnitudo</div>
@@ -306,7 +454,6 @@ export default function MapPage() {
             }}>
               <RefreshCw size={32} color="var(--color-primary)" style={{ animation: 'spin 1s linear infinite' }} />
               <p style={{ color: 'var(--color-primary)', fontWeight: '600' }}>Memuat data BMKG…</p>
-              <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
             </div>
           )}
         </div>
@@ -373,23 +520,49 @@ export default function MapPage() {
             </div>
 
             <div className="sidebar-content">
-              <h4 style={{ marginBottom: '12px', fontSize: '0.95rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Log Peringatan Aktif</h4>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <h4 style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Log Peringatan Aktif</h4>
+              </div>
+
+              {/* Label: data contoh banjir/longsor di sidebar */}
+              {hasSampleItems && (
+                <div style={{
+                  background: 'rgba(74,144,217,0.06)', border: '1px solid rgba(74,144,217,0.2)',
+                  borderRadius: 'var(--radius-sm)', padding: '6px 10px',
+                  fontSize: '0.75rem', color: 'var(--color-standby)', marginBottom: '10px',
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                }}>
+                  <Info size={12} /> Item berlabel "(contoh data)" adalah ilustrasi tampilan — bukan kejadian nyata
+                </div>
+              )}
 
               {loading
                 ? [1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: '80px', marginBottom: '12px', borderRadius: 'var(--radius-md)' }} />)
                 : filteredData.length > 0
                   ? filteredData.map(item => (
-                    <div key={item.id} className="alert-log-item" onClick={() => setMapCenter([item.lat, item.lng])} role="button" tabIndex={0} aria-label={`Lihat ${item.type} di ${item.location}`}>
+                    <div
+                      key={item.id}
+                      className="alert-log-item"
+                      onClick={() => { setMapCenter([item.lat, item.lng]); setMapZoom(9); }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Lihat ${item.type} di ${item.location}`}
+                    >
                       <div className="alert-log-header">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600', fontSize: '0.9rem' }}>
                           {getIcon(item.type)} {item.type}
+                          {item.isSample && (
+                            <span style={{ fontSize: '0.65rem', color: 'var(--color-standby)', fontWeight: '400', background: 'rgba(74,144,217,0.1)', padding: '1px 5px', borderRadius: '3px' }}>
+                              contoh data
+                            </span>
+                          )}
                         </div>
                         {getRiskLabel(item.risk)}
                       </div>
                       <div style={{ fontSize: '0.875rem', marginBottom: '4px', color: 'var(--color-text-main)' }}>{item.location}</div>
                       <div style={{ fontSize: '0.8rem' }}>
                         <span className="mono" style={{ color: 'var(--color-text-muted)' }}>{item.time}</span>
-                        {item.magnitude && item.magnitude !== '-' && (
+                        {item.magnitude && item.magnitude !== '-' && !item.isSample && (
                           <span className="mono" style={{ marginLeft: '8px', color: 'var(--color-primary)', fontWeight: '600' }}>M {item.magnitude}</span>
                         )}
                       </div>

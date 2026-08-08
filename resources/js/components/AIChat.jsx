@@ -173,15 +173,28 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
           padding: '16px 20px',
           background: 'linear-gradient(135deg, var(--color-primary), #1e5bb8)',
           color: 'white',
-          display: 'flex', alignItems: 'center', gap: '10px',
           flexShrink: 0,
         }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Bot size={20} color="white" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Bot size={20} color="white" />
+            </div>
+            <div>
+              <div style={{ fontWeight: '700', fontSize: '1rem' }}>GeoAlert AI</div>
+              <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>● Online • Siap membantu</div>
+            </div>
           </div>
-          <div>
-            <div style={{ fontWeight: '700', fontSize: '1rem' }}>GeoAlert AI</div>
-            <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>● Online • Siap membantu</div>
+          {/* Disclaimer — poin 6 */}
+          <div style={{
+            background: 'rgba(255,255,255,0.12)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '6px',
+            padding: '6px 10px',
+            fontSize: '0.72rem',
+            opacity: 0.9,
+            lineHeight: '1.4',
+          }}>
+            ℹ️ Asisten berbasis panduan resmi, bukan AI generatif. Jawaban diambil dari SOP BMKG & BNPB.
           </div>
         </div>
 
@@ -247,6 +260,18 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
           30% { transform: translateY(-8px); opacity: 1; }
         }
       `}</style>
+      {/* Disclaimer — poin 6 */}
+      <div style={{
+        padding: '6px 14px',
+        background: 'rgba(255,255,255,0.08)',
+        borderBottom: '1px solid rgba(255,255,255,0.15)',
+        fontSize: '0.72rem',
+        color: 'rgba(255,255,255,0.75)',
+        textAlign: 'center',
+        flexShrink: 0,
+      }}>
+        ℹ️ Asisten berbasis panduan resmi BMKG &amp; BNPB — bukan AI generatif
+      </div>
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column' }}>
         {messages.map((msg, i) => <MessageBubble key={i} msg={msg} />)}
         {isTyping && <TypingIndicator />}
