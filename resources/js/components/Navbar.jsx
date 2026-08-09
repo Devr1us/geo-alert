@@ -57,6 +57,23 @@ export default function Navbar() {
     forceScrollTop();
   };
 
+  const scrollToSection = (id) => (e) => {
+    e.preventDefault();
+    setIsOpen(false);
+    if (location.pathname !== '/') {
+      navigate('/', { replace: false });
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 150);
+    } else {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
   const navClass = `navbar ${!isVisible && !isOpen ? 'navbar-hidden' : ''}`;
 
   return (
@@ -74,27 +91,27 @@ export default function Navbar() {
           <div className="nav-group nav-group-left">
             <Link to="/" className="nav-link" onClick={() => setIsOpen(false)}>Beranda</Link>
             <a href="/peta" className="nav-link" onClick={goToMap}>Peta Bencana</a>
-            <Link to="/#tentang" className="nav-link" onClick={() => setIsOpen(false)}>Tentang Kami</Link>
+            <a href="#mitigasi" className="nav-link" onClick={scrollToSection('mitigasi')}>Mitigasi</a>
           </div>
 
-          {/* Center Brand Logo (Desktop) */}
-          <Link to="/" className="nav-brand-center" aria-label="GeoAlert">
-            <img src="/logo-geoalert.svg" alt="GeoAlert" className="nav-logo-center" />
-            <span className="nav-brand-text">GeoAlert</span>
+          {/* Center Brand Logo (Desktop - Only Logo Icon, NO text) */}
+          <Link to="/" className="nav-brand-center" aria-label="GeoAlert Beranda">
+            <svg viewBox="0 0 100 100" className="nav-logo-center-svg" fill="none" stroke="#0E2A5C" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="50" cy="50" r="40"/>
+              <circle cx="50" cy="50" r="24"/>
+              <line x1="50" y1="6" x2="50" y2="94"/>
+              <line x1="6" y1="50" x2="94" y2="50"/>
+              <line x1="50" y1="50" x2="75" y2="25"/>
+              <path d="M50 30 C43 30 38 35 38 42 C38 52 50 64 50 64 C50 64 62 52 62 42 C62 35 57 30 50 30 Z" fill="#0E2A5C" stroke="none"/>
+              <circle cx="50" cy="41" r="4" fill="#F7F2EA"/>
+            </svg>
           </Link>
 
           {/* Right Group Links */}
           <div className="nav-group nav-group-right">
-            <Link to="/#cara-penggunaan" className="nav-link" onClick={() => setIsOpen(false)}>Cara Penggunaan</Link>
-            <Link to="/#mitigasi" className="nav-link" onClick={() => setIsOpen(false)}>Mitigasi</Link>
-            <a href="#kontak" className="nav-link" onClick={() => setIsOpen(false)}>Kontak</a>
-            <a
-              href="/peta"
-              className="btn btn-primary nav-btn-cta"
-              onClick={goToMap}
-            >
-              Pantau Sekarang
-            </a>
+            <a href="#cara-penggunaan" className="nav-link" onClick={scrollToSection('cara-penggunaan')}>Tutorial</a>
+            <a href="#tentang" className="nav-link" onClick={scrollToSection('tentang')}>Tentang Kami</a>
+            <a href="#kontak" className="nav-link" onClick={scrollToSection('kontak')}>Contact</a>
           </div>
         </div>
 

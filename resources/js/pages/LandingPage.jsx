@@ -28,6 +28,36 @@ function useCountUp(end, duration = 2000) {
   return count;
 }
 
+// Bi-directional step reveal component for sequential scroll-driven animations
+function RevealStep({ children, className = '' }) {
+  const ref = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      {
+        threshold: 0.3,
+        rootMargin: '0px 0px -12% 0px',
+      }
+    );
+
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`how-to-use-step ${isVisible ? 'is-visible' : ''} ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
 // FAQ data
 const FAQ_DATA = [
   {
@@ -545,10 +575,6 @@ export default function LandingPage() {
                   className="map-silhouette-img"
                 />
               </div>
-              <div className="map-card-footer">
-                <h4 className="map-title">INDONESIAN</h4>
-                <p className="map-subtitle">EXPLORE THE ARCHIPELAGO</p>
-              </div>
             </RevealSection>
 
             {/* Right Card: Apa itu GeoAlert? */}
@@ -609,83 +635,12 @@ export default function LandingPage() {
         </div>
       </RevealSection>
 
-      {/* =================== HOW TO USE — Cara Menggunakan GeoAlert =================== */}
-      <RevealSection id="cara-penggunaan" className="section how-to-use-dark-section">
-        {/* Background Overlay Graphics (Layers 0-C, 1, 2, 3) */}
-        <div className="section-dark-bg-layers" aria-hidden="true">
-          {/* ENHANCEMENT C: Garis Kontur Topografi Tipis (Section 2: Rapat di bagian bawah) */}
-          <svg className="layer0-topo-contour" viewBox="0 0 1200 600" preserveAspectRatio="none" fill="none">
-            <path d="M0 100 C 220 140, 480 80, 720 150 C 950 200, 1100 130, 1200 160" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.04" />
-            <path d="M0 220 C 350 270, 650 200, 880 260 C 1050 300, 1150 250, 1200 270" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.05" />
-            <path d="M0 350 C 250 400, 520 320, 780 390 C 980 440, 1100 380, 1200 410" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.06" />
-            <path d="M0 440 C 280 490, 560 410, 820 470 C 1000 520, 1120 460, 1200 490" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.07" />
-            <path d="M0 520 C 300 560, 600 490, 850 540 C 1020 570, 1140 530, 1200 550" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.07" />
-          </svg>
-
-          {/* LAYER 1: Organic Network / Constellation Pattern */}
-          <svg className="layer1-constellation-svg" viewBox="0 0 1200 600" fill="none">
-            <line x1="60" y1="120" x2="220" y2="60" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
-            <line x1="220" y1="60" x2="390" y2="140" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
-            <line x1="390" y1="140" x2="560" y2="80" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
-            <line x1="560" y1="80" x2="780" y2="130" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
-            <line x1="780" y1="130" x2="980" y2="50" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
-            <line x1="980" y1="50" x2="1140" y2="110" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
-
-            <line x1="120" y1="420" x2="280" y2="350" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
-            <line x1="280" y1="350" x2="450" y2="460" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
-            <line x1="650" y1="410" x2="840" y2="480" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
-            <line x1="840" y1="480" x2="1020" y2="390" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
-
-            {/* ENHANCEMENT A: Added constellation-node class for animated CSS twinkle */}
-            <circle cx="60" cy="120" r="3" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
-            <circle cx="220" cy="60" r="2.5" fill="#bae6fd" fillOpacity="0.45" className="constellation-node" />
-            <circle cx="390" cy="140" r="3.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
-            <circle cx="560" cy="80" r="2" fill="#ffffff" fillOpacity="0.35" className="constellation-node" />
-            <circle cx="780" cy="130" r="3" fill="#bae6fd" fillOpacity="0.4" className="constellation-node" />
-            <circle cx="980" cy="50" r="2.5" fill="#ffffff" fillOpacity="0.45" className="constellation-node" />
-            <circle cx="1140" cy="110" r="3.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
-
-            <circle cx="120" cy="420" r="3" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
-            <circle cx="280" cy="350" r="2" fill="#bae6fd" fillOpacity="0.35" className="constellation-node" />
-            <circle cx="450" cy="460" r="3.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
-            <circle cx="650" cy="410" r="2.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
-            <circle cx="840" cy="480" r="3" fill="#bae6fd" fillOpacity="0.45" className="constellation-node" />
-            <circle cx="1020" cy="390" r="2.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
-          </svg>
-
-          {/* LAYER 2: Concentric Radar Ping Utama (Top Left - Merah) */}
-          <div className="layer2-radar-wrapper radar-pos-top-left">
-            <svg viewBox="0 0 300 300" className="radar-signal-svg" fill="none">
-              <circle cx="150" cy="150" r="5" fill="#e5533c" className="radar-center-dot" />
-              <circle cx="150" cy="150" r="25" stroke="#e5533c" strokeWidth="1.5" strokeOpacity="0.4" className="radar-ring ping-ring-1" />
-              <circle cx="150" cy="150" r="55" stroke="#bae6fd" strokeWidth="1.2" strokeOpacity="0.25" className="radar-ring ping-ring-2" />
-              <circle cx="150" cy="150" r="90" stroke="#bae6fd" strokeWidth="1" strokeOpacity="0.15" className="radar-ring ping-ring-3" />
-              <circle cx="150" cy="150" r="130" stroke="#bae6fd" strokeWidth="1" strokeOpacity="0.05" className="radar-ring ping-ring-4" />
-            </svg>
-          </div>
-
-          {/* ENHANCEMENT B: Radar Ping Kedua di Pojok Berlawanan (Bottom Right - Biru Standby) */}
-          <div className="layer2-radar-wrapper radar-pos-bottom-right radar-secondary">
-            <svg viewBox="0 0 300 300" className="radar-signal-svg" fill="none">
-              <circle cx="150" cy="150" r="4" fill="#4A90D9" className="radar-center-dot-blue" />
-              <circle cx="150" cy="150" r="25" stroke="#4A90D9" strokeWidth="1.2" strokeOpacity="0.3" className="radar-ring ping-ring-blue-1" />
-              <circle cx="150" cy="150" r="55" stroke="#4A90D9" strokeWidth="1" strokeOpacity="0.18" className="radar-ring ping-ring-blue-2" />
-              <circle cx="150" cy="150" r="90" stroke="#4A90D9" strokeWidth="1" strokeOpacity="0.1" className="radar-ring ping-ring-blue-3" />
-              <circle cx="150" cy="150" r="130" stroke="#4A90D9" strokeWidth="1" strokeOpacity="0.04" className="radar-ring ping-ring-blue-4" />
-            </svg>
-          </div>
-
-          {/* LAYER 3: Aksen Gelombang Seismik (Khusus Section 2) */}
-          <svg className="layer3-seismic-waveform" viewBox="0 0 1200 60" preserveAspectRatio="none" fill="none">
-            <path d="M0 30 L350 30 L365 10 L380 50 L395 0 L410 60 L425 15 L440 42 L455 25 L470 35 L485 30 L1200 30" stroke="#ffffff" strokeWidth="1.5" strokeOpacity="0.18" />
-          </svg>
-        </div>
-
+      {/* =================== HOW TO USE =================== */}
+      <RevealSection id="cara-penggunaan" className="how-to-use-white-section">
         <div className="container relative z-10">
           <h2 className="how-to-use-heading">Cara Menggunakan GeoAlert</h2>
           
-          <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center" style={{ marginTop: '3.5rem' }}>
-            {/* Left timeline */}
+          <div className="how-to-use-centered-container">
             <div className="how-to-use-timeline">
               <div className="timeline-connector-vertical" />
               {[
@@ -722,7 +677,7 @@ export default function LandingPage() {
                       ) : !('Notification' in window) ? (
                         <><BellOff size={14} /> Browser tidak mendukung notifikasi</>
                       ) : (
-                        <><Bell size={14} style={{ color: '#f59e0b' }} /> Aktifkan Notifikasi Sekarang</>
+                        <><Bell size={14} style={{ color: '#ffffff' }} /> Aktifkan Notifikasi Sekarang</>
                       )}
                     </button>
                   ),
@@ -734,40 +689,15 @@ export default function LandingPage() {
                   action: null 
                 },
               ].map((s, i) => (
-                <div key={i} className="how-to-use-step">
+                <RevealStep key={i}>
                   <div className="step-circle-num">{s.n}</div>
                   <div className="step-content-body">
                     <h3 className="step-title-text">{s.title}</h3>
                     <p className="step-desc-text">{s.desc}</p>
                     {s.action}
                   </div>
-                </div>
+                </RevealStep>
               ))}
-            </div>
-
-            {/* Right feature card */}
-            <div className="siaga-card">
-              <div className="siaga-card-graphic">
-                <div className="graphic-grid-bg" />
-                <svg className="radar-graphic" viewBox="0 0 200 200" fill="none">
-                  {/* Concentric rings */}
-                  <circle cx="100" cy="100" r="85" stroke="rgba(14, 42, 92, 0.08)" strokeWidth="1" />
-                  <circle cx="100" cy="100" r="65" stroke="rgba(14, 42, 92, 0.12)" strokeWidth="1" />
-                  <circle cx="100" cy="100" r="45" stroke="rgba(14, 42, 92, 0.18)" strokeWidth="1" />
-                  <circle cx="100" cy="100" r="25" stroke="rgba(229, 83, 60, 0.35)" strokeWidth="1.5" className="radar-ring-pulse" />
-                  {/* Center Dot */}
-                  <circle cx="100" cy="100" r="6" fill="#e5533c" className="radar-dot-center" />
-                </svg>
-              </div>
-              <div className="siaga-card-body">
-                <h3 className="siaga-title">Siaga Kapan Saja</h3>
-                <p className="siaga-desc">
-                  GeoAlert dirancang agar sangat mudah diakses bahkan dalam kondisi panik sekalipun.
-                </p>
-                <Link to="/peta" className="btn-siaga-action">
-                  Mulai Pemantauan
-                </Link>
-              </div>
             </div>
           </div>
         </div>
@@ -867,7 +797,7 @@ export default function LandingPage() {
       </RevealSection>
 
       {/* =================== MITIGATION =================== */}
-      <RevealSection className="section bg-white">
+      <RevealSection id="mitigasi" className="section bg-white">
         <div className="container">
           <h2 className="section-title">Panduan Mitigasi Instan</h2>
           <p className="section-subtitle">

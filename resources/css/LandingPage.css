@@ -1277,10 +1277,16 @@
   font-family: var(--font-heading), 'Merriweather', serif;
   font-size: clamp(2.2rem, 4vw, 2.75rem);
   font-weight: 700;
-  color: #ffffff !important;
+  color: #0E2A5C !important;
   text-align: center;
   margin-bottom: 1rem;
   letter-spacing: -0.01em;
+}
+
+.how-to-use-centered-container {
+  max-width: 620px;
+  margin: 3.5rem auto 0;
+  width: 100%;
 }
 
 /* ── Timeline Styles ─────────────────────────────────────────── */
@@ -1290,7 +1296,7 @@
   padding-left: 0;
   display: flex;
   flex-direction: column;
-  gap: 2.25rem;
+  gap: 2.5rem;
 }
 
 .timeline-connector-vertical {
@@ -1298,8 +1304,8 @@
   top: 22px;
   bottom: 22px;
   left: 20px;
-  width: 1.5px;
-  background: rgba(255, 255, 255, 0.22);
+  width: 2px;
+  background: rgba(14, 42, 92, 0.15);
   transform: translateX(-50%);
   z-index: 0;
 }
@@ -1310,23 +1316,40 @@
   align-items: flex-start;
   position: relative;
   z-index: 1;
+
+  /* Bi-directional scroll entrance and exit transitions */
+  opacity: 0;
+  transform: translateY(35px) scale(0.96);
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.how-to-use-step.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 .step-circle-num {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: #ffffff;
-  color: #0b1a32;
+  background: #0E2A5C;
+  color: #ffffff;
   font-family: var(--font-heading), 'Merriweather', serif;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 6px 16px rgba(14, 42, 92, 0.25);
   margin-top: 2px;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.how-to-use-step.is-visible .step-circle-num {
+  transform: scale(1.05);
 }
 
 .step-content-body {
@@ -1335,40 +1358,41 @@
 
 .step-title-text {
   font-family: var(--font-heading), 'Merriweather', serif;
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  color: #ffffff !important;
+  color: #0E2A5C !important;
   margin-bottom: 0.4rem;
   line-height: 1.3;
 }
 
 .step-desc-text {
   font-family: var(--font-body), 'Inter', sans-serif;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.925rem;
+  color: #475569;
+  font-size: 0.95rem;
   line-height: 1.6;
 }
 
 .btn-notif-action {
   margin-top: 0.85rem;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: #0E2A5C;
+  border: none;
   border-radius: 9999px;
   color: #ffffff;
-  padding: 0.55rem 1.25rem;
+  padding: 0.6rem 1.35rem;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
+  box-shadow: 0 4px 14px rgba(14, 42, 92, 0.2);
   transition: all 0.25s ease;
 }
 
 .btn-notif-action:hover {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.45);
-  transform: translateY(-1px);
+  background: #182e54;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(14, 42, 92, 0.3);
 }
 
 .notif-active-badge {
@@ -1503,11 +1527,27 @@
 
 .about-modern-section {
   position: relative;
-  /* LAYER 0: Diagonal multi-color navy gradient (135deg) */
+  /* Deep navy section background */
   background: linear-gradient(135deg, #0a1f44 0%, #0E2A5C 45%, #1b386b 75%, #0c2044 100%);
   color: #ffffff;
   padding: 5.5rem 0 6rem;
   overflow: hidden;
+}
+
+/* Soft, subtle white radial gradient centered in the middle of the section */
+.about-modern-section::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 750px;
+  height: 520px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 45%, transparent 70%);
+  filter: blur(50px);
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* Layer 0 Aksen Terracotta Radial Glow (Right Bottom Section 1) */
@@ -1525,28 +1565,15 @@
   z-index: 0;
 }
 
+.how-to-use-white-section,
 .how-to-use-dark-section {
   position: relative;
-  /* LAYER 0: Top-to-bottom/165deg navy gradient variation for section 2 */
-  background: linear-gradient(165deg, #0a1f44 0%, #0E2A5C 50%, #1e3a6e 82%, #081836 100%);
-  color: #ffffff;
+  background: #ffffff;
+  color: #1e293b;
   padding: 5.5rem 0 6rem;
+  border-top: 1px solid rgba(14, 42, 92, 0.08);
+  border-bottom: 1px solid rgba(14, 42, 92, 0.08);
   overflow: hidden;
-}
-
-/* Layer 0 Aksen Terracotta Radial Glow (Left Bottom Section 2) */
-.how-to-use-dark-section::before {
-  content: '';
-  position: absolute;
-  bottom: -80px;
-  left: -80px;
-  width: 550px;
-  height: 550px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(192, 73, 43, 0.11) 0%, rgba(192, 73, 43, 0.03) 50%, transparent 70%);
-  filter: blur(60px);
-  pointer-events: none;
-  z-index: 0;
 }
 
 .section-dark-bg-layers {
@@ -1781,15 +1808,14 @@
   left: 48%;
 }
 
-/* Top 2 Cards Grid */
 .about-map-card {
-  background: linear-gradient(135deg, #f7ebd7 0%, #eddabb 100%);
+  background: #f6ead6;
   border-radius: 24px;
-  padding: 2.25rem 2.5rem;
+  padding: 0;
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.32);
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: center;
   min-height: 280px;
   border: 1px solid rgba(255, 255, 255, 0.6);
   position: relative;
@@ -1803,19 +1829,26 @@
 }
 
 .map-card-graphic-wrapper {
-  flex: 1;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.25rem 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 .map-silhouette-img {
-  width: 85%;
-  height: auto;
-  max-height: 140px;
-  object-fit: contain;
-  filter: drop-shadow(0 6px 14px rgba(14, 42, 92, 0.16));
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  object-fit: cover;
+  border-radius: 24px;
+  transition: transform 0.35s ease;
+}
+
+.about-map-card:hover .map-silhouette-img {
+  transform: scale(1.03);
 }
 
 .map-card-footer {
