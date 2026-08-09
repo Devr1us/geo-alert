@@ -6,7 +6,6 @@ import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import FloatingAIWidget from './components/FloatingAIWidget';
 
 function ScrollController() {
   const { pathname, hash } = useLocation();
@@ -59,7 +58,6 @@ function App() {
         </Routes>
       </main>
       <Footer />
-      <FloatingAIWidget />
     </div>
   );
 }
