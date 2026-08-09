@@ -60,8 +60,8 @@
 }
 
 .hero-status-card-animated {
-  opacity: 0;
-  animation: heroCardReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 2.5s forwards;
+  opacity: 1;
+  animation: floatPill 6s ease-in-out infinite;
 }
 
 /* ── Hero Keyframe Animations ────────────────────────────────────── */
@@ -109,15 +109,9 @@
   }
 }
 
-@keyframes heroCardReveal {
-  0% {
-    opacity: 0;
-    transform: translateY(28px) scale(0.96);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+@keyframes floatPill {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -152,33 +146,96 @@
   margin-bottom: var(--spacing-8);
 }
 
-.live-status-card {
+.live-status-pill-card {
   display: inline-flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-3) var(--spacing-5);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
-  border: 1px solid rgba(14, 42, 92, 0.1) !important;
-  margin-top: var(--spacing-4);
-  animation: float 6s ease-in-out infinite;
+  gap: 2.25rem;
+  padding: 0.85rem 2.25rem;
+  background: #ffffff;
+  border-radius: 9999px;
+  box-shadow: 0 10px 30px rgba(14, 42, 92, 0.08), 0 0 0 1px rgba(14, 42, 92, 0.08);
+  margin-top: 2.75rem;
+  opacity: 1;
+  animation: floatPill 6s ease-in-out infinite;
   max-width: 720px;
-  row-gap: var(--spacing-2);
+}
+
+.status-pill-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.status-pill-label {
+  font-family: var(--font-body), 'Inter', sans-serif;
+  font-size: 0.725rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #718096;
+  text-transform: uppercase;
+}
+
+.status-pill-val {
+  font-family: var(--font-body), 'Inter', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.2;
+}
+
+.status-pill-val.location-val {
+  color: #0E2A5C;
+}
+
+.status-pill-val.area-val {
+  color: #2E7D32;
+}
+
+.status-pill-val.time-val {
+  font-family: var(--font-mono), 'Fira Code', monospace;
+  color: #1b386b;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.status-dot-glow {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.status-pill-divider {
+  width: 1px;
+  height: 34px;
+  background: rgba(14, 42, 92, 0.12);
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .live-status-pill-card {
+    border-radius: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    width: 100%;
+  }
+
+  .status-pill-divider {
+    display: none;
+  }
 }
 
 @keyframes float {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
   100% { transform: translateY(0px); }
-}
-
-.status-divider {
-  height: 40px;
-  width: 1px;
-  background-color: var(--color-border);
-  flex-shrink: 0;
 }
 
 .trust-bar {
@@ -1140,4 +1197,724 @@
   outline-offset: 3px;
   border-radius: 4px;
 }
+
+/* ============================================================
+   HOW TO USE SECTION — Dark Deep Navy Theme (Matching Mockup)
+   ============================================================ */
+
+.how-to-use-dark-section {
+  background: linear-gradient(180deg, #0a1b36 0%, #0d2140 50%, #08162b 100%);
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  padding: 5.5rem 0 6rem;
+}
+
+.how-to-use-bg-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-constellation {
+  position: absolute;
+  width: 320px;
+  height: 200px;
+  opacity: 0.6;
+}
+
+.bg-constellation-left {
+  top: 4%;
+  left: 3%;
+}
+
+.bg-constellation-right {
+  top: 6%;
+  right: 3%;
+}
+
+.bg-pulse-wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  opacity: 0.7;
+}
+
+.how-to-use-heading {
+  font-family: var(--font-heading), 'Merriweather', serif;
+  font-size: clamp(2.2rem, 4vw, 2.75rem);
+  font-weight: 700;
+  color: #ffffff !important;
+  text-align: center;
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+}
+
+/* ── Timeline Styles ─────────────────────────────────────────── */
+
+.how-to-use-timeline {
+  position: relative;
+  padding-left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+}
+
+.timeline-connector-vertical {
+  position: absolute;
+  top: 22px;
+  bottom: 22px;
+  left: 20px;
+  width: 1.5px;
+  background: rgba(255, 255, 255, 0.22);
+  transform: translateX(-50%);
+  z-index: 0;
+}
+
+.how-to-use-step {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  position: relative;
+  z-index: 1;
+}
+
+.step-circle-num {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #0b1a32;
+  font-family: var(--font-heading), 'Merriweather', serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  margin-top: 2px;
+}
+
+.step-content-body {
+  flex: 1;
+}
+
+.step-title-text {
+  font-family: var(--font-heading), 'Merriweather', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff !important;
+  margin-bottom: 0.4rem;
+  line-height: 1.3;
+}
+
+.step-desc-text {
+  font-family: var(--font-body), 'Inter', sans-serif;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.925rem;
+  line-height: 1.6;
+}
+
+.btn-notif-action {
+  margin-top: 0.85rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 9999px;
+  color: #ffffff;
+  padding: 0.55rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-notif-action:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.45);
+  transform: translateY(-1px);
+}
+
+.notif-active-badge {
+  margin-top: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(46, 125, 50, 0.2);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  color: #81c784;
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  font-size: 0.825rem;
+  font-weight: 600;
+}
+
+/* ── Right Siaga Card Styles ─────────────────────────────────── */
+
+.siaga-card {
+  background: #ffffff;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.siaga-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 25px 55px rgba(0, 0, 0, 0.4);
+}
+
+.siaga-card-graphic {
+  height: 250px;
+  background: #edf3fa;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(14, 42, 92, 0.06);
+}
+
+.graphic-grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(180, 202, 226, 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(180, 202, 226, 0.4) 1px, transparent 1px);
+  background-size: 44px 44px;
+  background-position: center center;
+  opacity: 0.7;
+}
+
+.radar-graphic {
+  width: 210px;
+  height: 210px;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes radarPulseRing {
+  0% {
+    r: 15px;
+    opacity: 0.8;
+  }
+  100% {
+    r: 45px;
+    opacity: 0;
+  }
+}
+
+.radar-ring-pulse {
+  transform-origin: center;
+  animation: radarPulseRing 2.5s infinite ease-out;
+}
+
+.radar-dot-center {
+  filter: drop-shadow(0 0 6px rgba(229, 83, 60, 0.6));
+}
+
+.siaga-card-body {
+  padding: 2.25rem 2.5rem 2.5rem;
+  background: #ffffff;
+  color: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.siaga-title {
+  font-family: var(--font-heading), 'Merriweather', serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0b1a32 !important;
+  margin-bottom: 0.75rem;
+}
+
+.siaga-desc {
+  font-family: var(--font-body), 'Inter', sans-serif;
+  color: #475569;
+  font-size: 0.975rem;
+  line-height: 1.6;
+  margin-bottom: 1.75rem;
+}
+
+.btn-siaga-action {
+  background: #0b1a32;
+  color: #ffffff !important;
+  border-radius: 10px;
+  padding: 0.8rem 1.75rem;
+  font-family: var(--font-body), 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 14px rgba(11, 26, 50, 0.25);
+}
+
+.btn-siaga-action:hover {
+  background: #182e54;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(11, 26, 50, 0.35);
+}
+
+/* ============================================================
+   DARK NAVY SECTIONS — LAYER 0 (GRADASI #0a1f44 → #0E2A5C → #1e3a6e + #C0492B RADIAL GLOW)
+   LAYER 1 (Constellation), LAYER 2 (Radar Signal), LAYER 3 (Seismic Wave)
+   ============================================================ */
+
+.about-modern-section {
+  position: relative;
+  /* LAYER 0: Diagonal multi-color navy gradient (135deg) */
+  background: linear-gradient(135deg, #0a1f44 0%, #0E2A5C 45%, #1b386b 75%, #0c2044 100%);
+  color: #ffffff;
+  padding: 5.5rem 0 6rem;
+  overflow: hidden;
+}
+
+/* Layer 0 Aksen Terracotta Radial Glow (Right Bottom Section 1) */
+.about-modern-section::before {
+  content: '';
+  position: absolute;
+  bottom: -80px;
+  right: -80px;
+  width: 550px;
+  height: 550px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(192, 73, 43, 0.12) 0%, rgba(192, 73, 43, 0.04) 50%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.how-to-use-dark-section {
+  position: relative;
+  /* LAYER 0: Top-to-bottom/165deg navy gradient variation for section 2 */
+  background: linear-gradient(165deg, #0a1f44 0%, #0E2A5C 50%, #1e3a6e 82%, #081836 100%);
+  color: #ffffff;
+  padding: 5.5rem 0 6rem;
+  overflow: hidden;
+}
+
+/* Layer 0 Aksen Terracotta Radial Glow (Left Bottom Section 2) */
+.how-to-use-dark-section::before {
+  content: '';
+  position: absolute;
+  bottom: -80px;
+  left: -80px;
+  width: 550px;
+  height: 550px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(192, 73, 43, 0.11) 0%, rgba(192, 73, 43, 0.03) 50%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.section-dark-bg-layers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* LAYER 1: Constellation / Network Pattern */
+.layer1-constellation-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+}
+
+/* LAYER 2: Radar Signal Pulse / Broadcast Rings */
+.layer2-radar-wrapper {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.radar-pos-top-right {
+  top: -30px;
+  right: -30px;
+}
+
+.radar-pos-top-left {
+  top: -30px;
+  left: -30px;
+}
+
+.radar-signal-svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes radarBroadcastPulse {
+  0% {
+    r: 15px;
+    stroke-opacity: 0.5;
+  }
+  50% {
+    stroke-opacity: 0.3;
+  }
+  100% {
+    r: 140px;
+    stroke-opacity: 0;
+  }
+}
+
+.radar-ring {
+  transform-origin: center;
+  animation: radarBroadcastPulse 2.6s infinite cubic-bezier(0.2, 0.8, 0.4, 1);
+}
+
+.ping-ring-1 { animation-delay: 0s; }
+.ping-ring-2 { animation-delay: 0.65s; }
+.ping-ring-3 { animation-delay: 1.3s; }
+.ping-ring-4 { animation-delay: 1.95s; }
+
+.radar-center-dot {
+  filter: drop-shadow(0 0 8px rgba(229, 83, 60, 0.8));
+}
+
+/* LAYER 3: Aksen Gelombang Seismik (Khusus Section 2) */
+.layer3-seismic-waveform {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 55px;
+  opacity: 0.85;
+}
+
+/* ── ENHANCEMENT A: Twinkle animation for constellation nodes ──── */
+@keyframes constellationTwinkle {
+  0%, 100% {
+    fill-opacity: 0.45;
+  }
+  50% {
+    fill-opacity: 0.16;
+  }
+}
+
+.constellation-node {
+  animation: constellationTwinkle 4s ease-in-out infinite;
+}
+
+/* Staggered animation delays for twinkling nodes */
+.constellation-node:nth-child(13) { animation-delay: 0s; }
+.constellation-node:nth-child(14) { animation-delay: 0.4s; }
+.constellation-node:nth-child(15) { animation-delay: 0.9s; }
+.constellation-node:nth-child(16) { animation-delay: 1.3s; }
+.constellation-node:nth-child(17) { animation-delay: 1.8s; }
+.constellation-node:nth-child(18) { animation-delay: 2.2s; }
+.constellation-node:nth-child(19) { animation-delay: 2.7s; }
+.constellation-node:nth-child(20) { animation-delay: 3.1s; }
+.constellation-node:nth-child(21) { animation-delay: 0.6s; }
+.constellation-node:nth-child(22) { animation-delay: 1.5s; }
+.constellation-node:nth-child(23) { animation-delay: 2.4s; }
+
+/* ── ENHANCEMENT B: Secondary radar positioning & styles ─────── */
+.radar-secondary {
+  width: 180px;
+  height: 180px;
+}
+
+.radar-pos-bottom-left {
+  bottom: -20px;
+  left: -20px;
+}
+
+.radar-pos-bottom-right {
+  bottom: -20px;
+  right: -20px;
+}
+
+.radar-center-dot-blue {
+  filter: drop-shadow(0 0 6px rgba(74, 144, 217, 0.8));
+}
+
+/* Offset animation delay for blue secondary radar ping rings */
+.ping-ring-blue-1 { animation-delay: 1.3s; }
+.ping-ring-blue-2 { animation-delay: 1.95s; }
+.ping-ring-blue-3 { animation-delay: 2.6s; }
+.ping-ring-blue-4 { animation-delay: 3.25s; }
+
+/* ── ENHANCEMENT C: Topographic Contour Lines SVG ──────────────── */
+.layer0-topo-contour {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Accessibility: prefers-reduced-motion ─────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .constellation-node,
+  .radar-ring {
+    animation: none !important;
+  }
+}
+
+/* Header Tag on Top Right */
+.about-header-tag {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2.25rem;
+  position: relative;
+  z-index: 10;
+}
+
+.about-tag-title {
+  font-family: var(--font-body), 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #ffffff;
+  text-transform: uppercase;
+  opacity: 0.95;
+}
+
+.about-tag-dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-navy { background: #0E2A5C; border: 1px solid rgba(255,255,255,0.4); }
+.dot-red { background: #ef4444; }
+
+.about-floating-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fbbf24;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-left: 0.25rem;
+}
+
+/* Floating Decorative Badges */
+.floating-badge {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.badge-left {
+  top: 14%;
+  left: 3%;
+}
+
+.badge-center {
+  top: 8%;
+  left: 48%;
+}
+
+/* Top 2 Cards Grid */
+.about-map-card {
+  background: linear-gradient(135deg, #f7ebd7 0%, #eddabb 100%);
+  border-radius: 24px;
+  padding: 2.25rem 2.5rem;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.32);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 280px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-map-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 25px 55px rgba(0, 0, 0, 0.4);
+}
+
+.map-card-graphic-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 0;
+}
+
+.map-silhouette-img {
+  width: 85%;
+  height: auto;
+  max-height: 140px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 14px rgba(14, 42, 92, 0.16));
+}
+
+.map-card-footer {
+  margin-top: 1rem;
+}
+
+.map-title {
+  font-family: var(--font-heading), 'Merriweather', serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #11223b !important;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.2rem;
+}
+
+.map-subtitle {
+  font-family: var(--font-body), 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.about-info-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 3rem 2.75rem;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.32);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  min-height: 280px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-info-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 25px 55px rgba(0, 0, 0, 0.4);
+}
+
+.info-card-title {
+  font-family: var(--font-heading), 'Merriweather', serif;
+  font-size: clamp(2rem, 3.2vw, 2.5rem);
+  font-weight: 700;
+  color: #0b1a32 !important;
+  margin-bottom: 1.25rem;
+  line-height: 1.2;
+}
+
+.info-card-desc {
+  font-family: var(--font-body), 'Inter', sans-serif;
+  color: #475569;
+  font-size: 1.025rem;
+  line-height: 1.65;
+}
+
+/* Bottom 4 Feature Cards */
+.about-mini-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 1.85rem 1.6rem 1.6rem;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(230, 235, 242, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-mini-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+}
+
+.mini-icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  flex-shrink: 0;
+}
+
+.icon-bg-blue { background: #eff6ff; color: #2563eb; }
+.icon-bg-yellow { background: #fef3c7; color: #d97706; }
+.icon-bg-sky { background: #e0f2fe; color: #0284c7; }
+.icon-bg-rose { background: #ffe4e6; color: #e11d48; }
+
+.mini-card-title {
+  font-family: var(--font-heading), 'Merriweather', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0b1a32 !important;
+  margin-bottom: 0.5rem;
+}
+
+.mini-card-desc {
+  font-family: var(--font-body), 'Inter', sans-serif;
+  color: #64748b;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  flex: 1;
+  margin-bottom: 1.5rem;
+}
+
+.mini-card-link {
+  font-family: var(--font-body), 'Inter', sans-serif;
+  color: #0b1a32;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: gap 0.2s ease, color 0.2s ease;
+}
+
+.mini-card-link:hover {
+  color: #2563eb;
+  gap: 10px;
+}
+
+
+
 

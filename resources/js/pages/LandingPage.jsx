@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   Map, Bell, Bot, Shield, ChevronRight, Activity, ArrowRight,
   Wind, Droplets, Mountain, ChevronDown, ChevronUp, MapPin, BellOff, RefreshCw,
+  Zap, Quote, Compass, MessageSquare,
 } from 'lucide-react';
 import '../../css/LandingPage.css';
 import MitigationModal from '../components/MitigationModal';
@@ -332,53 +333,59 @@ export default function LandingPage() {
             </a>
           </div>
 
-          {/* ---- Live Status Card — poin 1 ---- */}
-          <div className="live-status-card glass hero-status-card-animated" style={{ marginTop: '3rem', border: '1px solid rgba(14,42,92,0.1)' }}>
-            {/* Lokasi */}
-            <div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Lokasi Anda</div>
+          {/* ---- Live Status Card (Refined to match exact screenshot mockup) ---- */}
+          <div className="live-status-pill-card hero-status-card-animated">
+            {/* Column 1: Lokasi Anda */}
+            <div className="status-pill-col">
+              <span className="status-pill-label">LOKASI ANDA</span>
               {locationStatus === 'loading' && (
-                <div style={{ fontWeight: '600', fontSize: '1rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <MapPin size={14} style={{ animation: 'pulse 1.5s ease-in-out infinite' }} /> Mendeteksi…
+                <div className="status-pill-val loading-val" style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>
+                  <MapPin size={14} className="animate-pulse" /> Mendeteksi…
                 </div>
               )}
               {locationStatus === 'denied' && (
-                <div style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div className="status-pill-val alert-val" style={{ color: 'var(--color-alert)', fontSize: '0.85rem' }}>
                   <MapPin size={14} color="var(--color-alert)" />
-                  <span style={{ fontSize: '0.8rem' }}>Izin lokasi diperlukan</span>
+                  <span>Izin lokasi diperlukan</span>
                 </div>
               )}
               {locationStatus === 'ready' && (
-                <div style={{ fontWeight: '700', fontSize: '1.1rem', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <MapPin size={14} />
-                  {locationName}
+                <div className="status-pill-val location-val">
+                  <MapPin size={14} color="#0E2A5C" />
+                  <span>{locationName || 'Karanganyar'}</span>
                 </div>
               )}
             </div>
 
-            <div className="status-divider" />
+            <div className="status-pill-divider" />
 
-            {/* Status Wilayah */}
-            <div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status Wilayah</div>
+            {/* Column 2: Status Wilayah */}
+            <div className="status-pill-col">
+              <span className="status-pill-label">STATUS WILAYAH</span>
               {locationStatus === 'denied' ? (
-                <div style={{ fontWeight: '600', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
-                  Aktifkan lokasi untuk melihat status wilayah Anda
+                <div className="status-pill-val text-muted" style={{ fontSize: '0.85rem' }}>
+                  Aktifkan lokasi
                 </div>
               ) : (
-                <div style={{ fontWeight: '700', color: currentStatus.color, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: currentStatus.color, boxShadow: `0 0 10px ${currentStatus.glow}`, display: 'inline-block' }} />
-                  {locationStatus === 'loading' ? '—' : currentStatus.label}
+                <div className="status-pill-val area-val" style={{ color: currentStatus.color }}>
+                  <span
+                    className="status-dot-glow"
+                    style={{
+                      backgroundColor: currentStatus.color,
+                      boxShadow: `0 0 10px ${currentStatus.glow}`,
+                    }}
+                  />
+                  <span>{locationStatus === 'loading' ? '—' : currentStatus.label}</span>
                 </div>
               )}
             </div>
 
-            <div className="status-divider" />
+            <div className="status-pill-divider" />
 
-            {/* Pembaruan */}
-            <div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pembaruan</div>
-              <div className="mono" style={{ fontSize: '0.95rem', fontWeight: '500', color: 'var(--color-primary)' }}>
+            {/* Column 3: Pembaruan */}
+            <div className="status-pill-col">
+              <span className="status-pill-label">PEMBARUAN</span>
+              <div className="status-pill-val time-val mono">
                 {eventsLoading ? '…' : 'Baru saja'}
               </div>
             </div>
@@ -438,86 +445,163 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* =================== ABOUT (MENGAPA MEMILIH GEOALERT) =================== */}
-      <RevealSection id="tentang" className="about-custom-section">
-        <div className="container">
-          {/* Header Tag on Top Right */}
-          <div className="about-top-tag">
-            <span className="about-tag-text">TENTANG KAMI</span>
-            <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
-              <span className="about-dot" style={{ background: '#2563EB' }} />
-              <span className="about-dot" style={{ background: '#EA580C' }} />
-              <span className="about-dot" style={{ background: '#DC2626' }} />
+      {/* =================== ABOUT (TENTANG KAMI) =================== */}
+      <RevealSection id="tentang" className="about-modern-section">
+        {/* Background Overlay Graphics (Layers 0-C, 1, 2) */}
+        <div className="section-dark-bg-layers" aria-hidden="true">
+          {/* ENHANCEMENT C: Garis Kontur Topografi Tipis (Section 1: Rapat di bagian atas) */}
+          <svg className="layer0-topo-contour" viewBox="0 0 1200 600" preserveAspectRatio="none" fill="none">
+            <path d="M0 60 C 250 110, 500 20, 750 90 C 950 140, 1100 70, 1200 100" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.07" />
+            <path d="M0 120 C 300 160, 550 80, 800 150 C 1000 200, 1120 130, 1200 160" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.06" />
+            <path d="M0 190 C 220 230, 480 160, 720 220 C 920 270, 1080 200, 1200 230" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.05" />
+            <path d="M0 320 C 350 370, 650 300, 880 360 C 1050 400, 1150 350, 1200 370" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.05" />
+            <path d="M0 460 C 280 500, 580 430, 820 480 C 1000 520, 1120 470, 1200 490" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.04" />
+          </svg>
+
+          {/* LAYER 1: Organic Network / Constellation Pattern */}
+          <svg className="layer1-constellation-svg" viewBox="0 0 1200 600" fill="none">
+            <line x1="90" y1="80" x2="240" y2="150" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
+            <line x1="240" y1="150" x2="410" y2="90" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
+            <line x1="410" y1="90" x2="580" y2="180" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
+            <line x1="580" y1="180" x2="740" y2="100" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
+            <line x1="740" y1="100" x2="920" y2="160" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
+            <line x1="920" y1="160" x2="1110" y2="70" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
+
+            <line x1="150" y1="360" x2="290" y2="480" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
+            <line x1="290" y1="480" x2="480" y2="410" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
+            <line x1="720" y1="450" x2="880" y2="520" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
+            <line x1="880" y1="520" x2="1050" y2="430" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
+
+            {/* ENHANCEMENT A: Added constellation-node class for animated CSS twinkle */}
+            <circle cx="90" cy="80" r="3" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
+            <circle cx="240" cy="150" r="2.5" fill="#bae6fd" fillOpacity="0.45" className="constellation-node" />
+            <circle cx="410" cy="90" r="3.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
+            <circle cx="580" cy="180" r="2" fill="#ffffff" fillOpacity="0.35" className="constellation-node" />
+            <circle cx="740" cy="100" r="3" fill="#bae6fd" fillOpacity="0.4" className="constellation-node" />
+            <circle cx="920" cy="160" r="2.5" fill="#ffffff" fillOpacity="0.45" className="constellation-node" />
+            <circle cx="1110" cy="70" r="3.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
+
+            <circle cx="150" cy="360" r="3" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
+            <circle cx="290" cy="480" r="2" fill="#bae6fd" fillOpacity="0.35" className="constellation-node" />
+            <circle cx="480" cy="410" r="3.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
+            <circle cx="720" cy="450" r="2.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
+            <circle cx="880" cy="520" r="3" fill="#bae6fd" fillOpacity="0.45" className="constellation-node" />
+            <circle cx="1050" cy="430" r="2.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
+          </svg>
+
+          {/* LAYER 2: Concentric Radar Ping Utama (Top Right - Merah) */}
+          <div className="layer2-radar-wrapper radar-pos-top-right">
+            <svg viewBox="0 0 300 300" className="radar-signal-svg" fill="none">
+              <circle cx="150" cy="150" r="5" fill="#e5533c" className="radar-center-dot" />
+              <circle cx="150" cy="150" r="25" stroke="#e5533c" strokeWidth="1.5" strokeOpacity="0.4" className="radar-ring ping-ring-1" />
+              <circle cx="150" cy="150" r="55" stroke="#bae6fd" strokeWidth="1.2" strokeOpacity="0.25" className="radar-ring ping-ring-2" />
+              <circle cx="150" cy="150" r="90" stroke="#bae6fd" strokeWidth="1" strokeOpacity="0.15" className="radar-ring ping-ring-3" />
+              <circle cx="150" cy="150" r="130" stroke="#bae6fd" strokeWidth="1" strokeOpacity="0.05" className="radar-ring ping-ring-4" />
+            </svg>
+          </div>
+
+          {/* ENHANCEMENT B: Radar Ping Kedua di Pojok Berlawanan (Bottom Left - Biru Standby) */}
+          <div className="layer2-radar-wrapper radar-pos-bottom-left radar-secondary">
+            <svg viewBox="0 0 300 300" className="radar-signal-svg" fill="none">
+              <circle cx="150" cy="150" r="4" fill="#4A90D9" className="radar-center-dot-blue" />
+              <circle cx="150" cy="150" r="25" stroke="#4A90D9" strokeWidth="1.2" strokeOpacity="0.3" className="radar-ring ping-ring-blue-1" />
+              <circle cx="150" cy="150" r="55" stroke="#4A90D9" strokeWidth="1" strokeOpacity="0.18" className="radar-ring ping-ring-blue-2" />
+              <circle cx="150" cy="150" r="90" stroke="#4A90D9" strokeWidth="1" strokeOpacity="0.1" className="radar-ring ping-ring-blue-3" />
+              <circle cx="150" cy="150" r="130" stroke="#4A90D9" strokeWidth="1" strokeOpacity="0.04" className="radar-ring ping-ring-blue-4" />
+            </svg>
+          </div>
+        </div>
+
+        <div className="container relative z-10">
+          {/* Top Right Label / Tag */}
+          <div className="about-header-tag">
+            <span className="about-tag-title">TENTANG KAMI</span>
+            <div className="about-tag-dots">
+              <span className="dot dot-navy" />
+              <span className="dot dot-red" />
+              <span className="dot dot-red" />
+            </div>
+            <div className="about-floating-icon icon-lightning">
+              <Zap size={14} />
             </div>
           </div>
 
-          {/* Hero Banner Box: Map Canvas + Floating Overlap Card */}
-          <div className="about-hero-box">
-            {/* Map Canvas Background Container */}
-            <div className="about-map-container">
-              <img
-                src="/images/INDONESIAN.png"
-                alt="Peta Indonesia GeoAlert"
-                className="about-map-img"
-              />
-              {/* Radar pulse ripples on key locations */}
-              <div className="map-radar-pulse pulse-sumatra" />
-              <div className="map-radar-pulse pulse-jawa" />
-              <div className="map-radar-pulse pulse-sulawesi" />
-              <div className="map-radar-pulse pulse-papua" />
-            </div>
+          {/* Floating decorative icons */}
+          <div className="floating-badge badge-left" aria-hidden="true">
+            <Quote size={16} />
+          </div>
+          <div className="floating-badge badge-center" aria-hidden="true">
+            <Compass size={16} />
+          </div>
 
-            {/* Floating Overlap Card */}
-            <RevealSection className="about-floating-card">
-              <h2 className="about-card-title">Apa itu GeoAlert?</h2>
-              <p className="about-card-desc">
+          {/* Top Row: 2 Big Cards */}
+          <div className="grid md:grid-cols-2 gap-8 items-stretch" style={{ marginBottom: '2.25rem' }}>
+            {/* Left Card: Indonesian Archipelago */}
+            <RevealSection className="about-map-card">
+              <div className="map-card-graphic-wrapper">
+                <img
+                  src="/images/INDONESIAN.png"
+                  alt="Indonesia Archipelago Map"
+                  className="map-silhouette-img"
+                />
+              </div>
+              <div className="map-card-footer">
+                <h4 className="map-title">INDONESIAN</h4>
+                <p className="map-subtitle">EXPLORE THE ARCHIPELAGO</p>
+              </div>
+            </RevealSection>
+
+            {/* Right Card: Apa itu GeoAlert? */}
+            <RevealSection className="about-info-card">
+              <h2 className="info-card-title">Apa itu GeoAlert?</h2>
+              <p className="info-card-desc">
                 Platform cerdas yang menggabungkan data otoritatif dengan kecerdasan buatan untuk memberikan peringatan yang cepat, akurat, dan dapat ditindaklanjuti.
               </p>
             </RevealSection>
           </div>
 
-          {/* 4 Feature Cards Grid below */}
-          <div className="about-features-grid">
-            <RevealSection className="about-feature-card shuffle-card shuffle-card-1" style={{ transitionDelay: '0ms' }}>
-              <div className="feature-icon-wrapper icon-blue">
-                <RefreshCw size={22} />
+          {/* Bottom Row: 4 Feature Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <RevealSection className="about-mini-card" style={{ transitionDelay: '0ms' }}>
+              <div className="mini-icon-circle icon-bg-blue">
+                <RefreshCw size={18} />
               </div>
-              <h4 className="feature-title">Data Real-time</h4>
-              <p className="feature-desc">Terintegrasi dengan sumber data resmi BMKG & BNPB.</p>
-              <Link to="/peta" className="feature-link">
+              <h4 className="mini-card-title">Data Real-time</h4>
+              <p className="mini-card-desc">Terintegrasi dengan sumber data resmi BMKG & BNPB.</p>
+              <Link to="/peta" className="mini-card-link">
                 Selengkapnya <span>→</span>
               </Link>
             </RevealSection>
 
-            <RevealSection className="about-feature-card shuffle-card shuffle-card-2" style={{ transitionDelay: '300ms' }}>
-              <div className="feature-icon-wrapper icon-orange">
-                <Bell size={22} />
+            <RevealSection className="about-mini-card" style={{ transitionDelay: '150ms' }}>
+              <div className="mini-icon-circle icon-bg-yellow">
+                <Bell size={18} />
               </div>
-              <h4 className="feature-title">Peringatan Dini</h4>
-              <p className="feature-desc">Notifikasi instan berbasis lokasi untuk kesiapsiagaan Anda.</p>
-              <Link to="/peta" className="feature-link">
+              <h4 className="mini-card-title">Peringatan Dini</h4>
+              <p className="mini-card-desc">Notifikasi instan berbasis lokasi untuk kesiapsiagaan Anda.</p>
+              <Link to="/peta" className="mini-card-link">
                 Selengkapnya <span>→</span>
               </Link>
             </RevealSection>
 
-            <RevealSection className="about-feature-card shuffle-card shuffle-card-3" style={{ transitionDelay: '600ms' }}>
-              <div className="feature-icon-wrapper icon-sky">
-                <Bot size={22} />
+            <RevealSection className="about-mini-card" style={{ transitionDelay: '300ms' }}>
+              <div className="mini-icon-circle icon-bg-sky">
+                <MessageSquare size={18} />
               </div>
-              <h4 className="feature-title">AI Assistant</h4>
-              <p className="feature-desc">Asisten cerdas menjawab seputar mitigasi & prosedur darurat.</p>
-              <Link to="/peta" className="feature-link">
+              <h4 className="mini-card-title">AI Assistant</h4>
+              <p className="mini-card-desc">Asisten cerdas menjawab seputar mitigasi & prosedur darurat.</p>
+              <Link to="/peta" className="mini-card-link">
                 Selengkapnya <span>→</span>
               </Link>
             </RevealSection>
 
-            <RevealSection className="about-feature-card shuffle-card shuffle-card-4" style={{ transitionDelay: '900ms' }}>
-              <div className="feature-icon-wrapper icon-red">
-                <Map size={22} />
+            <RevealSection className="about-mini-card" style={{ transitionDelay: '450ms' }}>
+              <div className="mini-icon-circle icon-bg-rose">
+                <Map size={18} />
               </div>
-              <h4 className="feature-title">Peta Interaktif</h4>
-              <p className="feature-desc">Visualisasi sebaran ancaman bencana di seluruh Indonesia.</p>
-              <Link to="/peta" className="feature-link">
+              <h4 className="mini-card-title">Peta Interaktif</h4>
+              <p className="mini-card-desc">Visualisasi sebaran ancaman bencana di seluruh Indonesia.</p>
+              <Link to="/peta" className="mini-card-link">
                 Selengkapnya <span>→</span>
               </Link>
             </RevealSection>
@@ -525,25 +609,111 @@ export default function LandingPage() {
         </div>
       </RevealSection>
 
-      {/* =================== HOW TO USE — poin 2 (notifikasi) =================== */}
-      <RevealSection id="cara-penggunaan" className="section">
-        <div className="container">
-          <h2 className="section-title">Cara Menggunakan GeoAlert</h2>
-          <div className="grid md:grid-cols-2 gap-12 items-start" style={{ marginTop: '4rem' }}>
-            <div className="vertical-timeline-flow timeline-stacking">
+      {/* =================== HOW TO USE — Cara Menggunakan GeoAlert =================== */}
+      <RevealSection id="cara-penggunaan" className="section how-to-use-dark-section">
+        {/* Background Overlay Graphics (Layers 0-C, 1, 2, 3) */}
+        <div className="section-dark-bg-layers" aria-hidden="true">
+          {/* ENHANCEMENT C: Garis Kontur Topografi Tipis (Section 2: Rapat di bagian bawah) */}
+          <svg className="layer0-topo-contour" viewBox="0 0 1200 600" preserveAspectRatio="none" fill="none">
+            <path d="M0 100 C 220 140, 480 80, 720 150 C 950 200, 1100 130, 1200 160" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.04" />
+            <path d="M0 220 C 350 270, 650 200, 880 260 C 1050 300, 1150 250, 1200 270" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.05" />
+            <path d="M0 350 C 250 400, 520 320, 780 390 C 980 440, 1100 380, 1200 410" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.06" />
+            <path d="M0 440 C 280 490, 560 410, 820 470 C 1000 520, 1120 460, 1200 490" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.07" />
+            <path d="M0 520 C 300 560, 600 490, 850 540 C 1020 570, 1140 530, 1200 550" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.07" />
+          </svg>
+
+          {/* LAYER 1: Organic Network / Constellation Pattern */}
+          <svg className="layer1-constellation-svg" viewBox="0 0 1200 600" fill="none">
+            <line x1="60" y1="120" x2="220" y2="60" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
+            <line x1="220" y1="60" x2="390" y2="140" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
+            <line x1="390" y1="140" x2="560" y2="80" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
+            <line x1="560" y1="80" x2="780" y2="130" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
+            <line x1="780" y1="130" x2="980" y2="50" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
+            <line x1="980" y1="50" x2="1140" y2="110" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
+
+            <line x1="120" y1="420" x2="280" y2="350" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
+            <line x1="280" y1="350" x2="450" y2="460" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
+            <line x1="650" y1="410" x2="840" y2="480" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
+            <line x1="840" y1="480" x2="1020" y2="390" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
+
+            {/* ENHANCEMENT A: Added constellation-node class for animated CSS twinkle */}
+            <circle cx="60" cy="120" r="3" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
+            <circle cx="220" cy="60" r="2.5" fill="#bae6fd" fillOpacity="0.45" className="constellation-node" />
+            <circle cx="390" cy="140" r="3.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
+            <circle cx="560" cy="80" r="2" fill="#ffffff" fillOpacity="0.35" className="constellation-node" />
+            <circle cx="780" cy="130" r="3" fill="#bae6fd" fillOpacity="0.4" className="constellation-node" />
+            <circle cx="980" cy="50" r="2.5" fill="#ffffff" fillOpacity="0.45" className="constellation-node" />
+            <circle cx="1140" cy="110" r="3.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
+
+            <circle cx="120" cy="420" r="3" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
+            <circle cx="280" cy="350" r="2" fill="#bae6fd" fillOpacity="0.35" className="constellation-node" />
+            <circle cx="450" cy="460" r="3.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
+            <circle cx="650" cy="410" r="2.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
+            <circle cx="840" cy="480" r="3" fill="#bae6fd" fillOpacity="0.45" className="constellation-node" />
+            <circle cx="1020" cy="390" r="2.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
+          </svg>
+
+          {/* LAYER 2: Concentric Radar Ping Utama (Top Left - Merah) */}
+          <div className="layer2-radar-wrapper radar-pos-top-left">
+            <svg viewBox="0 0 300 300" className="radar-signal-svg" fill="none">
+              <circle cx="150" cy="150" r="5" fill="#e5533c" className="radar-center-dot" />
+              <circle cx="150" cy="150" r="25" stroke="#e5533c" strokeWidth="1.5" strokeOpacity="0.4" className="radar-ring ping-ring-1" />
+              <circle cx="150" cy="150" r="55" stroke="#bae6fd" strokeWidth="1.2" strokeOpacity="0.25" className="radar-ring ping-ring-2" />
+              <circle cx="150" cy="150" r="90" stroke="#bae6fd" strokeWidth="1" strokeOpacity="0.15" className="radar-ring ping-ring-3" />
+              <circle cx="150" cy="150" r="130" stroke="#bae6fd" strokeWidth="1" strokeOpacity="0.05" className="radar-ring ping-ring-4" />
+            </svg>
+          </div>
+
+          {/* ENHANCEMENT B: Radar Ping Kedua di Pojok Berlawanan (Bottom Right - Biru Standby) */}
+          <div className="layer2-radar-wrapper radar-pos-bottom-right radar-secondary">
+            <svg viewBox="0 0 300 300" className="radar-signal-svg" fill="none">
+              <circle cx="150" cy="150" r="4" fill="#4A90D9" className="radar-center-dot-blue" />
+              <circle cx="150" cy="150" r="25" stroke="#4A90D9" strokeWidth="1.2" strokeOpacity="0.3" className="radar-ring ping-ring-blue-1" />
+              <circle cx="150" cy="150" r="55" stroke="#4A90D9" strokeWidth="1" strokeOpacity="0.18" className="radar-ring ping-ring-blue-2" />
+              <circle cx="150" cy="150" r="90" stroke="#4A90D9" strokeWidth="1" strokeOpacity="0.1" className="radar-ring ping-ring-blue-3" />
+              <circle cx="150" cy="150" r="130" stroke="#4A90D9" strokeWidth="1" strokeOpacity="0.04" className="radar-ring ping-ring-blue-4" />
+            </svg>
+          </div>
+
+          {/* LAYER 3: Aksen Gelombang Seismik (Khusus Section 2) */}
+          <svg className="layer3-seismic-waveform" viewBox="0 0 1200 60" preserveAspectRatio="none" fill="none">
+            <path d="M0 30 L350 30 L365 10 L380 50 L395 0 L410 60 L425 15 L440 42 L455 25 L470 35 L485 30 L1200 30" stroke="#ffffff" strokeWidth="1.5" strokeOpacity="0.18" />
+          </svg>
+        </div>
+
+        <div className="container relative z-10">
+          <h2 className="how-to-use-heading">Cara Menggunakan GeoAlert</h2>
+          
+          <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center" style={{ marginTop: '3.5rem' }}>
+            {/* Left timeline */}
+            <div className="how-to-use-timeline">
+              <div className="timeline-connector-vertical" />
               {[
-                { n: '1', title: 'Pilih Lokasi Anda', desc: 'Izinkan akses lokasi atau cari kota Anda secara manual di peta interaktif.', action: null },
-                { n: '2', title: 'Lihat Status Bencana', desc: 'Periksa indikator warna untuk mengetahui tingkat risiko di sekitar Anda.', action: null },
+                { 
+                  n: '1', 
+                  title: 'Pilih Lokasi Anda', 
+                  desc: 'Izinkan akses lokasi atau cari kota Anda secara manual di peta interaktif.', 
+                  action: null 
+                },
+                { 
+                  n: '2', 
+                  title: 'Lihat Status Bencana', 
+                  desc: 'Periksa indikator warna untuk mengetahui tingkat risiko di sekitar Anda.', 
+                  action: null 
+                },
                 {
                   n: '3',
                   title: 'Aktifkan Notifikasi',
                   desc: 'Dapatkan lansiran peringatan dini langsung ke perangkat saat terjadi anomali.',
-                  action: notifPref === 'true' ? null : (
+                  action: notifPref === 'true' ? (
+                    <span className="notif-active-badge">
+                      <Bell size={13} /> Notifikasi Aktif
+                    </span>
+                  ) : (
                     <button
                       onClick={handleActivateNotif}
                       disabled={notifRequesting || !('Notification' in window)}
-                      className="btn btn-secondary"
-                      style={{ marginTop: '0.75rem', padding: '0.5rem 1.25rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+                      className="btn-notif-action"
                     >
                       {notifRequesting ? (
                         <span>Meminta izin…</span>
@@ -552,58 +722,52 @@ export default function LandingPage() {
                       ) : !('Notification' in window) ? (
                         <><BellOff size={14} /> Browser tidak mendukung notifikasi</>
                       ) : (
-                        <><Bell size={14} /> Aktifkan Notifikasi Sekarang</>
+                        <><Bell size={14} style={{ color: '#f59e0b' }} /> Aktifkan Notifikasi Sekarang</>
                       )}
                     </button>
                   ),
-                  badge: notifPref === 'true' ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(46,125,50,0.1)', color: 'var(--color-status-safe)', padding: '3px 10px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '600', marginTop: '8px' }}>
-                      <Bell size={12} /> Notifikasi aktif
-                    </span>
-                  ) : null,
                 },
-                { n: '4', title: 'Tanya Asisten AI', desc: 'Gunakan asisten panduan SOP BMKG untuk informasi evakuasi dan mitigasi.', action: null },
+                { 
+                  n: '4', 
+                  title: 'Tanya Asisten AI', 
+                  desc: 'Gunakan asisten panduan SOP BMKG untuk informasi evakuasi dan mitigasi.', 
+                  action: null 
+                },
               ].map((s, i) => (
-                <div key={i} className="timeline-step-wrapper" style={{ marginBottom: i < 3 ? '0' : 0 }}>
-                  {/* Connector line between steps */}
-                  {i > 0 && (
-                    <RevealSection
-                      className="timeline-connector-anim"
-                      style={{ transitionDelay: `${i * 1200}ms` }}
-                    >
-                      <div className="timeline-connector-line" />
-                    </RevealSection>
-                  )}
-                  {/* Step row: number + text */}
-                  <div className="timeline-step-row">
-                    <RevealSection
-                      className="timeline-number-anim"
-                      style={{ transitionDelay: `${i * 1200 + (i > 0 ? 400 : 0)}ms` }}
-                    >
-                      <div className="timeline-number">{s.n}</div>
-                    </RevealSection>
-                    <RevealSection
-                      className="timeline-text-anim"
-                      style={{ transitionDelay: `${i * 1200 + (i > 0 ? 800 : 400)}ms` }}
-                    >
-                      <h4 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{s.title}</h4>
-                      <p className="text-muted" style={{ lineHeight: '1.6' }}>{s.desc}</p>
-                      {s.action}
-                      {s.badge}
-                    </RevealSection>
+                <div key={i} className="how-to-use-step">
+                  <div className="step-circle-num">{s.n}</div>
+                  <div className="step-content-body">
+                    <h3 className="step-title-text">{s.title}</h3>
+                    <p className="step-desc-text">{s.desc}</p>
+                    {s.action}
                   </div>
                 </div>
               ))}
             </div>
-            <div style={{ background: 'linear-gradient(135deg, var(--color-primary), #1e5bb8)', borderRadius: 'var(--radius-xl)', padding: 'clamp(2rem, 4vw, 4rem) clamp(1.5rem, 3vw, 3rem)', color: 'white', boxShadow: 'var(--shadow-lg)', display: 'flex', flexDirection: 'column' }}>
-              <Shield size={48} color="var(--color-standby)" style={{ marginBottom: '2rem' }} />
-              <h3 style={{ color: 'white', marginBottom: '1rem', fontSize: '2rem' }}>Siaga Kapan Saja</h3>
-              <p style={{ color: 'rgba(255,255,255,0.8)', marginBottom: '2.5rem', fontSize: '1.125rem', lineHeight: '1.6' }}>
-                GeoAlert dirancang agar sangat mudah diakses bahkan dalam kondisi panik sekalipun.
-              </p>
-              <Link to="/peta" className="btn btn-primary" style={{ alignSelf: 'flex-start', padding: '1rem 2rem' }}>
-                Mulai Pemantauan
-              </Link>
+
+            {/* Right feature card */}
+            <div className="siaga-card">
+              <div className="siaga-card-graphic">
+                <div className="graphic-grid-bg" />
+                <svg className="radar-graphic" viewBox="0 0 200 200" fill="none">
+                  {/* Concentric rings */}
+                  <circle cx="100" cy="100" r="85" stroke="rgba(14, 42, 92, 0.08)" strokeWidth="1" />
+                  <circle cx="100" cy="100" r="65" stroke="rgba(14, 42, 92, 0.12)" strokeWidth="1" />
+                  <circle cx="100" cy="100" r="45" stroke="rgba(14, 42, 92, 0.18)" strokeWidth="1" />
+                  <circle cx="100" cy="100" r="25" stroke="rgba(229, 83, 60, 0.35)" strokeWidth="1.5" className="radar-ring-pulse" />
+                  {/* Center Dot */}
+                  <circle cx="100" cy="100" r="6" fill="#e5533c" className="radar-dot-center" />
+                </svg>
+              </div>
+              <div className="siaga-card-body">
+                <h3 className="siaga-title">Siaga Kapan Saja</h3>
+                <p className="siaga-desc">
+                  GeoAlert dirancang agar sangat mudah diakses bahkan dalam kondisi panik sekalipun.
+                </p>
+                <Link to="/peta" className="btn-siaga-action">
+                  Mulai Pemantauan
+                </Link>
+              </div>
             </div>
           </div>
         </div>
