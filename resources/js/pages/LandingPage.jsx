@@ -412,11 +412,11 @@ export default function LandingPage() {
               { value: `< ${speedCount}s`, label: 'Kecepatan Notifikasi' },
               { value: '24/7', label: 'Pemantauan Aktif' },
             ].map((s, i) => (
-              <RevealSection key={i} style={{ padding: '2rem', borderRadius: 'var(--radius-lg)', transitionDelay: `${i * 400}ms` }} className="stat-item glass-dark">
+              <RevealSection key={i} style={{ padding: '2rem', borderRadius: 'var(--radius-lg)', transitionDelay: `${i * 400}ms` }} className="stat-item">
                 <div className="stat-number">{s.value}</div>
-                <div style={{ fontWeight: '500', letterSpacing: '0.05em' }}>{s.label}</div>
+                <div style={{ fontWeight: '600', color: 'var(--color-primary)', letterSpacing: '0.03em' }}>{s.label}</div>
                 {s.note && (
-                  <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', marginTop: '4px' }}>{s.note}</div>
+                  <div style={{ fontSize: '0.725rem', color: '#64748b', marginTop: '4px' }}>{s.note}</div>
                 )}
               </RevealSection>
             ))}
