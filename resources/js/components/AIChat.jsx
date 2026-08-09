@@ -252,52 +252,52 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
       </div>
 
       {/* Main Content Area */}
-      <div className="ai-chat-scroll-area dark-scroll" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', position: 'relative', zIndex: 1 }}>
+      <div className="ai-chat-scroll-area dark-scroll" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: messages.length === 0 ? 'hidden' : 'auto', position: 'relative', zIndex: 1 }}>
 
         {/* INITIAL DASHBOARD MODE (ThinkAI Style) */}
         {messages.length === 0 ? (
           <div style={{
             flex: 1, display: 'flex', flexDirection: 'column',
             alignItems: 'center', justifyContent: 'center',
-            padding: '2.5rem 1.5rem 1.5rem', textAlign: 'center'
+            padding: '1.75rem 1.5rem 1rem', textAlign: 'center'
           }}>
             {/* Center 3D Glowing Orb */}
-            <div className={`ai-orb-wrapper ${inView ? 'animate-orb-enter' : ''}`} style={{ position: 'relative', marginBottom: '2rem' }}>
+            <div className={`ai-orb-wrapper ${inView ? 'animate-orb-enter' : ''}`} style={{ position: 'relative', marginBottom: '1.25rem' }}>
               {/* Outer Pulse Ring */}
               <div style={{
-                position: 'absolute', inset: '-12px', borderRadius: '50%',
+                position: 'absolute', inset: '-10px', borderRadius: '50%',
                 border: '1px solid rgba(0, 210, 255, 0.3)',
                 animation: 'orb-pulse-ring 3s infinite ease-in-out',
                 pointerEvents: 'none'
               }} />
               {/* 3D Glowing Sphere */}
               <div style={{
-                width: '80px', height: '80px', borderRadius: '50%',
+                width: '72px', height: '72px', borderRadius: '50%',
                 background: 'radial-gradient(circle at 35% 35%, #FFFFFF 0%, #00D2FF 40%, #4A90D9 70%, #0E2A5C 100%)',
                 animation: 'orb-glow 6s infinite ease-in-out',
                 display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}>
-                <Bot size={38} color="#FFFFFF" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))' }} />
+                <Bot size={34} color="#FFFFFF" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))' }} />
               </div>
             </div>
 
             {/* Hero Greeting Typography */}
             <h2 className={`ai-greeting-title ${inView ? 'animate-greeting-enter' : ''}`} style={{
-              fontSize: 'clamp(1.75rem, 3.5vw, 2.3rem)', fontWeight: '700',
-              lineHeight: '1.25', color: '#FFFFFF', marginBottom: '0.5rem',
+              fontSize: 'clamp(1.6rem, 3vw, 2.1rem)', fontWeight: '700',
+              lineHeight: '1.25', color: '#FFFFFF', marginBottom: '0.35rem',
               letterSpacing: '-0.02em', textShadow: '0 4px 20px rgba(0,0,0,0.3)'
             }}>
               {getGreeting()}, Pengunjung
             </h2>
             <p className={`ai-greeting-sub ${inView ? 'animate-sub-enter' : ''}`} style={{
-              fontSize: 'clamp(1.1rem, 2.2vw, 1.4rem)', fontWeight: '500',
-              color: 'rgba(255, 255, 255, 0.9)', marginBottom: '0.75rem'
+              fontSize: 'clamp(1rem, 2vw, 1.25rem)', fontWeight: '500',
+              color: 'rgba(255, 255, 255, 0.9)', marginBottom: '0.5rem'
             }}>
               Ada yang bisa GeoAlert AI bantu hari ini?
             </p>
             <p className={`ai-greeting-sub ${inView ? 'animate-sub-enter' : ''}`} style={{
-              fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.6)',
-              maxWidth: '520px', marginBottom: '2.5rem', lineHeight: '1.5'
+              fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.6)',
+              maxWidth: '520px', marginBottom: '1.75rem', lineHeight: '1.5'
             }}>
               Pilih salah satu saran pertanyaan di bawah atau ketik pertanyaan Anda sendiri seputar mitigasi bencana.
             </p>

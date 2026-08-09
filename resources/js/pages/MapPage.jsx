@@ -585,7 +585,7 @@ export default function MapPage() {
       {/* SECTION: TANYA ASISTEN AI */}
       <RevealSection id="tanya-ai" animation="glow-in" className="tanya-ai-section">
         <div className="container" style={{ maxWidth: '1140px' }}>
-          <div style={{ borderRadius: '24px', overflow: 'hidden', height: '680px', boxShadow: 'var(--shadow-lg)' }}>
+          <div style={{ borderRadius: '24px', overflow: 'hidden', height: '740px', boxShadow: 'var(--shadow-lg)' }}>
             <AIChat isFloating={false} />
           </div>
         </div>
