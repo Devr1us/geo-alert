@@ -79,8 +79,11 @@ export default function Navbar() {
   return (
     <nav className={navClass}>
       <div className="container nav-pill-container">
-        {/* Mobile Header Brand (Visible on small screens) */}
-        <Link to="/" className="nav-brand-mobile" aria-label="GeoAlert">
+        {/* Mobile Spacer (for 3-way balance: Spacer | Logo Center | Toggle Right) */}
+        <div className="nav-mobile-spacer" aria-hidden="true" />
+
+        {/* Mobile Header Brand (Centered on mobile view) */}
+        <Link to="/" className="nav-brand-mobile" aria-label="GeoAlert" onClick={() => setIsOpen(false)}>
           <img src="/logo-geoalert.svg" alt="GeoAlert" className="nav-logo" />
           <span className="nav-brand-text">GeoAlert</span>
         </Link>
@@ -111,7 +114,7 @@ export default function Navbar() {
           <div className="nav-group nav-group-right">
             <a href="#cara-penggunaan" className="nav-link" onClick={scrollToSection('cara-penggunaan')}>Tutorial</a>
             <a href="#tentang" className="nav-link" onClick={scrollToSection('tentang')}>Tentang Kami</a>
-            <a href="#kontak" className="nav-link" onClick={scrollToSection('kontak')}>Contact</a>
+            <a href="#kontak" className="nav-link" onClick={scrollToSection('kontak')}>Kontak</a>
           </div>
         </div>
 

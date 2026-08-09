@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   Map, Bell, Bot, Shield, ChevronRight, Activity, ArrowRight,
   Wind, Droplets, Mountain, ChevronDown, ChevronUp, MapPin, BellOff, RefreshCw,
-  Zap, Quote, Compass, MessageSquare,
+  Zap, Quote, Compass, MessageSquare, Clock,
 } from 'lucide-react';
 import '../../css/LandingPage.css';
 import MitigationModal from '../components/MitigationModal';
@@ -193,25 +193,44 @@ async function fetchBmkgEvents() {
 
 // ============================================================
 // Notification helper — poin 2
+// Pakai SW.showNotification() jika tersedia (wajib untuk PWA),
+// fallback ke new Notification() untuk browser tanpa SW.
 // ============================================================
 const NOTIF_KEY = 'geoalert_notifications_enabled';
 
-async function requestNotificationPermission() {
-  if (!('Notification' in window)) return 'unsupported';
-  const permission = await Notification.requestPermission();
-  localStorage.setItem(NOTIF_KEY, permission === 'granted' ? 'true' : 'false');
-  return permission;
-}
+async function sendBrowserNotification(title, body) {
+  if (Notification.permission !== 'granted') return;
 
-function sendBrowserNotification(title, body) {
-  if (Notification.permission === 'granted') {
-    new Notification(title, {
-      body,
-      icon: '/favicon.svg',
-      tag: 'geoalert-warning',
-    });
+  const options = {
+    body,
+    icon: '/logo-geoalert.svg',
+    badge: '/logo-geoalert.svg',
+    tag: 'geoalert-warning',
+    renotify: true,
+    requireInteraction: false,
+  };
+
+  // Chrome & PWA browsers memerlukan SW.showNotification()
+  // ketika ada service worker terdaftar — new Notification() akan diabaikan
+  if ('serviceWorker' in navigator) {
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      await reg.showNotification(title, options);
+      return;
+    } catch (_) {
+      // SW tidak ready atau gagal — fallback ke constructor
+    }
+  }
+
+  // Fallback untuk browser tanpa service worker
+  try {
+    // eslint-disable-next-line no-new
+    new Notification(title, options);
+  } catch (_) {
+    // Beberapa browser memblokir constructor sama sekali — abaikan
   }
 }
+
 
 export default function LandingPage() {
   // ---- State ----
@@ -319,16 +338,49 @@ export default function LandingPage() {
 
   // ============================================================
   // Poin 2: Handle klik "Aktifkan Notifikasi"
+  // Selalu sync state dengan Notification.permission asli dari browser
   // ============================================================
+  const [notifBrowserPerm, setNotifBrowserPerm] = useState(() => {
+    if (!('Notification' in window)) return 'unsupported';
+    return Notification.permission; // 'default' | 'granted' | 'denied'
+  });
+
   const handleActivateNotif = async () => {
+    if (!('Notification' in window)) return;
+
+    // Jika sudah denied, arahkan ke pengaturan browser
+    if (notifBrowserPerm === 'denied') {
+      alert('Notifikasi diblokir browser Anda. Klik ikon gembok/info di address bar untuk mengizinkan notifikasi dari situs ini, lalu muat ulang halaman.');
+      return;
+    }
+
+    // Jika sudah granted, tidak perlu request lagi
+    if (notifBrowserPerm === 'granted') {
+      setNotifPref('true');
+      localStorage.setItem(NOTIF_KEY, 'true');
+      sendBrowserNotification('✅ GeoAlert — Notifikasi Aktif', 'Anda sudah mendapat peringatan bencana di wilayah Anda.');
+      return;
+    }
+
     setNotifRequesting(true);
-    const permission = await requestNotificationPermission();
-    setNotifPref(permission === 'granted' ? 'true' : 'false');
-    setNotifRequesting(false);
-    if (permission === 'granted') {
-      sendBrowserNotification('✅ GeoAlert — Notifikasi Aktif', 'Anda akan mendapat peringatan bencana di wilayah Anda.');
+    try {
+      const result = await Notification.requestPermission();
+      setNotifBrowserPerm(result);
+      if (result === 'granted') {
+        setNotifPref('true');
+        localStorage.setItem(NOTIF_KEY, 'true');
+        sendBrowserNotification('✅ GeoAlert — Notifikasi Aktif', 'Anda akan mendapat peringatan bencana di wilayah Anda.');
+      } else {
+        setNotifPref('false');
+        localStorage.setItem(NOTIF_KEY, 'false');
+      }
+    } catch (err) {
+      console.warn('Notification request failed:', err);
+    } finally {
+      setNotifRequesting(false);
     }
   };
+
 
   // ---- Helpers untuk status wilayah ----
   const areaStatusConfig = {
@@ -415,8 +467,9 @@ export default function LandingPage() {
             {/* Column 3: Pembaruan */}
             <div className="status-pill-col">
               <span className="status-pill-label">PEMBARUAN</span>
-              <div className="status-pill-val time-val mono">
-                {eventsLoading ? '…' : 'Baru saja'}
+              <div className="status-pill-val time-val">
+                <Clock size={13} color="#0E2A5C" />
+                <span>{eventsLoading ? '…' : 'Baru saja'}</span>
               </div>
             </div>
           </div>
@@ -660,22 +713,24 @@ export default function LandingPage() {
                   n: '3',
                   title: 'Aktifkan Notifikasi',
                   desc: 'Dapatkan lansiran peringatan dini langsung ke perangkat saat terjadi anomali.',
-                  action: notifPref === 'true' ? (
+                  action: notifBrowserPerm === 'granted' ? (
                     <span className="notif-active-badge">
                       <Bell size={13} /> Notifikasi Aktif
+                    </span>
+                  ) : notifBrowserPerm === 'unsupported' ? (
+                    <span className="notif-unsupported-badge">
+                      <BellOff size={13} /> Browser tidak mendukung notifikasi
                     </span>
                   ) : (
                     <button
                       onClick={handleActivateNotif}
-                      disabled={notifRequesting || !('Notification' in window)}
-                      className="btn-notif-action"
+                      disabled={notifRequesting}
+                      className={`btn-notif-action${notifBrowserPerm === 'denied' ? ' btn-notif-denied' : ''}`}
                     >
                       {notifRequesting ? (
-                        <span>Meminta izin…</span>
-                      ) : notifPref === 'false' ? (
-                        <><BellOff size={14} /> Izin ditolak — ubah di pengaturan browser</>
-                      ) : !('Notification' in window) ? (
-                        <><BellOff size={14} /> Browser tidak mendukung notifikasi</>
+                        <><span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin-notif 0.7s linear infinite' }} /> Meminta izin…</>
+                      ) : notifBrowserPerm === 'denied' ? (
+                        <><BellOff size={14} /> Buka pengaturan browser</>
                       ) : (
                         <><Bell size={14} style={{ color: '#ffffff' }} /> Aktifkan Notifikasi Sekarang</>
                       )}

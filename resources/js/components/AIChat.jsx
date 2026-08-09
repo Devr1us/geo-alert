@@ -252,17 +252,18 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
       </div>
 
       {/* Main Content Area */}
-      <div className="ai-chat-scroll-area dark-scroll" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: messages.length === 0 ? 'hidden' : 'auto', position: 'relative', zIndex: 1 }}>
+      <div className="ai-chat-scroll-area dark-scroll" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', position: 'relative', zIndex: 1 }}>
 
         {/* INITIAL DASHBOARD MODE (ThinkAI Style) */}
         {messages.length === 0 ? (
           <div style={{
             flex: 1, display: 'flex', flexDirection: 'column',
             alignItems: 'center', justifyContent: 'center',
-            padding: '1.75rem 1.5rem 1rem', textAlign: 'center'
+            padding: '1.5rem 1rem 1rem', textAlign: 'center',
+            width: '100%', boxSizing: 'border-box'
           }}>
             {/* Center 3D Glowing Orb */}
-            <div className={`ai-orb-wrapper ${inView ? 'animate-orb-enter' : ''}`} style={{ position: 'relative', marginBottom: '1.25rem' }}>
+            <div className={`ai-orb-wrapper ${inView ? 'animate-orb-enter' : ''}`} style={{ position: 'relative', marginBottom: '1rem' }}>
               {/* Outer Pulse Ring */}
               <div style={{
                 position: 'absolute', inset: '-10px', borderRadius: '50%',
@@ -272,42 +273,38 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
               }} />
               {/* 3D Glowing Sphere */}
               <div style={{
-                width: '72px', height: '72px', borderRadius: '50%',
+                width: '64px', height: '64px', borderRadius: '50%',
                 background: 'radial-gradient(circle at 35% 35%, #FFFFFF 0%, #00D2FF 40%, #4A90D9 70%, #0E2A5C 100%)',
                 animation: 'orb-glow 6s infinite ease-in-out',
                 display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}>
-                <Bot size={34} color="#FFFFFF" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))' }} />
+                <Bot size={30} color="#FFFFFF" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))' }} />
               </div>
             </div>
 
             {/* Hero Greeting Typography */}
             <h2 className={`ai-greeting-title ${inView ? 'animate-greeting-enter' : ''}`} style={{
-              fontSize: 'clamp(1.6rem, 3vw, 2.1rem)', fontWeight: '700',
+              fontSize: 'clamp(1.4rem, 2.5vw, 2.1rem)', fontWeight: '700',
               lineHeight: '1.25', color: '#FFFFFF', marginBottom: '0.35rem',
               letterSpacing: '-0.02em', textShadow: '0 4px 20px rgba(0,0,0,0.3)'
             }}>
               {getGreeting()}, Pengunjung
             </h2>
             <p className={`ai-greeting-sub ${inView ? 'animate-sub-enter' : ''}`} style={{
-              fontSize: 'clamp(1rem, 2vw, 1.25rem)', fontWeight: '500',
-              color: 'rgba(255, 255, 255, 0.9)', marginBottom: '0.5rem'
+              fontSize: 'clamp(0.95rem, 1.8vw, 1.2rem)', fontWeight: '500',
+              color: 'rgba(255, 255, 255, 0.9)', marginBottom: '0.35rem'
             }}>
               Ada yang bisa GeoAlert AI bantu hari ini?
             </p>
             <p className={`ai-greeting-sub ${inView ? 'animate-sub-enter' : ''}`} style={{
-              fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.6)',
-              maxWidth: '520px', marginBottom: '1.75rem', lineHeight: '1.5'
+              fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.6)',
+              maxWidth: '520px', marginBottom: '1.25rem', lineHeight: '1.5'
             }}>
               Pilih salah satu saran pertanyaan di bawah atau ketik pertanyaan Anda sendiri seputar mitigasi bencana.
             </p>
 
-            {/* Prompt Suggestion Cards (4 Grid Pills) */}
-            <div style={{
-              width: '100%', maxWidth: '840px',
-              display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
-              gap: '12px', marginBottom: '1.25rem'
-            }}>
+            {/* Prompt Suggestion Cards Container */}
+            <div className="thinkai-prompts-container">
               {activePrompts.map((p, idx) => (
                 <button
                   key={idx}
@@ -413,11 +410,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
       </div>
 
       {/* THINKAI BOTTOM CHAT BOX CONTAINER */}
-      <div className={`thinkai-bottom-container ${inView ? 'animate-input-enter' : ''}`} style={{
-        padding: '0 1.5rem 1.25rem',
-        maxWidth: '860px', width: '100%', margin: '0 auto',
-        position: 'relative', zIndex: 10
-      }}>
+      <div className={`thinkai-bottom-container ${inView ? 'animate-input-enter' : ''}`}>
         <div className="thinkai-input-box">
           {/* Main Input Textarea/Field */}
           <textarea

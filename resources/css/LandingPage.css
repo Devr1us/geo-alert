@@ -219,27 +219,90 @@
 
 @media (max-width: 640px) {
   .live-status-pill-card {
-    border-radius: 20px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.85rem;
-    padding: 1.15rem 1.35rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 8px;
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(224, 217, 205, 0.9);
+    box-shadow: 0 12px 32px rgba(14, 42, 92, 0.09);
+    margin-top: 1.75rem;
   }
 
   .status-pill-col {
     width: 100%;
-    padding-bottom: 0.65rem;
-    border-bottom: 1px dashed rgba(14, 42, 92, 0.12);
+    padding: 10px 6px;
+    background: rgba(14, 42, 92, 0.03);
+    border: 1px solid rgba(14, 42, 92, 0.06);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 4px;
+    box-sizing: border-box;
+    border-bottom: none !important;
   }
 
   .status-pill-col:last-child {
-    padding-bottom: 0;
-    border-bottom: none;
+    border-bottom: none !important;
+  }
+
+  .status-pill-label {
+    font-size: 0.625rem;
+    letter-spacing: 0.04em;
+    color: #718096;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .status-pill-val {
+    font-size: 0.85rem;
+    font-weight: 700;
+    justify-content: center;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    gap: 4px;
+  }
+
+  .status-pill-val.time-val {
+    font-family: var(--font-body), 'Inter', sans-serif;
+    font-size: 0.825rem;
+    color: #0E2A5C;
+    font-weight: 600;
   }
 
   .status-pill-divider {
     display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .live-status-pill-card {
+    padding: 6px;
+    gap: 4px;
+  }
+
+  .status-pill-col {
+    padding: 8px 4px;
+    border-radius: 12px;
+  }
+
+  .status-pill-label {
+    font-size: 0.58rem;
+  }
+
+  .status-pill-val {
+    font-size: 0.78rem;
   }
 }
 
@@ -1409,6 +1472,55 @@
   font-weight: 700;
   box-shadow: 0 2px 8px rgba(27, 94, 32, 0.12);
 }
+
+.btn-notif-test {
+  background: rgba(14, 42, 92, 0.08);
+  border: 1px solid rgba(14, 42, 92, 0.2);
+  color: #0E2A5C;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-notif-test:hover {
+  background: #0E2A5C;
+  color: #ffffff;
+  border-color: #0E2A5C;
+}
+
+.notif-unsupported-badge {
+  margin-top: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(120, 120, 120, 0.1);
+  border: 1px solid rgba(120, 120, 120, 0.3);
+  color: #666 !important;
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.btn-notif-action.btn-notif-denied {
+  background: #6b7280;
+  box-shadow: 0 4px 14px rgba(107, 114, 128, 0.25);
+}
+
+.btn-notif-action.btn-notif-denied:hover {
+  background: #4b5563;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(107, 114, 128, 0.35);
+}
+
+@keyframes spin-notif {
+  to { transform: rotate(360deg); }
+}
+
+
 
 /* ── Right Siaga Card Styles ─────────────────────────────────── */
 
