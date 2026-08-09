@@ -387,7 +387,7 @@ export default function LandingPage() {
       </section>
 
       {/* =================== STATS + TRUST BAR (gabungan) =================== */}
-      <RevealSection className="stats-section">
+      <section className="stats-section">
         <div className="container">
           {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -405,13 +405,13 @@ export default function LandingPage() {
               { value: `< ${speedCount}s`, label: 'Kecepatan Notifikasi' },
               { value: '24/7', label: 'Pemantauan Aktif' },
             ].map((s, i) => (
-              <div key={i} className="stat-item glass-dark" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)' }}>
+              <RevealSection key={i} style={{ padding: '2rem', borderRadius: 'var(--radius-lg)', transitionDelay: `${i * 400}ms` }} className="stat-item glass-dark">
                 <div className="stat-number">{s.value}</div>
                 <div style={{ fontWeight: '500', letterSpacing: '0.05em' }}>{s.label}</div>
                 {s.note && (
                   <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', marginTop: '4px' }}>{s.note}</div>
                 )}
-              </div>
+              </RevealSection>
             ))}
           </div>
 
@@ -436,7 +436,7 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-      </RevealSection>
+      </section>
 
       {/* =================== ABOUT (MENGAPA MEMILIH GEOALERT) =================== */}
       <RevealSection id="tentang" className="about-custom-section">
@@ -468,17 +468,17 @@ export default function LandingPage() {
             </div>
 
             {/* Floating Overlap Card */}
-            <div className="about-floating-card">
+            <RevealSection className="about-floating-card">
               <h2 className="about-card-title">Apa itu GeoAlert?</h2>
               <p className="about-card-desc">
                 Platform cerdas yang menggabungkan data otoritatif dengan kecerdasan buatan untuk memberikan peringatan yang cepat, akurat, dan dapat ditindaklanjuti.
               </p>
-            </div>
+            </RevealSection>
           </div>
 
           {/* 4 Feature Cards Grid below */}
           <div className="about-features-grid">
-            <div className="about-feature-card">
+            <RevealSection className="about-feature-card shuffle-card shuffle-card-1" style={{ transitionDelay: '0ms' }}>
               <div className="feature-icon-wrapper icon-blue">
                 <RefreshCw size={22} />
               </div>
@@ -487,9 +487,9 @@ export default function LandingPage() {
               <Link to="/peta" className="feature-link">
                 Selengkapnya <span>→</span>
               </Link>
-            </div>
+            </RevealSection>
 
-            <div className="about-feature-card">
+            <RevealSection className="about-feature-card shuffle-card shuffle-card-2" style={{ transitionDelay: '300ms' }}>
               <div className="feature-icon-wrapper icon-orange">
                 <Bell size={22} />
               </div>
@@ -498,9 +498,9 @@ export default function LandingPage() {
               <Link to="/peta" className="feature-link">
                 Selengkapnya <span>→</span>
               </Link>
-            </div>
+            </RevealSection>
 
-            <div className="about-feature-card">
+            <RevealSection className="about-feature-card shuffle-card shuffle-card-3" style={{ transitionDelay: '600ms' }}>
               <div className="feature-icon-wrapper icon-sky">
                 <Bot size={22} />
               </div>
@@ -509,9 +509,9 @@ export default function LandingPage() {
               <Link to="/peta" className="feature-link">
                 Selengkapnya <span>→</span>
               </Link>
-            </div>
+            </RevealSection>
 
-            <div className="about-feature-card">
+            <RevealSection className="about-feature-card shuffle-card shuffle-card-4" style={{ transitionDelay: '900ms' }}>
               <div className="feature-icon-wrapper icon-red">
                 <Map size={22} />
               </div>
@@ -520,7 +520,7 @@ export default function LandingPage() {
               <Link to="/peta" className="feature-link">
                 Selengkapnya <span>→</span>
               </Link>
-            </div>
+            </RevealSection>
           </div>
         </div>
       </RevealSection>
@@ -530,7 +530,7 @@ export default function LandingPage() {
         <div className="container">
           <h2 className="section-title">Cara Menggunakan GeoAlert</h2>
           <div className="grid md:grid-cols-2 gap-12 items-start" style={{ marginTop: '4rem' }}>
-            <div className="vertical-timeline-flow">
+            <div className="vertical-timeline-flow timeline-stacking">
               {[
                 { n: '1', title: 'Pilih Lokasi Anda', desc: 'Izinkan akses lokasi atau cari kota Anda secara manual di peta interaktif.', action: null },
                 { n: '2', title: 'Lihat Status Bencana', desc: 'Periksa indikator warna untuk mengetahui tingkat risiko di sekitar Anda.', action: null },
@@ -564,13 +564,33 @@ export default function LandingPage() {
                 },
                 { n: '4', title: 'Tanya Asisten AI', desc: 'Gunakan asisten panduan SOP BMKG untuk informasi evakuasi dan mitigasi.', action: null },
               ].map((s, i) => (
-                <div key={i} className="timeline-step" style={{ marginBottom: i < 3 ? '2rem' : 0 }}>
-                  <div className="timeline-number">{s.n}</div>
-                  <div>
-                    <h4 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{s.title}</h4>
-                    <p className="text-muted" style={{ lineHeight: '1.6' }}>{s.desc}</p>
-                    {s.action}
-                    {s.badge}
+                <div key={i} className="timeline-step-wrapper" style={{ marginBottom: i < 3 ? '0' : 0 }}>
+                  {/* Connector line between steps */}
+                  {i > 0 && (
+                    <RevealSection
+                      className="timeline-connector-anim"
+                      style={{ transitionDelay: `${i * 1200}ms` }}
+                    >
+                      <div className="timeline-connector-line" />
+                    </RevealSection>
+                  )}
+                  {/* Step row: number + text */}
+                  <div className="timeline-step-row">
+                    <RevealSection
+                      className="timeline-number-anim"
+                      style={{ transitionDelay: `${i * 1200 + (i > 0 ? 400 : 0)}ms` }}
+                    >
+                      <div className="timeline-number">{s.n}</div>
+                    </RevealSection>
+                    <RevealSection
+                      className="timeline-text-anim"
+                      style={{ transitionDelay: `${i * 1200 + (i > 0 ? 800 : 400)}ms` }}
+                    >
+                      <h4 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{s.title}</h4>
+                      <p className="text-muted" style={{ lineHeight: '1.6' }}>{s.desc}</p>
+                      {s.action}
+                      {s.badge}
+                    </RevealSection>
                   </div>
                 </div>
               ))}

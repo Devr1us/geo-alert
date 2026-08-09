@@ -4,7 +4,7 @@ import React, { useRef, useState, useEffect } from 'react';
  * Reusable RevealSection component with bi-directional IntersectionObserver trigger
  * and support for custom animation variants (e.g., 'glow-in', 'zoom-in', 'fade-up').
  */
-export default function RevealSection({ children, className = '', id = '', animation = '' }) {
+export default function RevealSection({ children, className = '', id = '', animation = '', style = {} }) {
   const ref = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -34,6 +34,7 @@ export default function RevealSection({ children, className = '', id = '', anima
     <div
       ref={ref}
       id={id}
+      style={style}
       className={`reveal-on-scroll ${animClass} ${isVisible ? 'is-visible' : ''} ${className}`}
     >
       {children}

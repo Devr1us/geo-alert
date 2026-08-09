@@ -504,23 +504,89 @@
   margin-top: 5px;
 }
 
-.vertical-timeline-flow::before {
-  content: '';
-  position: absolute;
-  top: 24px;
-  left: 31px; /* 8px padding + 24px half of the 48px circle */
-  bottom: 24px;
-  width: 3px;
-  background: linear-gradient(to bottom, var(--color-primary) 0%, rgba(14, 42, 92, 0.1) 100%);
-  z-index: 0;
+/* Hide the static vertical line when stacking is active */
+.vertical-timeline-flow.timeline-stacking::before {
+  display: none;
 }
 
-.timeline-step {
+.timeline-step-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.timeline-step-row {
   display: flex;
   gap: var(--spacing-5);
-  margin-bottom: var(--spacing-8);
+  align-items: center;
   position: relative;
   z-index: 1;
+}
+
+/* Connector line — grows vertically between steps */
+.timeline-connector-anim.reveal-on-scroll {
+  display: flex;
+  justify-content: center;
+  width: 48px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  will-change: opacity;
+}
+
+.timeline-connector-anim.reveal-on-scroll.is-visible {
+  opacity: 1;
+}
+
+.timeline-connector-line {
+  width: 3px;
+  height: 2rem;
+  background: linear-gradient(to bottom, var(--color-primary), rgba(14, 42, 92, 0.25));
+  border-radius: 2px;
+  transform: scaleY(0);
+  transform-origin: top center;
+  animation: none;
+}
+
+.timeline-connector-anim.is-visible .timeline-connector-line {
+  animation: growLine 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes growLine {
+  0% {
+    transform: scaleY(0);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+/* Number circle animation — pops in with scale */
+.timeline-number-anim.reveal-on-scroll {
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 0.5s cubic-bezier(0.34, 1.4, 0.64, 1),
+              transform 0.5s cubic-bezier(0.34, 1.4, 0.64, 1);
+  will-change: opacity, transform;
+  flex-shrink: 0;
+}
+
+.timeline-number-anim.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Text content animation — slides in from left */
+.timeline-text-anim.reveal-on-scroll {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.timeline-text-anim.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .timeline-number {
@@ -847,6 +913,7 @@
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(224, 215, 198, 0.7);
+  z-index: 2;
 }
 
 @media (min-width: 992px) {
@@ -915,7 +982,21 @@
   border: 1px solid rgba(230, 225, 215, 0.8);
   margin-top: -3rem;
   position: relative;
-  z-index: 5;
+  z-index: 1;
+}
+
+/* Slide out from behind/under the map layer to the side animation */
+.about-floating-card.reveal-on-scroll {
+  opacity: 0;
+  transform: translateX(-80px);
+  transition: opacity 2s cubic-bezier(0.16, 1, 0.3, 1), transform 2s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.about-floating-card.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+  z-index: 3;
 }
 
 @media (min-width: 992px) {
@@ -928,6 +1009,16 @@
     max-width: 42%;
     margin-top: 0;
     padding: 2.75rem 2.5rem;
+  }
+
+  .about-floating-card.reveal-on-scroll {
+    opacity: 0;
+    transform: translate(-160px, -50%); /* Tucked behind the map layer */
+  }
+
+  .about-floating-card.reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: translate(0, -50%); /* Slides out smoothly to the right */
   }
 }
 
@@ -958,11 +1049,42 @@
   border: 1px solid rgba(230, 225, 215, 0.6);
   display: flex;
   flex-direction: column;
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
 }
 
-.about-feature-card:hover {
-  transform: translateY(-5px);
+/* Shuffle Card Animation */
+.shuffle-card.reveal-on-scroll {
+  opacity: 0;
+  transition: opacity 2s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 2s cubic-bezier(0.34, 1.4, 0.64, 1),
+              box-shadow var(--transition-normal);
+  will-change: opacity, transform;
+}
+
+/* Shuffled start states: cards start offset and tilted towards center */
+.shuffle-card-1.reveal-on-scroll {
+  transform: translate(60px, 45px) rotate(-6deg);
+}
+
+.shuffle-card-2.reveal-on-scroll {
+  transform: translate(25px, 50px) rotate(-3deg);
+}
+
+.shuffle-card-3.reveal-on-scroll {
+  transform: translate(-25px, 50px) rotate(3deg);
+}
+
+.shuffle-card-4.reveal-on-scroll {
+  transform: translate(-60px, 45px) rotate(6deg);
+}
+
+/* Settled state when revealed on scroll */
+.shuffle-card.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translate(0, 0) rotate(0deg);
+}
+
+.about-feature-card.shuffle-card.is-visible:hover {
+  transform: translateY(-8px) scale(1.02) rotate(0deg);
   box-shadow: var(--shadow-card-hover);
 }
 
