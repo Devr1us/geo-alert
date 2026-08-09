@@ -7,6 +7,7 @@ import '../../css/MapPage.css';
 import '../../css/LandingPage.css';
 import AIChat from '../components/AIChat';
 import RevealSection from '../components/RevealSection';
+import { BMKG_TERKINI_URL, BMKG_DIRASAKAN_URL } from '../config/bmkgApi';
 
 // Fix for default leaflet icons in React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -168,8 +169,8 @@ export default function MapPage() {
 
     try {
       const [resTerkini, resDirasakan] = await Promise.all([
-        fetch('/api/bmkg/gempa-terkini'),
-        fetch('/api/bmkg/gempa-dirasakan'),
+        fetch(BMKG_TERKINI_URL),
+        fetch(BMKG_DIRASAKAN_URL),
       ]);
 
       if (!resTerkini.ok || !resDirasakan.ok) throw new Error('Proxy API gagal');

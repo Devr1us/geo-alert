@@ -8,6 +8,7 @@ import {
 import '../../css/LandingPage.css';
 import MitigationModal from '../components/MitigationModal';
 import RevealSection from '../components/RevealSection';
+import { BMKG_TERKINI_URL, BMKG_DIRASAKAN_URL } from '../config/bmkgApi';
 
 // Count-up hook
 function useCountUp(end, duration = 2000) {
@@ -150,8 +151,8 @@ async function reverseGeocode(lat, lng) {
 // ============================================================
 async function fetchBmkgEvents() {
   const [resTerkini, resDirasakan] = await Promise.all([
-    fetch('/api/bmkg/gempa-terkini'),
-    fetch('/api/bmkg/gempa-dirasakan'),
+    fetch(BMKG_TERKINI_URL),
+    fetch(BMKG_DIRASAKAN_URL),
   ]);
   const parsedTerkini = await resTerkini.json();
   const parsedDirasakan = await resDirasakan.json();
@@ -393,7 +394,10 @@ export default function LandingPage() {
   return (
     <div>
       {/* =================== HERO =================== */}
-      <section className="hero-section">
+      <section
+        className="hero-section"
+        style={{ backgroundImage: `linear-gradient(rgba(247, 242, 234, 0.1), rgba(247, 242, 234, 0.2)), url("${import.meta.env.BASE_URL}images/Background utama.png")` }}
+      >
         <div className="container">
           <h1 className="hero-title hero-title-animated" style={{ fontSize: '4rem', fontWeight: '900' }}>
             GeoAlert
@@ -623,7 +627,7 @@ export default function LandingPage() {
             <RevealSection className="about-map-card" once={false}>
               <div className="map-card-graphic-wrapper">
                 <img
-                  src="/images/INDONESIAN.png"
+                  src={`${import.meta.env.BASE_URL}images/INDONESIAN.png`}
                   alt="Indonesia Archipelago Map"
                   className="map-silhouette-img"
                 />
@@ -689,7 +693,11 @@ export default function LandingPage() {
       </RevealSection>
 
       {/* =================== HOW TO USE =================== */}
-      <RevealSection id="cara-penggunaan" className="how-to-use-white-section">
+      <RevealSection
+        id="cara-penggunaan"
+        className="how-to-use-white-section"
+        style={{ backgroundImage: `url("${import.meta.env.BASE_URL}images/bg-cara-penggunaan.jpg")`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
+      >
         <div className="container relative z-10">
           <h2 className="how-to-use-heading">Cara Menggunakan GeoAlert</h2>
           

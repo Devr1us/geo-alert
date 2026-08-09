@@ -4,6 +4,7 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
+        "build:ghpages": "vite build --config vite.config.ghpages.js --mode ghpages && node -e \"require('fs').copyFileSync('dist/index.html','dist/404.html')\"",
         "dev": "vite"
     },
     "devDependencies": {

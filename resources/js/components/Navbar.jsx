@@ -84,7 +84,7 @@ export default function Navbar() {
 
         {/* Mobile Header Brand (Centered on mobile view) */}
         <Link to="/" className="nav-brand-mobile" aria-label="GeoAlert" onClick={() => setIsOpen(false)}>
-          <img src="/logo-geoalert.svg" alt="GeoAlert" className="nav-logo" />
+          <img src={`${import.meta.env.BASE_URL}logo-geoalert.svg`} alt="GeoAlert" className="nav-logo" />
           <span className="nav-brand-text">GeoAlert</span>
         </Link>
 

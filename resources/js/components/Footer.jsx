@@ -48,7 +48,7 @@ export default function Footer() {
           {/* Column 1: Brand Info & Social Icons */}
           <div className="footer-brand-col">
             <Link to="/" className="footer-logo-wrap">
-              <img src="/logo-geoalert.svg" alt="GeoAlert" className="footer-logo-img" />
+              <img src={`${import.meta.env.BASE_URL}logo-geoalert.svg`} alt="GeoAlert" className="footer-logo-img" />
               <span className="footer-brand-title">GeoAlert</span>
             </Link>
             
