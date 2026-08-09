@@ -106,6 +106,25 @@ function ChangeView({ center, zoom }) {
   return null;
 }
 
+// Invalidate Leaflet map size on mount and resize (prevents blank map tiles on mobile)
+function MapFixResize() {
+  const map = useMap();
+  useEffect(() => {
+    const t1 = setTimeout(() => map.invalidateSize(), 50);
+    const t2 = setTimeout(() => map.invalidateSize(), 200);
+    const t3 = setTimeout(() => map.invalidateSize(), 500);
+    const handleResize = () => map.invalidateSize();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [map]);
+  return null;
+}
+
 // Nominatim geocoding untuk search bar
 async function geocodeLocation(query) {
   const encoded = encodeURIComponent(query);
@@ -381,6 +400,7 @@ export default function MapPage() {
                 maxBoundsViscosity={1.0}
                 minZoom={4}
               >
+                <MapFixResize />
                 <SetBounds />
                 <ChangeView center={mapCenter} zoom={mapZoom} />
                 <TileLayer

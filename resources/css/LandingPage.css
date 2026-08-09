@@ -222,9 +222,20 @@
     border-radius: 20px;
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
-    padding: 1.25rem 1.5rem;
+    gap: 0.85rem;
+    padding: 1.15rem 1.35rem;
     width: 100%;
+  }
+
+  .status-pill-col {
+    width: 100%;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px dashed rgba(14, 42, 92, 0.12);
+  }
+
+  .status-pill-col:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
   }
 
   .status-pill-divider {
@@ -1208,6 +1219,10 @@
   position: relative;
   overflow: hidden;
   padding: 5.5rem 0 6rem;
+  margin-top: -1px;
+  margin-bottom: -1px;
+  box-shadow: 0 -1px 0 0 #0a1b36, 0 1px 0 0 #08162b;
+  z-index: 2;
 }
 
 .how-to-use-bg-overlay {
@@ -1913,6 +1928,69 @@
 .mini-card-link:hover {
   color: #2563eb;
   gap: 10px;
+}
+
+/* ============================================================
+   Responsive Adjustments for Landing Page (Tablet & Mobile)
+   ============================================================ */
+@media (max-width: 992px) {
+  .about-info-card {
+    padding: 2.25rem 2rem;
+  }
+
+  .siaga-card-body {
+    padding: 1.85rem 1.75rem 2rem;
+  }
+
+  .siaga-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .about-map-card,
+  .about-info-card {
+    padding: 1.75rem 1.5rem;
+    min-height: auto;
+  }
+
+  .info-card-title {
+    font-size: 1.65rem;
+  }
+
+  .siaga-card-graphic {
+    height: 180px;
+  }
+
+  .radar-graphic {
+    width: 160px;
+    height: 160px;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-mini-card {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .map-title {
+    font-size: 1.15rem;
+  }
+
+  .siaga-title {
+    font-size: 1.35rem;
+  }
 }
 
 

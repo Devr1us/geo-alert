@@ -195,7 +195,16 @@
   z-index: 1;
   width: 100%;
   height: 100%;
+  min-height: 360px;
   border-radius: var(--radius-xl);
+}
+
+.map-container .leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+  min-height: 360px;
+  border-radius: inherit;
+  background-color: #e5e3df !important; /* OpenStreetMap tile tint fallback */
 }
 
 /* Leaflet control repositioning so it doesn't overlap floating toolbar */
@@ -397,4 +406,65 @@
 @keyframes loading-skeleton {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+/* ============================================================
+   Responsive Adjustments for Map Dashboard (Tablet & Mobile)
+   ============================================================ */
+@media (max-width: 768px) {
+  .map-page-wrapper {
+    padding: calc(var(--navbar-height) + 0.5rem) 0.75rem 1.5rem;
+  }
+
+  .map-page-container {
+    height: auto;
+    min-height: 0;
+  }
+
+  .map-main-card {
+    height: 60vh;
+    min-height: 400px;
+  }
+
+  .map-toolbar-floating {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    border-radius: 20px;
+    padding: 10px 12px;
+  }
+
+  .search-bar-pill {
+    max-width: 100%;
+  }
+
+  .map-notice-toast {
+    top: 118px;
+    left: 12px;
+    right: 12px;
+    max-width: none;
+    font-size: 0.75rem;
+    padding: 8px 12px;
+  }
+
+  .leaflet-top.leaflet-left {
+    top: 125px !important;
+    left: 12px !important;
+  }
+
+  .map-sidebar-card {
+    height: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chip-pill {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+  }
+
+  .map-main-card {
+    height: 52vh;
+    min-height: 360px;
+  }
 }

@@ -622,5 +622,42 @@ Yang Diminta:
   - `.gitignore`
   - `log.md`
 
+---
+
+### Timestamp: 2026-08-09 13:58:00
+
+- **Model used:** Antigravity (Claude Sonnet 4.6 & Gemini 3.6 Flash)
+- **Human Prompt:** `sekarang buat responsive design untuk websitenya baik untuk dekstop/tab/mobile tanpa mengurangi hal yang ada di website`
+- **TLDR AI agents done:** 
+  1. **Pengaturan Layout Adaptif Global**: Memperbarui breakpoint CSS pada `components.css`, `LandingPage.css`, dan `MapPage.css` agar seluruh tampilan website tampil optimal di Desktop (1280px+), Tablet (768px–1024px), dan Mobile (320px–768px).
+  2. **Responsivitas Navbar Mobile/Tablet**: Penyesuaian breakpoint drawer menu pada `992px` serta pengaturan padding capsule yang fleksibel agar tautan menu dan tombol panggilan cepat tidak berhimpitan di tablet maupun layar smartphone kecil.
+  3. **Responsivitas Live Status Pill & Section**: Menyesuaikan `.live-status-pill-card` pada Hero Landing Page agar bertumpuk rapi dengan pemisah vertikal/horizontal yang bersih pada layar ponsel (<640px), serta penyesuaian grid pada section "Tentang Kami" dan "Cara Menggunakan GeoAlert".
+  4. **Peta Bencana & Toolbar Mobile**: Mengoptimalkan bilah pencarian mengambang (*floating toolbar overlay*) dan filter chips agar dapat di-swipe secara mulus pada layar sentuh ponsel tanpa menutupi tombol zoom Leaflet Map.
+- **file changed:**
+  - `resources/css/components.css`
+  - `resources/css/LandingPage.css`
+  - `resources/css/MapPage.css`
+  - `log.md`
+
+---
+
+### Timestamp: 2026-08-09 14:04:00
+
+- **Model used:** Antigravity (Claude Sonnet 4.6 & Gemini 3.6 Flash)
+- **Human Prompt:** `di mobile map tidak terload gambar kedua ada sedikit bug ketika scroll down ada kedip kedip putih di akhir section dan tambahkan animated di navbar bagian mobile jangan langsung muncul` / `perubahan tadi massukkan ke log.md dan sesuaikan kata katanya`
+- **TLDR AI agents done:** 
+  1. **Perbaikan Render Peta Leaflet Mobile**: Menambahkan komponen `MapFixResize` (`map.invalidateSize()`) saat mount/resize dan warna fallback OpenStreetMap `#e5e3df` pada `.map-container` sehingga peta Leaflet langsung ter-load utuh di layar seluler tanpa area putih kosong.
+  2. **Perbaikan Kedip Putih (Sub-pixel Seam Flicker)**: Menambahkan aturan celah tumpang-tindih `margin-top: -1px; margin-bottom: -1px;` dan `box-shadow` pelindung warna navy pada batas `.how-to-use-dark-section` untuk menghilangkan garis kedip putih saat di-scroll ke bawah pada layar smartphone.
+  3. **Animasi Smooth Dropdown Navbar Mobile**: Mengganti efek tampilan seketika pada menu navbar seluler dengan animasi meluncur halus (`translateY(-14px) scale(0.97)` → `translateY(0) scale(1)` dengan `backdrop-filter: blur(20px)`) serta *staggered entrance animation* bertahap pada setiap tautan menu.
+- **file changed:**
+  - `resources/js/pages/MapPage.jsx`
+  - `resources/css/MapPage.css`
+  - `resources/css/LandingPage.css`
+  - `resources/css/components.css`
+  - `log.md`
+
+
+
+
 
 
