@@ -823,19 +823,19 @@
   border-bottom-left-radius: var(--radius-md);
 }
 
-/* Reveal on Scroll */
+/* Reveal on Scroll — Smooth, dynamic entry animation without bugs */
 .reveal-on-scroll {
   opacity: 0;
-  transform: translateY(32px);
+  transform: translateY(36px) scale(0.96);
   transition:
-    opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
 .reveal-on-scroll.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1400,13 +1400,14 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(46, 125, 50, 0.2);
-  border: 1px solid rgba(76, 175, 80, 0.4);
-  color: #81c784;
-  padding: 0.35rem 0.9rem;
+  background: #e8f5e9;
+  border: 1px solid #4caf50;
+  color: #1b5e20 !important;
+  padding: 0.4rem 1rem;
   border-radius: 9999px;
-  font-size: 0.825rem;
-  font-weight: 600;
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(27, 94, 32, 0.12);
 }
 
 /* ── Right Siaga Card Styles ─────────────────────────────────── */
@@ -1521,51 +1522,60 @@
 }
 
 /* ============================================================
-   DARK NAVY SECTIONS — LAYER 0 (GRADASI #0a1f44 → #0E2A5C → #1e3a6e + #C0492B RADIAL GLOW)
+   MATCHING WARM CREAM SECTION — TENTANG KAMI (ALIGNED WITH CARA MENGGUNAKAN GEOALERT)
    LAYER 1 (Constellation), LAYER 2 (Radar Signal), LAYER 3 (Seismic Wave)
    ============================================================ */
 
 .about-modern-section {
   position: relative;
-  /* Deep navy section background */
-  background: linear-gradient(135deg, #0a1f44 0%, #0E2A5C 45%, #1b386b 75%, #0c2044 100%);
-  color: #ffffff;
+  /* Matching soft warm cream/ivory gradient seamlessly flowing into the batik pattern section */
+  background: linear-gradient(180deg, #FAF6F0 0%, #F5EFE6 50%, #F7F2EA 100%);
+  color: #1e293b;
   padding: 5.5rem 0 6rem;
   overflow: hidden;
+  border-bottom: 1px solid rgba(14, 42, 92, 0.06);
 }
 
-/* Soft, subtle white radial gradient centered in the middle of the section */
+/* Subtle warm radial highlight */
 .about-modern-section::after {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 15%;
+  right: 10%;
   width: 750px;
   height: 520px;
   border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 45%, transparent 70%);
-  filter: blur(50px);
+  background: radial-gradient(circle, rgba(235, 130, 80, 0.08) 0%, rgba(225, 120, 70, 0.03) 50%, transparent 75%);
+  filter: blur(55px);
   pointer-events: none;
   z-index: 0;
 }
 
-/* Layer 0 Aksen Terracotta Radial Glow (Right Bottom Section 1) */
+/* Soft amber accent glow */
 .about-modern-section::before {
   content: '';
   position: absolute;
-  bottom: -80px;
-  right: -80px;
-  width: 550px;
-  height: 550px;
+  bottom: -60px;
+  left: -60px;
+  width: 600px;
+  height: 600px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(192, 73, 43, 0.12) 0%, rgba(192, 73, 43, 0.04) 50%, transparent 70%);
+  background: radial-gradient(circle, rgba(14, 42, 92, 0.05) 0%, transparent 70%);
   filter: blur(60px);
   pointer-events: none;
   z-index: 0;
 }
 
-.how-to-use-white-section,
+.how-to-use-white-section {
+  position: relative;
+  background: url("/images/bg-cara-penggunaan.jpg") center/cover no-repeat;
+  color: #1e293b;
+  padding: 5.5rem 0 6rem;
+  border-top: 1px solid rgba(14, 42, 92, 0.08);
+  border-bottom: 1px solid rgba(14, 42, 92, 0.08);
+  overflow: hidden;
+}
+
 .how-to-use-dark-section {
   position: relative;
   background: #ffffff;
@@ -1742,11 +1752,10 @@
 .about-tag-title {
   font-family: var(--font-body), 'Inter', sans-serif;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.15em;
-  color: #ffffff;
+  color: #0E2A5C !important;
   text-transform: uppercase;
-  opacity: 0.95;
 }
 
 .about-tag-dots {
@@ -1762,21 +1771,21 @@
   display: inline-block;
 }
 
-.dot-navy { background: #0E2A5C; border: 1px solid rgba(255,255,255,0.4); }
+.dot-navy { background: #0E2A5C; border: 1px solid rgba(14, 42, 92, 0.3); }
 .dot-red { background: #ef4444; }
 
 .about-floating-icon {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(14, 42, 92, 0.06);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #fbbf24;
+  border: 1px solid rgba(14, 42, 92, 0.15);
+  color: #d97706;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(14, 42, 92, 0.08);
   margin-left: 0.25rem;
 }
 
@@ -1786,14 +1795,14 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(14, 42, 92, 0.06);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  color: #ffffff;
+  border: 1px solid rgba(14, 42, 92, 0.15);
+  color: #0E2A5C;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 18px rgba(14, 42, 92, 0.08);
   z-index: 5;
   pointer-events: none;
 }
@@ -1809,15 +1818,15 @@
 }
 
 .about-map-card {
-  background: #f6ead6;
+  background: #FAF5EB;
   border-radius: 24px;
   padding: 0;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.32);
+  box-shadow: 0 16px 40px rgba(14, 42, 92, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 280px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(220, 210, 190, 0.8);
   position: relative;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -1825,7 +1834,7 @@
 
 .about-map-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 25px 55px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 22px 50px rgba(14, 42, 92, 0.12);
 }
 
 .map-card-graphic-wrapper {
@@ -1877,18 +1886,47 @@
   background: #ffffff;
   border-radius: 24px;
   padding: 3rem 2.75rem;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.32);
+  box-shadow: 0 16px 40px rgba(14, 42, 92, 0.08);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(220, 210, 190, 0.8);
   min-height: 280px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .about-info-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 25px 55px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 22px 50px rgba(14, 42, 92, 0.12);
+}
+
+/* Scroll Down & Scroll Up Bi-Directional Animations for Tentang Kami Cards */
+.about-map-card.reveal-on-scroll {
+  opacity: 0;
+  transform: translateX(-70px) scale(0.94);
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.about-map-card.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+.about-info-card.reveal-on-scroll {
+  opacity: 0;
+  transform: translateX(70px) scale(0.94);
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.about-info-card.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateX(0) scale(1);
 }
 
 .info-card-title {
@@ -1907,22 +1945,36 @@
   line-height: 1.65;
 }
 
-/* Bottom 4 Feature Cards */
 .about-mini-card {
   background: #ffffff;
   border-radius: 20px;
   padding: 1.85rem 1.6rem 1.6rem;
-  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(230, 235, 242, 0.9);
+  box-shadow: 0 12px 32px rgba(14, 42, 92, 0.06);
+  border: 1px solid rgba(220, 210, 190, 0.9);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.about-mini-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+/* Dynamic Scroll-Down Animation for the 4 Feature Cards */
+.about-mini-card.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(50px) scale(0.92);
+  transition:
+    opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.about-mini-card.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.about-mini-card.reveal-on-scroll.is-visible:hover {
+  transform: translateY(-8px) scale(1.025);
+  box-shadow: 0 22px 48px rgba(14, 42, 92, 0.14);
 }
 
 .mini-icon-circle {

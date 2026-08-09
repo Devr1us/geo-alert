@@ -479,65 +479,65 @@ export default function LandingPage() {
       <RevealSection id="tentang" className="about-modern-section">
         {/* Background Overlay Graphics (Layers 0-C, 1, 2) */}
         <div className="section-dark-bg-layers" aria-hidden="true">
-          {/* ENHANCEMENT C: Garis Kontur Topografi Tipis (Section 1: Rapat di bagian atas) */}
+          {/* ENHANCEMENT C: Garis Kontur Topografi Tipis */}
           <svg className="layer0-topo-contour" viewBox="0 0 1200 600" preserveAspectRatio="none" fill="none">
-            <path d="M0 60 C 250 110, 500 20, 750 90 C 950 140, 1100 70, 1200 100" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.07" />
-            <path d="M0 120 C 300 160, 550 80, 800 150 C 1000 200, 1120 130, 1200 160" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.06" />
-            <path d="M0 190 C 220 230, 480 160, 720 220 C 920 270, 1080 200, 1200 230" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.05" />
-            <path d="M0 320 C 350 370, 650 300, 880 360 C 1050 400, 1150 350, 1200 370" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.05" />
-            <path d="M0 460 C 280 500, 580 430, 820 480 C 1000 520, 1120 470, 1200 490" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.04" />
+            <path d="M0 60 C 250 110, 500 20, 750 90 C 950 140, 1100 70, 1200 100" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.08" />
+            <path d="M0 120 C 300 160, 550 80, 800 150 C 1000 200, 1120 130, 1200 160" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.07" />
+            <path d="M0 190 C 220 230, 480 160, 720 220 C 920 270, 1080 200, 1200 230" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.06" />
+            <path d="M0 320 C 350 370, 650 300, 880 360 C 1050 400, 1150 350, 1200 370" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.06" />
+            <path d="M0 460 C 280 500, 580 430, 820 480 C 1000 520, 1120 470, 1200 490" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.05" />
           </svg>
 
           {/* LAYER 1: Organic Network / Constellation Pattern */}
           <svg className="layer1-constellation-svg" viewBox="0 0 1200 600" fill="none">
-            <line x1="90" y1="80" x2="240" y2="150" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
-            <line x1="240" y1="150" x2="410" y2="90" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
-            <line x1="410" y1="90" x2="580" y2="180" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
-            <line x1="580" y1="180" x2="740" y2="100" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
-            <line x1="740" y1="100" x2="920" y2="160" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
-            <line x1="920" y1="160" x2="1110" y2="70" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
+            <line x1="90" y1="80" x2="240" y2="150" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.1" />
+            <line x1="240" y1="150" x2="410" y2="90" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.1" />
+            <line x1="410" y1="90" x2="580" y2="180" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.08" />
+            <line x1="580" y1="180" x2="740" y2="100" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.1" />
+            <line x1="740" y1="100" x2="920" y2="160" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.08" />
+            <line x1="920" y1="160" x2="1110" y2="70" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.1" />
 
-            <line x1="150" y1="360" x2="290" y2="480" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
-            <line x1="290" y1="480" x2="480" y2="410" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
-            <line x1="720" y1="450" x2="880" y2="520" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.12" />
-            <line x1="880" y1="520" x2="1050" y2="430" stroke="#ffffff" strokeWidth="1" strokeOpacity="0.14" />
+            <line x1="150" y1="360" x2="290" y2="480" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.08" />
+            <line x1="290" y1="480" x2="480" y2="410" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.1" />
+            <line x1="720" y1="450" x2="880" y2="520" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.08" />
+            <line x1="880" y1="520" x2="1050" y2="430" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.1" />
 
             {/* ENHANCEMENT A: Added constellation-node class for animated CSS twinkle */}
-            <circle cx="90" cy="80" r="3" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
-            <circle cx="240" cy="150" r="2.5" fill="#bae6fd" fillOpacity="0.45" className="constellation-node" />
-            <circle cx="410" cy="90" r="3.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
-            <circle cx="580" cy="180" r="2" fill="#ffffff" fillOpacity="0.35" className="constellation-node" />
-            <circle cx="740" cy="100" r="3" fill="#bae6fd" fillOpacity="0.4" className="constellation-node" />
-            <circle cx="920" cy="160" r="2.5" fill="#ffffff" fillOpacity="0.45" className="constellation-node" />
-            <circle cx="1110" cy="70" r="3.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
+            <circle cx="90" cy="80" r="3" fill="#0E2A5C" fillOpacity="0.3" className="constellation-node" />
+            <circle cx="240" cy="150" r="2.5" fill="#d97706" fillOpacity="0.35" className="constellation-node" />
+            <circle cx="410" cy="90" r="3.5" fill="#0E2A5C" fillOpacity="0.3" className="constellation-node" />
+            <circle cx="580" cy="180" r="2" fill="#0E2A5C" fillOpacity="0.25" className="constellation-node" />
+            <circle cx="740" cy="100" r="3" fill="#d97706" fillOpacity="0.3" className="constellation-node" />
+            <circle cx="920" cy="160" r="2.5" fill="#0E2A5C" fillOpacity="0.35" className="constellation-node" />
+            <circle cx="1110" cy="70" r="3.5" fill="#0E2A5C" fillOpacity="0.3" className="constellation-node" />
 
-            <circle cx="150" cy="360" r="3" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
-            <circle cx="290" cy="480" r="2" fill="#bae6fd" fillOpacity="0.35" className="constellation-node" />
-            <circle cx="480" cy="410" r="3.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
-            <circle cx="720" cy="450" r="2.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
-            <circle cx="880" cy="520" r="3" fill="#bae6fd" fillOpacity="0.45" className="constellation-node" />
-            <circle cx="1050" cy="430" r="2.5" fill="#ffffff" fillOpacity="0.4" className="constellation-node" />
+            <circle cx="150" cy="360" r="3" fill="#0E2A5C" fillOpacity="0.3" className="constellation-node" />
+            <circle cx="290" cy="480" r="2" fill="#d97706" fillOpacity="0.25" className="constellation-node" />
+            <circle cx="480" cy="410" r="3.5" fill="#0E2A5C" fillOpacity="0.3" className="constellation-node" />
+            <circle cx="720" cy="450" r="2.5" fill="#0E2A5C" fillOpacity="0.3" className="constellation-node" />
+            <circle cx="880" cy="520" r="3" fill="#d97706" fillOpacity="0.35" className="constellation-node" />
+            <circle cx="1050" cy="430" r="2.5" fill="#0E2A5C" fillOpacity="0.3" className="constellation-node" />
           </svg>
 
-          {/* LAYER 2: Concentric Radar Ping Utama (Top Right - Merah) */}
+          {/* LAYER 2: Concentric Radar Ping Utama */}
           <div className="layer2-radar-wrapper radar-pos-top-right">
             <svg viewBox="0 0 300 300" className="radar-signal-svg" fill="none">
               <circle cx="150" cy="150" r="5" fill="#e5533c" className="radar-center-dot" />
-              <circle cx="150" cy="150" r="25" stroke="#e5533c" strokeWidth="1.5" strokeOpacity="0.4" className="radar-ring ping-ring-1" />
-              <circle cx="150" cy="150" r="55" stroke="#bae6fd" strokeWidth="1.2" strokeOpacity="0.25" className="radar-ring ping-ring-2" />
-              <circle cx="150" cy="150" r="90" stroke="#bae6fd" strokeWidth="1" strokeOpacity="0.15" className="radar-ring ping-ring-3" />
-              <circle cx="150" cy="150" r="130" stroke="#bae6fd" strokeWidth="1" strokeOpacity="0.05" className="radar-ring ping-ring-4" />
+              <circle cx="150" cy="150" r="25" stroke="#e5533c" strokeWidth="1.5" strokeOpacity="0.3" className="radar-ring ping-ring-1" />
+              <circle cx="150" cy="150" r="55" stroke="#0E2A5C" strokeWidth="1.2" strokeOpacity="0.18" className="radar-ring ping-ring-2" />
+              <circle cx="150" cy="150" r="90" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.12" className="radar-ring ping-ring-3" />
+              <circle cx="150" cy="150" r="130" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.05" className="radar-ring ping-ring-4" />
             </svg>
           </div>
 
-          {/* ENHANCEMENT B: Radar Ping Kedua di Pojok Berlawanan (Bottom Left - Biru Standby) */}
+          {/* ENHANCEMENT B: Radar Ping Kedua */}
           <div className="layer2-radar-wrapper radar-pos-bottom-left radar-secondary">
             <svg viewBox="0 0 300 300" className="radar-signal-svg" fill="none">
               <circle cx="150" cy="150" r="4" fill="#4A90D9" className="radar-center-dot-blue" />
-              <circle cx="150" cy="150" r="25" stroke="#4A90D9" strokeWidth="1.2" strokeOpacity="0.3" className="radar-ring ping-ring-blue-1" />
-              <circle cx="150" cy="150" r="55" stroke="#4A90D9" strokeWidth="1" strokeOpacity="0.18" className="radar-ring ping-ring-blue-2" />
-              <circle cx="150" cy="150" r="90" stroke="#4A90D9" strokeWidth="1" strokeOpacity="0.1" className="radar-ring ping-ring-blue-3" />
-              <circle cx="150" cy="150" r="130" stroke="#4A90D9" strokeWidth="1" strokeOpacity="0.04" className="radar-ring ping-ring-blue-4" />
+              <circle cx="150" cy="150" r="25" stroke="#4A90D9" strokeWidth="1.2" strokeOpacity="0.25" className="radar-ring ping-ring-blue-1" />
+              <circle cx="150" cy="150" r="55" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.12" className="radar-ring ping-ring-blue-2" />
+              <circle cx="150" cy="150" r="90" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.08" className="radar-ring ping-ring-blue-3" />
+              <circle cx="150" cy="150" r="130" stroke="#0E2A5C" strokeWidth="1" strokeOpacity="0.04" className="radar-ring ping-ring-blue-4" />
             </svg>
           </div>
         </div>
@@ -567,7 +567,7 @@ export default function LandingPage() {
           {/* Top Row: 2 Big Cards */}
           <div className="grid md:grid-cols-2 gap-8 items-stretch" style={{ marginBottom: '2.25rem' }}>
             {/* Left Card: Indonesian Archipelago */}
-            <RevealSection className="about-map-card">
+            <RevealSection className="about-map-card" once={false}>
               <div className="map-card-graphic-wrapper">
                 <img
                   src="/images/INDONESIAN.png"
@@ -578,7 +578,7 @@ export default function LandingPage() {
             </RevealSection>
 
             {/* Right Card: Apa itu GeoAlert? */}
-            <RevealSection className="about-info-card">
+            <RevealSection className="about-info-card" once={false}>
               <h2 className="info-card-title">Apa itu GeoAlert?</h2>
               <p className="info-card-desc">
                 Platform cerdas yang menggabungkan data otoritatif dengan kecerdasan buatan untuk memberikan peringatan yang cepat, akurat, dan dapat ditindaklanjuti.
@@ -588,7 +588,7 @@ export default function LandingPage() {
 
           {/* Bottom Row: 4 Feature Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <RevealSection className="about-mini-card" style={{ transitionDelay: '0ms' }}>
+            <RevealSection className="about-mini-card" style={{ transitionDelay: '0ms' }} once={false}>
               <div className="mini-icon-circle icon-bg-blue">
                 <RefreshCw size={18} />
               </div>
@@ -599,7 +599,7 @@ export default function LandingPage() {
               </Link>
             </RevealSection>
 
-            <RevealSection className="about-mini-card" style={{ transitionDelay: '150ms' }}>
+            <RevealSection className="about-mini-card" style={{ transitionDelay: '120ms' }} once={false}>
               <div className="mini-icon-circle icon-bg-yellow">
                 <Bell size={18} />
               </div>
@@ -610,7 +610,7 @@ export default function LandingPage() {
               </Link>
             </RevealSection>
 
-            <RevealSection className="about-mini-card" style={{ transitionDelay: '300ms' }}>
+            <RevealSection className="about-mini-card" style={{ transitionDelay: '240ms' }} once={false}>
               <div className="mini-icon-circle icon-bg-sky">
                 <MessageSquare size={18} />
               </div>
@@ -621,7 +621,7 @@ export default function LandingPage() {
               </Link>
             </RevealSection>
 
-            <RevealSection className="about-mini-card" style={{ transitionDelay: '450ms' }}>
+            <RevealSection className="about-mini-card" style={{ transitionDelay: '360ms' }} once={false}>
               <div className="mini-icon-circle icon-bg-rose">
                 <Map size={18} />
               </div>

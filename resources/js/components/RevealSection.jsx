@@ -4,7 +4,7 @@ import React, { useRef, useState, useEffect } from 'react';
  * Reusable RevealSection component with bi-directional IntersectionObserver trigger
  * and support for custom animation variants (e.g., 'glow-in', 'zoom-in', 'fade-up').
  */
-export default function RevealSection({ children, className = '', id = '', animation = '', style = {} }) {
+export default function RevealSection({ children, className = '', id = '', animation = '', style = {}, once = false }) {
   const ref = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -13,12 +13,14 @@ export default function RevealSection({ children, className = '', id = '', anima
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-        } else {
-          // Re-trigger animation on scroll up / down
+          if (once) {
+            observer.disconnect();
+          }
+        } else if (!once) {
           setIsVisible(false);
         }
       },
-      { threshold: 0.12 }
+      { threshold: 0.1, rootMargin: '0px 0px -30px 0px' }
     );
 
     if (ref.current) {
@@ -26,7 +28,7 @@ export default function RevealSection({ children, className = '', id = '', anima
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [once]);
 
   const animClass = animation ? `reveal-${animation}` : '';
 
