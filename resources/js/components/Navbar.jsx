@@ -87,10 +87,10 @@ export default function Navbar() {
           <Link to="/" className="nav-link" onClick={() => setIsOpen(false)}>Beranda</Link>
           <Link to="/#tentang" className="nav-link" onClick={() => setIsOpen(false)}>Tentang</Link>
           <Link to="/#cara-penggunaan" className="nav-link" onClick={() => setIsOpen(false)}>Cara Penggunaan</Link>
-          {/* Tanya AI — scroll ke section #tanya-ai di /peta */}
-          <a href="/peta#tanya-ai" className="nav-link" onClick={goToAIChat}>Tanya AI</a>
           {/* Peta Bencana — navigasi ke /peta dan scroll ke atas */}
           <a href="/peta" className="nav-link" onClick={goToMap}>Peta Bencana</a>
+          {/* Tanya AI — scroll ke section #tanya-ai di /peta */}
+          <a href="/peta#tanya-ai" className="nav-link" onClick={goToAIChat}>Tanya AI</a>
           <a href="#kontak" className="nav-link" onClick={() => setIsOpen(false)}>Kontak</a>
           
           <a
