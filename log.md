@@ -781,15 +781,6 @@ Yang Diminta:
 
 - **Model used:** Antigravity (Gemini 3.6 Flash & Claude)
 - **Human Prompt:**
-  - `https://github.com/Devr1us/GeoAlert.git bisa kah membantu saya untuk menghilangkan contributors dari claude ??`
-  - `masih 4 loh, gimana cara menghapus claude nyaaa`
-  - `saya sudah pernah mencoba dan ternyata ai contributornya tidak hilang setelah 48 jam.`
-  - `berarti semua contributors akan hilang?? bagaimana jika membuat repo baru dan commit nya di pindahkan kecuali sblm claude itu commit apkaah bisa??`
-  - `tapi nanti jika repo baru contributorsnya hanya saya??`
-  - `https://github.com/Devr1us/geo-alert.git sekarang bisa di masukkan kesini contributros dan commitnya kecuali claude ai hama itu`
-  - `coba bantu agar semua nya bisa masuk ke github repo https://github.com/Devr1us/geo-alert.git termasuk contributors teman saya`
-  - `mana belum ke push`
-  - `masi kosong`
   - `ini kenapa error ya? jelaskan (Deploy GitHub Pages Get Pages site failed)`
   - `ini kira kira kenapa ? (Some checks were not successful)`
   - `error nya itu (Node 20 is being deprecated & Get Pages site failed)`
