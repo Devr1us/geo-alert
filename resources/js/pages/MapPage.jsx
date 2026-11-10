@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, AlertTriangle, AlertOctagon, ShieldAlert, RefreshCw, Activity, Droplets, Wind, Mountain, Bot, Map as MapIcon, Info, X } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { Search, AlertTriangle, AlertOctagon, ShieldAlert, RefreshCw, Activity, Droplets, Wind, Mountain, Waves, Flame, Bot, Map as MapIcon, Info, X } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -60,12 +61,12 @@ const INDONESIA_BOUNDS = L.latLngBounds(
 const INDONESIA_CENTER = [-2.5, 117.5];
 
 // =============================================================
-// Sample data — BANJIR & LONGSOR
-// Catatan: Data banjir dan longsor tidak tersedia via API publik
-// resmi BNPB/InaRISK tanpa autentikasi. Ditampilkan sebagai
-// contoh tampilan data saja.
+// Sample data — SIMULASI BENCANA MULTI-BAHAYA
+// Catatan: Data banjir, longsor, dan erupsi gunung api belum
+// tersedia melalui API publik tanpa autentikasi, ditampilkan
+// sebagai contoh data edukatif terstruktur.
 // =============================================================
-const SAMPLE_FLOOD_LANDSLIDE = [
+const SAMPLE_DISASTERS = [
   {
     id: 'sample-banjir-1',
     type: 'Banjir',
@@ -87,7 +88,31 @@ const SAMPLE_FLOOD_LANDSLIDE = [
     risk: 'warning',
     magnitude: 'Volume sedang',
     depth: '-',
-    step: 'Jauhi area lereng. Evakuasi ke dataran rendah yang aman. Pantau perkembangan.',
+    step: 'Jauhi area lereng. Evakuasi lari tegak lurus dari luncuran. Pantau perkembangan.',
+    isSample: true,
+  },
+  {
+    id: 'sample-tsunami-1',
+    type: 'Tsunami',
+    location: 'Pesisir Pangandaran, Jawa Barat',
+    lat: -7.7011, lng: 108.4947,
+    time: '(contoh simulasi)',
+    risk: 'danger',
+    magnitude: 'Potensi Gelombang 3m',
+    depth: 'Laut Dangkal',
+    step: 'Aturan 20-20-20: Gempa terasa 20 detik, lari dalam 20 menit ke ketinggian >20m dpl.',
+    isSample: true,
+  },
+  {
+    id: 'sample-gunungapi-1',
+    type: 'Gunung Api',
+    location: 'Gunung Merapi, Sleman, D.I. Yogyakarta',
+    lat: -7.5407, lng: 110.4457,
+    time: '(contoh status PVMBG)',
+    risk: 'warning',
+    magnitude: 'Level III (Siaga)',
+    depth: 'Kawah Aktif',
+    step: 'Jauhi radius bahaya 5 km dari kawah puncak. Kenakan masker N95 antisipasi abu silika.',
     isSample: true,
   },
 ];
@@ -147,6 +172,7 @@ async function geocodeLocation(query) {
 }
 
 export default function MapPage() {
+  const location = useLocation();
   const [activeFilter, setActiveFilter] = useState('Semua');
   const [search, setSearch] = useState('');
   const [data, setData] = useState([]);
@@ -158,6 +184,14 @@ export default function MapPage() {
   const [mapZoom, setMapZoom] = useState(5);
   const [sidebarTab, setSidebarTab] = useState('map');
   const [noticeDismissed, setNoticeDismissed] = useState(false);
+
+  // Auto-pan map jika diarahkan dari tombol "Cek Bencana Terdekat" / CTA di LandingPage
+  useEffect(() => {
+    if (location.state?.userCoords) {
+      setMapCenter(location.state.userCoords);
+      setMapZoom(10);
+    }
+  }, [location.state]);
 
   // Geocoding search state
   const [geocodeLoading, setGeocodeLoading] = useState(false);
@@ -232,7 +266,7 @@ export default function MapPage() {
         };
       });
 
-      setData([...formattedData, ...SAMPLE_FLOOD_LANDSLIDE]);
+      setData([...formattedData, ...SAMPLE_DISASTERS]);
       setLastUpdate(new Date());
     } catch (err) {
       console.error('[GeoAlert] Gagal mengambil data BMKG:', err.message);
@@ -240,7 +274,7 @@ export default function MapPage() {
       setData([
         { id: 's1', type: 'Gempa Bumi', location: formatLocation('Selatan Jawa Barat'), lat: -7.5, lng: 107.0, time: '(contoh data)', risk: 'danger', magnitude: '6.2', depth: '10 km', step: 'Berlindung di bawah meja kuat.', isSample: true },
         { id: 's4', type: 'Gempa Bumi', location: formatLocation('Palu, Sulawesi Tengah'), lat: -0.9, lng: 119.87, time: '(contoh data)', risk: 'standby', magnitude: '4.1', depth: '30 km', step: 'Tetap tenang.', isSample: true },
-        ...SAMPLE_FLOOD_LANDSLIDE,
+        ...SAMPLE_DISASTERS,
       ]);
       setIsSampleData(true);
     } finally {
@@ -314,14 +348,25 @@ export default function MapPage() {
 
   const getIcon = (type) => {
     if (type.includes('Gempa')) return <Activity size={16} />;
+    if (type.includes('Tsunami')) return <Waves size={16} />;
     if (type.includes('Banjir')) return <Droplets size={16} />;
     if (type.includes('Cuaca')) return <Wind size={16} />;
     if (type.includes('Longsor')) return <Mountain size={16} />;
+    if (type.includes('Gunung Api') || type.includes('Erupsi')) return <Flame size={16} />;
     return <AlertTriangle size={16} />;
   };
 
   const filteredData = data.filter(item => {
-    const matchesFilter = activeFilter === 'Semua' || item.type.includes(activeFilter);
+    let matchesFilter = false;
+    if (activeFilter === 'Semua') {
+      matchesFilter = true;
+    } else if (activeFilter === 'Tsunami') {
+      matchesFilter = item.type.includes('Tsunami') || (item.potensi && item.potensi.toLowerCase().includes('tsunami'));
+    } else if (activeFilter === 'Gunung Api') {
+      matchesFilter = item.type.includes('Gunung Api') || item.type.includes('Erupsi');
+    } else {
+      matchesFilter = item.type.includes(activeFilter);
+    }
     const matchesSearch = item.location.toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
   });
@@ -388,7 +433,7 @@ export default function MapPage() {
 
               {/* Filter chips pills */}
               <div className="filter-chips-pill">
-                {['Semua', 'Gempa', 'Banjir', 'Cuaca Ekstrem', 'Longsor'].map(chip => (
+                {['Semua', 'Gempa', 'Tsunami', 'Banjir', 'Longsor', 'Cuaca Ekstrem', 'Gunung Api'].map(chip => (
                   <button
                     key={chip}
                     className={`chip-pill ${activeFilter === chip ? 'active' : ''}`}
@@ -410,7 +455,7 @@ export default function MapPage() {
                     <span>{error}</span>
                   ) : (
                     <span>
-                      Data banjir &amp; longsor: <strong>contoh tampilan data</strong> — API resmi BNPB belum publik.
+                      Data simulasi multi-bahaya: <strong>contoh tampilan data</strong> — API resmi BNPB/PVMBG belum publik penuh.
                     </span>
                   )}
                 </div>

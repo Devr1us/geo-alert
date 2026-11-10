@@ -202,6 +202,59 @@
   font-size: 1rem;
 }
 
+.status-pill-val-action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-status-pill-activate {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  background: #0E2A5C;
+  color: #FFFFFF;
+  border: none;
+  font-size: 0.825rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(14, 42, 92, 0.25);
+}
+
+.btn-status-pill-activate:hover {
+  background: #1e5bb8;
+  transform: translateY(-1px);
+}
+
+.btn-status-pill-manual {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 9999px;
+  background: #F1F5F9;
+  color: #0E2A5C;
+  border: 1px solid #CBD5E1;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-status-pill-manual:hover {
+  background: #E2E8F0;
+}
+
+.status-pill-helper-text {
+  font-size: 0.68rem;
+  color: #64748B;
+  margin-top: 2px;
+  display: block;
+}
+
 .status-dot-glow {
   width: 9px;
   height: 9px;

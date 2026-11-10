@@ -1289,3 +1289,56 @@
   font-style: italic;
 }
 
+/* ============================================================
+   PRINT STYLING (Checklist Tas Siaga Bencana / Dokumen Keselamatan)
+   ============================================================ */
+@media print {
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+  }
+
+  .navbar,
+  .footer-custom,
+  .floating-ai-widget-fab,
+  .no-print,
+  button,
+  .hero-section,
+  .stats-section,
+  .about-modern-section,
+  .recent-disasters-glass-card,
+  .ai-chat-full-card {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .tsb-modal-overlay {
+    position: static !important;
+    background: none !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+
+  .tsb-print-container {
+    position: static !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .tsb-print-sheet {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+}
+
+

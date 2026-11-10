@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Map, Bell, Bot, Shield, ChevronRight, Activity, ArrowRight,
   Wind, Droplets, Mountain, ChevronDown, ChevronUp, MapPin, BellOff, RefreshCw,
-  Zap, Quote, Compass, MessageSquare, Clock, AlertTriangle, AlertOctagon, ShieldAlert
+  Zap, Quote, Compass, MessageSquare, Clock, AlertTriangle, AlertOctagon, ShieldAlert,
+  Waves, Flame, Briefcase, Navigation
 } from 'lucide-react';
 import '../../css/LandingPage.css';
 import MitigationModal from '../components/MitigationModal';
+import EmergencyBagModal from '../components/EmergencyBagModal';
+import CitySelectModal from '../components/CitySelectModal';
 import RevealSection from '../components/RevealSection';
 import { BMKG_TERKINI_URL, BMKG_DIRASAKAN_URL } from '../config/bmkgApi';
 import { ASSET_BASE } from '../config/baseUrl';
@@ -86,12 +89,14 @@ const FAQ_DATA = [
   },
 ];
 
-// Education content
+// Education content — 6 Bencana Utama Indonesia (BMKG, BNPB, PVMBG)
 const EDUCATION_DATA = [
-  { icon: <Activity size={32} color="var(--color-alert)" />, bg: 'rgba(192, 73, 43, 0.1)', accentColor: 'var(--color-alert)', title: 'Gempa Bumi', desc: 'Getaran atau guncangan di permukaan bumi akibat pelepasan energi dari dalam secara tiba-tiba. Indonesia rawan gempa karena berada di Cincin Api Pasifik, pertemuan tiga lempeng tektonik besar dunia.' },
-  { icon: <Mountain size={32} color="var(--color-status-warning)" />, bg: 'rgba(245, 124, 0, 0.1)', accentColor: 'var(--color-status-warning)', title: 'Tanah Longsor', desc: 'Perpindahan massa tanah, batuan, atau material campuran yang bergerak ke bawah lereng. Sering dipicu oleh curah hujan tinggi atau gempa. Kawasan rawan: Jawa Barat, Sumatra, Sulawesi.' },
-  { icon: <Droplets size={32} color="var(--color-standby)" />, bg: 'rgba(74, 144, 217, 0.1)', accentColor: 'var(--color-standby)', title: 'Banjir', desc: 'Terbenamnya daratan karena volume air yang melebihi kapasitas drainase. Banjir bandang sangat berbahaya karena bergerak cepat dengan membawa lumpur dan material berbahaya.' },
-  { icon: <Wind size={32} color="var(--color-primary)" />, bg: 'rgba(14, 42, 92, 0.1)', accentColor: 'var(--color-primary)', title: 'Cuaca Ekstrem', desc: 'Kondisi cuaca berbahaya seperti puting beliung, hujan es, atau badai tropis. Berpotensi merusak infrastruktur dan membahayakan keselamatan jiwa, terutama di wilayah pesisir dan perbukitan.' },
+  { icon: <Activity size={32} color="var(--color-alert)" />, bg: 'rgba(192, 73, 43, 0.1)', accentColor: 'var(--color-alert)', title: 'Gempa Bumi', desc: 'Getaran tektonik tiba-tiba akibat pelepasan energi lempeng bumi. Indonesia berada di Cincin Api Pasifik dengan ribuan sesar aktif yang memerlukan kewaspadaan tinggi.' },
+  { icon: <Waves size={32} color="#0284C7" />, bg: 'rgba(2, 132, 199, 0.1)', accentColor: '#0284C7', title: 'Tsunami', desc: 'Gelombang laut raksasa yang dipicu oleh gempa bumi dangkal di dasar laut, longsor bawah laut, atau letusan gunung api. Terapkan evakuasi emas 20-20-20 di pesisir.' },
+  { icon: <Droplets size={32} color="var(--color-standby)" />, bg: 'rgba(74, 144, 217, 0.1)', accentColor: 'var(--color-standby)', title: 'Banjir & Banjir Bandang', desc: 'Luapan air berlebih akibat curah hujan ekstrem atau kegagalan tanggul. Aliran air deras membawa material lumpur dan puing yang membahayakan nyawa dan kelistrikan.' },
+  { icon: <Mountain size={32} color="var(--color-status-warning)" />, bg: 'rgba(245, 124, 0, 0.1)', accentColor: 'var(--color-status-warning)', title: 'Tanah Longsor', desc: 'Pergerakan massa batuan atau tanah menuruni lereng saat kondisi tanah jenuh air. Selalu evakuasi secara tegak lurus (menyamping) dari jalur luncuran tebing.' },
+  { icon: <Wind size={32} color="#D97706" />, bg: 'rgba(217, 119, 6, 0.1)', accentColor: '#D97706', title: 'Cuaca Ekstrem & Puting Beliung', desc: 'Fenomena hidrometeorologi berbahaya seperti angin puting beliung, petir hebat, dan hujan es. Berlindung di bangunan kokoh dan jauhi pohon tunggal serta tiang tinggi.' },
+  { icon: <Flame size={32} color="#DC2626" />, bg: 'rgba(220, 38, 38, 0.1)', accentColor: '#DC2626', title: 'Erupsi Gunung Api', desc: 'Keluarnya magma, awan panas (wedhus gembel), lontaran batu pijar, dan abu silika dari kawah aktif. Kenakan masker debu/N95 dan patuhi radius Kawasan Rawan Bencana (KRB).' },
 ];
 
 // ============================================================
@@ -248,20 +253,36 @@ async function sendBrowserNotification(title, body) {
 
 
 export default function LandingPage() {
+  const navigate = useNavigate();
+
   // ---- State ----
   const [events, setEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(true);
 
-  // Geolocation state — poin 1
-  const [locationName, setLocationName] = useState(null);       // string | null
-  const [locationStatus, setLocationStatus] = useState('loading'); // 'loading' | 'denied' | 'ready' | 'error'
-  const [areaStatus, setAreaStatus] = useState('safe');          // 'safe' | 'warning' | 'danger'
+  // Ambil lokasi tersimpan dari sesi sebelumnya jika ada
+  const [savedLocData] = useState(() => {
+    try {
+      const item = localStorage.getItem('geoalert_user_location');
+      return item ? JSON.parse(item) : null;
+    } catch { return null; }
+  });
 
-  // Notification state — poin 2
+  // Geolocation state — Poin 3
+  const [userCoords, setUserCoords] = useState(() => savedLocData?.coords || null);
+  const [locationName, setLocationName] = useState(() => savedLocData?.name || null);
+  const [locationStatus, setLocationStatus] = useState(() => savedLocData ? 'ready' : 'prompt'); // 'prompt' | 'detecting' | 'ready' | 'denied'
+  const [areaStatus, setAreaStatus] = useState(() => savedLocData?.areaStatus || 'none'); // 'none' | 'safe' | 'warning' | 'danger'
+  const [lastUpdatedTime, setLastUpdatedTime] = useState(() => savedLocData?.updatedAt || null);
+
+  // Modals state
+  const [showCityModal, setShowCityModal] = useState(false);
+  const [showTsbModal, setShowTsbModal] = useState(false);
+
+  // Notification state
   const [notifPref, setNotifPref] = useState(() => localStorage.getItem(NOTIF_KEY));
   const [notifRequesting, setNotifRequesting] = useState(false);
 
-  // Statistics — poin 4
+  // Statistics
   const [liveAlerts, setLiveAlerts] = useState(0);
   const [liveProvinces, setLiveProvinces] = useState(0);
 
@@ -273,7 +294,7 @@ export default function LandingPage() {
   const [modal, setModal] = useState(null);
 
   // ============================================================
-  // Poin 4: Fetch BMKG events & hitung statistik
+  // Fetch BMKG events & hitung statistik
   // ============================================================
   useEffect(() => {
     let cancelled = false;
@@ -281,7 +302,6 @@ export default function LandingPage() {
       .then((data) => {
         if (cancelled) return;
         setEvents(data);
-        // Statistik poin 4
         const activeCount = data.filter(e => e.risk === 'warning' || e.risk === 'danger').length;
         setLiveAlerts(activeCount > 0 ? activeCount : data.length);
         const provinces = new Set(data.map(e => e.province).filter(Boolean));
@@ -297,59 +317,109 @@ export default function LandingPage() {
     return () => { cancelled = true; };
   }, []);
 
-  // ============================================================
-  // Poin 1: Geolocation + reverse-geocode + hitung status wilayah
-  // ============================================================
+  // Re-kalkulasi status wilayah jika events selesai dimuat & koordinat tersedia
   useEffect(() => {
+    if (events.length === 0 || !userCoords) return;
+    const status = calcAreaStatus(userCoords[0], userCoords[1], events);
+    setAreaStatus(status);
+
+    if (localStorage.getItem(NOTIF_KEY) === 'true' && status === 'danger') {
+      sendBrowserNotification(
+        '⚠️ GeoAlert — Peringatan Bahaya',
+        'Terdapat bencana tingkat BAHAYA di dekat wilayah Anda. Cek peta GeoAlert sekarang.'
+      );
+    }
+  }, [events, userCoords]);
+
+  // Alur minta izin lokasi otomatis
+  const requestLocation = (navigateOnSuccess = false) => {
     if (!('geolocation' in navigator)) {
-      setLocationStatus('denied');
+      setShowCityModal(true);
       return;
     }
+
+    setLocationStatus('detecting');
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
           const { latitude, longitude } = pos.coords;
+          const coords = [latitude, longitude];
+          setUserCoords(coords);
+
           const name = await reverseGeocode(latitude, longitude);
           setLocationName(name);
 
-          // Hitung status wilayah dari events BMKG (tunggu sampai events ada)
-          if (events.length > 0) {
-            const status = calcAreaStatus(latitude, longitude, events);
-            setAreaStatus(status);
+          const currentEvents = events.length > 0 ? events : [];
+          const status = calcAreaStatus(latitude, longitude, currentEvents);
+          setAreaStatus(status);
+
+          const nowStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+          setLastUpdatedTime(nowStr);
+          setLocationStatus('ready');
+
+          try {
+            localStorage.setItem('geoalert_user_location', JSON.stringify({
+              coords,
+              name,
+              areaStatus: status,
+              updatedAt: nowStr
+            }));
+          } catch {}
+
+          if (navigateOnSuccess) {
+            navigate('/peta', { state: { userCoords: coords, locationName: name } });
           }
-          setLocationStatus('ready');
         } catch {
-          setLocationName('Lokasi Anda');
+          setLocationName('Lokasi Terdeteksi');
           setLocationStatus('ready');
+          if (navigateOnSuccess) {
+            navigate('/peta');
+          }
         }
       },
-      () => {
+      (err) => {
+        console.warn('Geolocation failed or denied:', err.message);
         setLocationStatus('denied');
+        setShowCityModal(true);
       },
       { timeout: 8000, maximumAge: 5 * 60 * 1000 }
     );
-  }, []); // runs once on mount
+  };
 
-  // Re-hitung status wilayah ketika events terisi
-  useEffect(() => {
-    if (events.length === 0 || locationStatus !== 'ready') return;
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const status = calcAreaStatus(pos.coords.latitude, pos.coords.longitude, events);
-        setAreaStatus(status);
+  // Pilih kota manual
+  const handleSelectManualCity = (city) => {
+    const coords = [city.lat, city.lng];
+    setUserCoords(coords);
+    setLocationName(city.name);
 
-        // Poin 2: Kirim notifikasi jika ada bahaya & notif aktif
-        if (localStorage.getItem(NOTIF_KEY) === 'true' && status === 'danger') {
-          sendBrowserNotification(
-            '⚠️ GeoAlert — Peringatan Bahaya',
-            'Terdapat bencana tingkat BAHAYA di dekat wilayah Anda. Cek peta GeoAlert sekarang.'
-          );
-        }
-      },
-      () => {}
-    );
-  }, [events, locationStatus]);
+    const currentEvents = events.length > 0 ? events : [];
+    const status = calcAreaStatus(city.lat, city.lng, currentEvents);
+    setAreaStatus(status);
+
+    const nowStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+    setLastUpdatedTime(nowStr);
+    setLocationStatus('ready');
+
+    try {
+      localStorage.setItem('geoalert_user_location', JSON.stringify({
+        coords,
+        name: city.name,
+        areaStatus: status,
+        updatedAt: nowStr
+      }));
+    } catch {}
+  };
+
+  // Tombol aksi Hero & CTA
+  const handleCekBencana = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (locationStatus === 'ready' && userCoords) {
+      navigate('/peta', { state: { userCoords, locationName } });
+    } else {
+      requestLocation(true);
+    }
+  };
 
   // ============================================================
   // Poin 2: Handle klik "Aktifkan Notifikasi"
@@ -425,9 +495,14 @@ export default function LandingPage() {
           </p>
 
           <div className="hero-actions hero-actions-animated">
-            <Link to="/peta" className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.125rem' }}>
+            <button
+              type="button"
+              onClick={handleCekBencana}
+              className="btn btn-primary"
+              style={{ padding: '1rem 2rem', fontSize: '1.125rem', cursor: 'pointer', border: 'none' }}
+            >
               <Map size={24} /> Cek Bencana Terdekat
-            </Link>
+            </button>
             <a href="#tentang" className="btn btn-secondary" style={{ padding: '1rem 2rem', fontSize: '1.125rem', background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(10px)' }}>
               Pelajari Lebih Lanjut
             </a>
@@ -438,21 +513,45 @@ export default function LandingPage() {
             {/* Column 1: Lokasi Anda */}
             <div className="status-pill-col">
               <span className="status-pill-label">LOKASI ANDA</span>
-              {locationStatus === 'loading' && (
-                <div className="status-pill-val loading-val" style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem' }}>
-                  <MapPin size={14} className="animate-pulse" /> Mendeteksi…
-                </div>
-              )}
-              {locationStatus === 'denied' && (
-                <div className="status-pill-val alert-val" style={{ color: 'var(--color-alert)', fontSize: '0.85rem' }}>
-                  <MapPin size={14} color="var(--color-alert)" />
-                  <span>Izin lokasi diperlukan</span>
+              {locationStatus === 'detecting' && (
+                <div className="status-pill-val loading-val" style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+                  <RefreshCw size={14} className="animate-spin" /> Mendeteksi…
                 </div>
               )}
               {locationStatus === 'ready' && (
-                <div className="status-pill-val location-val">
-                  <MapPin size={14} color="#0E2A5C" />
-                  <span>{locationName || 'Karanganyar'}</span>
+                <div className="status-pill-val location-val" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <MapPin size={15} color="#0E2A5C" />
+                  <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={locationName}>
+                    {locationName || 'Lokasi Terdeteksi'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowCityModal(true)}
+                    title="Ubah kota atau lokasi"
+                    style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: '0.75rem', textDecoration: 'underline', padding: '0 2px' }}
+                  >
+                    Ubah
+                  </button>
+                </div>
+              )}
+              {(locationStatus === 'prompt' || locationStatus === 'denied') && (
+                <div className="status-pill-val-action">
+                  <button
+                    type="button"
+                    className="btn-status-pill-activate"
+                    onClick={() => requestLocation(false)}
+                    title="Aktifkan deteksi lokasi otomatis via peramban"
+                  >
+                    <Navigation size={13} /> Aktifkan Lokasi
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-status-pill-manual"
+                    onClick={() => setShowCityModal(true)}
+                    title="Pilih kota secara manual tanpa GPS"
+                  >
+                    Pilih Kota
+                  </button>
                 </div>
               )}
             </div>
@@ -462,11 +561,7 @@ export default function LandingPage() {
             {/* Column 2: Status Wilayah */}
             <div className="status-pill-col">
               <span className="status-pill-label">STATUS WILAYAH</span>
-              {locationStatus === 'denied' ? (
-                <div className="status-pill-val text-muted" style={{ fontSize: '0.85rem' }}>
-                  Aktifkan lokasi
-                </div>
-              ) : (
+              {locationStatus === 'ready' ? (
                 <div className="status-pill-val area-val" style={{ color: currentStatus.color }}>
                   <span
                     className="status-dot-glow"
@@ -475,7 +570,18 @@ export default function LandingPage() {
                       boxShadow: `0 0 10px ${currentStatus.glow}`,
                     }}
                   />
-                  <span>{locationStatus === 'loading' ? '—' : currentStatus.label}</span>
+                  <span>{currentStatus.label}</span>
+                </div>
+              ) : (
+                <div className="status-pill-val text-muted" style={{ fontSize: '0.95rem', color: '#64748B' }}>
+                  <span
+                    className="status-dot-glow"
+                    style={{
+                      backgroundColor: '#94A3B8',
+                      boxShadow: 'none',
+                    }}
+                  />
+                  <span>Belum tersedia</span>
                 </div>
               )}
             </div>
@@ -487,10 +593,17 @@ export default function LandingPage() {
               <span className="status-pill-label">PEMBARUAN</span>
               <div className="status-pill-val time-val">
                 <Clock size={13} color="#0E2A5C" />
-                <span>{eventsLoading ? '…' : 'Baru saja'}</span>
+                <span>{locationStatus === 'ready' ? (lastUpdatedTime || 'Baru saja') : '-'}</span>
               </div>
             </div>
           </div>
+
+          {/* Transparent Location Privacy Note */}
+          {locationStatus !== 'ready' && (
+            <p className="hero-location-privacy-note" style={{ fontSize: '0.8rem', color: '#64748B', marginTop: '0.85rem', textAlign: 'center' }}>
+              🔒 Untuk mendeteksi bencana terdekat dari posisi Anda. Koordinat diproses langsung di peramban Anda dan tidak disimpan di server.
+            </p>
+          )}
         </div>
       </section>
 
@@ -897,27 +1010,116 @@ export default function LandingPage() {
         <div className="container">
           <h2 className="section-title">Panduan Mitigasi Instan</h2>
           <p className="section-subtitle">
-            Langkah taktis yang dapat Anda ambil sebelum, saat, dan sesudah bencana terjadi.
+            Langkah taktis yang dapat Anda ambil sebelum, saat, dan sesudah bencana terjadi berdasarkan standar BMKG &amp; BNPB.
           </p>
+
+          {/* 6 Disaster Cards Grid */}
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { key: 'gempa', icon: <Activity size={48} color="var(--color-alert)" />, title: 'Gempa Bumi', desc: 'Jangan panik. Berlindung di bawah meja yang kuat, jauhi kaca dan perabotan berat. Jika di pesisir, waspadai tsunami setelah guncangan kuat.' },
-              { key: 'banjir', icon: <Droplets size={48} color="var(--color-standby)" />, title: 'Banjir', desc: 'Matikan arus listrik dari meteran utama. Amankan dokumen ke tempat tinggi dalam wadah kedap air, dan ikuti jalur evakuasi resmi.' },
-              { key: 'cuaca', icon: <Wind size={48} color="var(--color-status-warning)" />, title: 'Cuaca Ekstrem', desc: 'Masuk ke dalam bangunan kokoh segera. Hindari pohon besar, tiang listrik, dan area terbuka. Pantau peringatan resmi BMKG.' },
+              {
+                key: 'gempa',
+                icon: <Activity size={44} color="var(--color-alert)" />,
+                title: 'Gempa Bumi',
+                desc: 'Terapkan DUCK, COVER, HOLD ON. Jauhi jendela kaca, perabot tinggi, dan jangan gunakan lift. Evakuasi setelah getaran reda.',
+              },
+              {
+                key: 'tsunami',
+                icon: <Waves size={44} color="#0284C7" />,
+                title: 'Tsunami',
+                desc: 'Gunakan aturan emas 20-20-20. Jika gempa terasa 20 detik, Anda punya 20 menit untuk lari ke tempat setinggi minimal 20 meter dpl.',
+              },
+              {
+                key: 'banjir',
+                icon: <Droplets size={44} color="var(--color-standby)" />,
+                title: 'Banjir & Bandang',
+                desc: 'Matikan sakelar MCB listrik utama segera. Amankan dokumen ke wadah kedap air di lantai atas, dan jangan terobos arus deras.',
+              },
+              {
+                key: 'longsor',
+                icon: <Mountain size={44} color="var(--color-status-warning)" />,
+                title: 'Tanah Longsor',
+                desc: 'Kenali retakan tanah & dinding seret. Saat terjadi suara gemuruh tebing, evakuasi lari TEGAK LURUS (menyamping) dari luncuran.',
+              },
+              {
+                key: 'cuaca',
+                icon: <Wind size={44} color="#D97706" />,
+                title: 'Cuaca Ekstrem',
+                desc: 'Berlindung di bangunan kokoh tertutup. Jauhi pohon besar, tiang listrik, dan cabut kabel alat elektronik dari stopkontak.',
+              },
+              {
+                key: 'gunungapi',
+                icon: <Flame size={44} color="#DC2626" />,
+                title: 'Erupsi Gunung Api',
+                desc: 'Gunakan masker N95 dan kacamata pelindung dari abu silika. Patuhi radius zona steril KRB yang ditetapkan pos pemantauan PVMBG.',
+              },
             ].map(card => (
-              <div key={card.key} className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <div style={{ marginBottom: '1.5rem' }}>{card.icon}</div>
-                <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>{card.title}</h3>
-                <p className="text-muted" style={{ marginBottom: '2rem', fontSize: '1rem', lineHeight: '1.6', flex: 1 }}>{card.desc}</p>
+              <div key={card.key} className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%', transition: 'transform 0.2s, box-shadow 0.2s' }}>
+                <div style={{ marginBottom: '1.25rem' }}>{card.icon}</div>
+                <h3 style={{ marginBottom: '0.75rem', fontSize: '1.35rem' }}>{card.title}</h3>
+                <p className="text-muted" style={{ marginBottom: '1.75rem', fontSize: '0.95rem', lineHeight: '1.6', flex: 1 }}>{card.desc}</p>
                 <button
+                  type="button"
                   className="btn btn-secondary"
-                  style={{ width: '100%', padding: '0.75rem' }}
+                  style={{ width: '100%', padding: '0.75rem', fontWeight: '600' }}
                   onClick={() => setModal(card.key)}
                 >
                   Lihat SOP Lengkap →
                 </button>
               </div>
             ))}
+          </div>
+
+          {/* Tas Siaga Bencana (TSB) Banner */}
+          <div
+            className="tsb-promo-banner"
+            style={{
+              marginTop: '3.5rem',
+              padding: '2.5rem',
+              borderRadius: 'var(--radius-lg)',
+              background: 'linear-gradient(135deg, #0E2A5C 0%, #173B7A 100%)',
+              color: '#FFFFFF',
+              boxShadow: '0 12px 30px rgba(14, 42, 92, 0.15)',
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '2rem',
+              flexWrap: 'wrap',
+            }}
+          >
+            <div style={{ maxWidth: '680px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.15)', padding: '4px 12px', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: '700', letterSpacing: '0.05em', marginBottom: '12px' }}>
+                <Briefcase size={14} /> STANDAR KESIAPSIAGAAN MANDIRI
+              </div>
+              <h3 style={{ color: '#FFFFFF', fontSize: '1.75rem', marginBottom: '8px', fontWeight: '800' }}>
+                Checklist Tas Siaga Bencana (TSB) 72 Jam
+              </h3>
+              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.98rem', lineHeight: '1.6', margin: 0 }}>
+                Pastikan perbekalan mandiri keluarga Anda untuk 3 hari pertama pasca-bencana telah lengkap dan tersimpan dalam tas kedap air dekat pintu keluar. Dilengkapi fitur cetak bersih ukuran A4 siap tempel di dinding.
+              </p>
+            </div>
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowTsbModal(true)}
+                className="btn btn-primary"
+                style={{
+                  background: '#F7F2EA',
+                  color: '#0E2A5C',
+                  border: 'none',
+                  padding: '1rem 1.75rem',
+                  fontSize: '1rem',
+                  fontWeight: '700',
+                  boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                }}
+              >
+                <Briefcase size={18} /> Buka &amp; Cetak Checklist TSB
+              </button>
+            </div>
           </div>
         </div>
       </RevealSection>
@@ -954,14 +1156,35 @@ export default function LandingPage() {
           <p className="section-subtitle">
             Pantau kondisi lingkungan Anda dan jadilah selangkah lebih maju dalam menghadapi potensi bencana. Keselamatan Anda adalah prioritas utama.
           </p>
-          <Link to="/peta" className="btn btn-primary" style={{ padding: '1.25rem 3rem', fontSize: '1.25rem', borderRadius: 'var(--radius-full)' }}>
+          <button
+            type="button"
+            onClick={handleCekBencana}
+            className="btn btn-primary"
+            style={{ padding: '1.25rem 3rem', fontSize: '1.25rem', borderRadius: 'var(--radius-full)', cursor: 'pointer', border: 'none' }}
+          >
             Pantau Wilayah Saya Sekarang
-          </Link>
+          </button>
         </div>
       </RevealSection>
 
-      {/* Mitigation Modal */}
+      {/* Mitigation SOP Modal */}
       {modal && <MitigationModal type={modal} onClose={() => setModal(null)} />}
+
+      {/* Manual City Selector Modal */}
+      {showCityModal && (
+        <CitySelectModal
+          isOpen={showCityModal}
+          onClose={() => setShowCityModal(false)}
+          onSelectCity={handleSelectManualCity}
+        />
+      )}
+
+      {/* Emergency Bag (TSB) Checklist Modal */}
+      {showTsbModal && (
+        <EmergencyBagModal
+          onClose={() => setShowTsbModal(false)}
+        />
+      )}
     </div>
   );
 }

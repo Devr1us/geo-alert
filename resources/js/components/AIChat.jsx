@@ -69,6 +69,10 @@ const AI_RESPONSES = [
     answer: `⚡ **Langkah Keselamatan Cuaca Ekstrem & Petir:**\n\n1. 🚫 **Jauhi Pohon & Tiang:** Dilarang keras berteduh di bawah pohon tunggal atau tiang besi di tempat terbuka saat hujan deras.\n2. 🌪️ **Angin Puting Beliung:** Jika di luar ruangan, segera tiarap di cekungan tanah atau parit kering sambil melindungi kepala.\n3. 🔌 **Cabut Stopkontak:** Lepaskan kabel alat elektronik dan antena untuk menghindari bahaya lonjakan arus akibat petir.`
   },
   {
+    keywords: ['gunung', 'erupsi', 'vulkanik', 'lahar', 'abu vulkanik', 'kawah', 'merapi', 'magma', 'wedhus gembel'],
+    answer: `🌋 **Panduan Mitigasi Erupsi Gunung Api (SOP PVMBG & BNPB):**\n\n1. 😷 **Lindungi Saluran Napas:** Wajib kenakan masker khusus partikel debu (N95/KN95) atau kain basah untuk menyaring abu silika vulkanik yang berbahaya bagi paru-paru.\n2. 🥽 **Lindungi Mata & Kulit:** Kenakan kacamata pelindung (*goggles*) dan pakaian tertutup lengan panjang. Hindari menggunakan lensa kontak.\n3. 🚫 **Patuhi Radius Bahaya (KRB):** Dilarang beraktivitas di dalam radius Kawasan Rawan Bencana yang ditetapkan pos pemantauan PVMBG.\n4. 🌊 **Waspada Lahar Dingin:** Jauhi bantaran sungai yang berhulu di lereng gunung api saat terjadi hujan lebat di kawasan puncak.`
+  },
+  {
     keywords: ['tas siaga', 'tas darurat', 'emergency kit', 'perlengkapan', 'tsb', '72 jam'],
     answer: `🎒 **Isi Wajib Tas Siaga Bencana (TSB) untuk 72 Jam Pertama:**\n\n1. 💧 **Air & Makanan:** Minimal 3 liter air/orang dan makanan siap santap berkalori tinggi (biskuit, makanan kaleng).\n2. 📄 **Dokumen Penting:** Salinan identitas, KK, dan ijazah dalam kantong plastik ziplock kedap air.\n3. 🩺 **Kotak P3K & Obat Khusus:** Obat pribadi untuk 7 hari (asma, hipertensi, diabetes) dan perban antiseptik.\n4. 🔦 **Peralatan Darurat:** Senter LED, baterai cadangan, peluit darurat, radio portabel, dan powerbank.\n\n💡 Gantung TSB di dekat pintu keluar agar mudah dibawa saat evakuasi mendesak.`
   },
@@ -120,7 +124,7 @@ function getAIResponse(message, history = []) {
     }
 
     // Perkenalan pertama (ringkas, tanpa klaim data real-time)
-    return `Salam! Saya **GeoAlert AI**, asisten kesiapsiagaan dan panduan mitigasi bencana alam Indonesia berbasis SOP resmi BMKG & BNPB.\n\nSaya siap membantu Anda dengan:\n1. 🚨 **Prosedur Keselamatan:** Panduan evakuasi gempa, tsunami, banjir, longsor, & cuaca ekstrem.\n2. 🎒 **Kesiapsiagaan:** Penyusunan Tas Siaga Bencana (TSB) 72 jam & rencana evakuasi keluarga.\n3. 📞 **Nomor Darurat Resmi:** Informasi nomor telepon 112, 115 (BASARNAS), 118, dan 113.\n\n*Ada situasi atau pertanyaan mitigasi yang ingin Anda konsultasikan?*`;
+    return `Salam! Saya **GeoAlert AI**, asisten kesiapsiagaan dan panduan mitigasi bencana alam Indonesia berbasis SOP resmi BMKG & BNPB.\n\nSaya siap membantu Anda dengan:\n1. 🚨 **Prosedur Keselamatan:** Panduan evakuasi gempa, tsunami, banjir, longsor, cuaca ekstrem, & erupsi gunung api.\n2. 🎒 **Kesiapsiagaan:** Penyusunan Tas Siaga Bencana (TSB) 72 jam & rencana evakuasi keluarga.\n3. 📞 **Nomor Darurat Resmi:** Informasi nomor telepon 112, 115 (BASARNAS), 118, dan 113.\n\n*Ada situasi atau pertanyaan mitigasi yang ingin Anda konsultasikan?*`;
   }
 
   // 3. MATCH KNOWLEDGE BASE MITIGASI
@@ -132,10 +136,10 @@ function getAIResponse(message, history = []) {
   const isSafetyRelated = lower.includes('aman') || lower.includes('bahaya') || lower.includes('selamat') || lower.includes('evakuasi') || lower.includes('korban');
 
   if (isSafetyRelated || isQuestion) {
-    return `🧠 **Panduan Keselamatan GeoAlert AI:**\n\nMengenai pertanyaan Anda: *"_${message}_"*\n\n1. 🛡️ **Prioritas Keselamatan Jiwa:** Keselamatan diri dan keluarga adalah hal utama. Jangan menunda evakuasi demi menyelamatkan barang berharga.\n2. 📋 **Cek Informasi Resmi:** Pantau data peringatan resmi BMKG pada peta dan tabel GeoAlert.\n3. 📞 **Hubungi Bantuan Segera:** Jika terjadi bahaya mendesak, segera hubungi **112** (Darurat Bebas Pulsa) atau **115** (BASARNAS).\n\n*Ketik topik spesifik seperti "gempa", "banjir", "tsunami", atau "tas siaga" untuk panduan langkah demi langkah.*`;
+    return `🧠 **Panduan Keselamatan GeoAlert AI:**\n\nMengenai pertanyaan Anda: *"_${message}_"*\n\n1. 🛡️ **Prioritas Keselamatan Jiwa:** Keselamatan diri dan keluarga adalah hal utama. Jangan menunda evakuasi demi menyelamatkan barang berharga.\n2. 📋 **Cek Informasi Resmi:** Pantau data peringatan resmi BMKG pada peta dan tabel GeoAlert.\n3. 📞 **Hubungi Bantuan Segera:** Jika terjadi bahaya mendesak, segera hubungi **112** (Darurat Bebas Pulsa) atau **115** (BASARNAS).\n\n*Ketik topik spesifik seperti "gempa", "tsunami", "banjir", "gunung api", atau "tas siaga" untuk panduan langkah demi langkah.*`;
   }
 
-  return `Terima kasih atas pertanyaan Anda. **GeoAlert AI** siap membantu dengan panduan mitigasi bencana terstruktur:\n\n1. 🎒 **Tas Siaga Bencana (TSB):** Perlengkapan wajib 72 jam pertama\n2. 🔴 **Gempa Bumi:** Prosedur perlindungan di gedung, rumah, dan mobil\n3. 🌊 **Tsunami:** Aturan evakuasi 20-20-20 & tanda air laut surut\n4. 🔵 **Banjir & Longsor:** Penanganan arus listrik & arah lari lereng\n5. 📞 **Nomor Darurat:** Kontak cepat 112, 115 (BASARNAS), 118, dan 113\n\n*Silakan ketik pertanyaan spesifik Anda seputar mitigasi bencana di atas.*`;
+  return `Terima kasih atas pertanyaan Anda. **GeoAlert AI** siap membantu dengan panduan mitigasi bencana terstruktur:\n\n1. 🎒 **Tas Siaga Bencana (TSB):** Perlengkapan wajib 72 jam pertama\n2. 🔴 **Gempa Bumi:** Prosedur perlindungan di gedung, rumah, dan mobil\n3. 🌊 **Tsunami:** Aturan evakuasi 20-20-20 & tanda air laut surut\n4. 🔵 **Banjir, Longsor & Gunung Api:** Penanganan arus listrik, arah lari tebing, & masker abu\n5. 📞 **Nomor Darurat:** Kontak cepat 112, 115 (BASARNAS), 118, dan 113\n\n*Silakan ketik pertanyaan spesifik Anda seputar mitigasi bencana di atas.*`;
 }
 
 // Interactive Prompt Suggestion Sets for "Refresh Prompts"
@@ -150,7 +154,7 @@ const PROMPT_SETS = [
     { text: "Langkah evakuasi mandiri saat timbul tanda-tanda banjir", category: "Banjir" },
     { text: "Tanda-tanda awal tanah longsor di kawasan perbukitan", category: "Longsor" },
     { text: "Apa yang harus dilakukan saat terjadi angin puting beliung?", category: "Cuaca Ekstrem" },
-    { text: "Dari mana sumber data bencana GeoAlert diambil?", category: "Sumber Data" }
+    { text: "Perlindungan diri dan masker apa yang wajib saat erupsi gunung api?", category: "Gunung Api" }
   ],
   [
     { text: "Berapa liter air minum yang harus disiapkan per orang saat bencana?", category: "Perlengkapan" },

@@ -1,138 +1,245 @@
-import React, { useState, useEffect } from 'react';
-import { Activity, Wind, Droplets, X, CheckCircle, AlertTriangle, Info } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Activity, Wind, Droplets, Mountain, Waves, Flame, X, CheckCircle, ShieldAlert, PhoneCall, Info } from 'lucide-react';
 
-const MITIGATION_DATA = {
+export const MITIGATION_DATA = {
   gempa: {
-    title: 'Prosedur Lengkap Mitigasi Gempa Bumi',
+    title: 'SOP Mitigasi Gempa Bumi',
+    subtitle: 'Rujukan Standar Operasional Prosedur BMKG & BNPB',
     icon: <Activity size={32} color="var(--color-alert)" />,
     color: 'var(--color-alert)',
+    category: 'Geologi',
     sections: [
       {
-        heading: '🔴 Saat Gempa Terjadi',
+        phase: 'before',
+        heading: '🛡️ Sebelum Gempa (Kesiapsiagaan)',
         steps: [
-          'DUCK: Berlutut dan lindungi kepala serta leher dengan kedua tangan',
-          'COVER: Berlindung di bawah meja yang kokoh, atau di bawah rangka pintu yang kuat',
-          'HOLD ON: Pegang erat tempat berlindung hingga guncangan berhenti',
-          'Jauhi jendela, cermin, rak buku, dan lemari yang bisa jatuh',
-          'Jika di dalam gedung tinggi, jangan gunakan lift — tetap di dalam hingga aman',
-          'Jika di luar ruangan, hindari pohon, tiang listrik, dan gedung',
+          'Kenali jalur evakuasi aman dan tentukan titik kumpul (assembly point) di area terbuka bebas reruntuhan.',
+          'Pastikan perabot berat, lemari tinggi, dan water heater telah dibaut kokoh ke dinding untuk mencegah roboh.',
+          'Siapkan Tas Siaga Bencana (TSB) berisi kebutuhan darurat 72 jam di dekat pintu keluar utama rumah.',
+          'Simpan nomor darurat 112 dan 115 pada panggilan cepat ponsel seluruh anggota keluarga.',
+          'Periksa instalasi gas dan sekring listrik secara berkala, ketahui cara mematikannya secara cepat.'
         ]
       },
       {
-        heading: '🟡 Setelah Gempa Berhenti',
+        phase: 'during',
+        heading: '🚨 Saat Gempa Terjadi (Perlindungan Diri)',
         steps: [
-          'Periksa diri dan orang di sekitar dari kemungkinan cedera',
-          'Keluar dari gedung dengan hati-hati lewat tangga darurat',
-          'Periksa potensi kebocoran gas — jika mencium bau gas, buka jendela dan segera keluar',
-          'Matikan sumber listrik dan gas jika aman dilakukan',
-          'Jauhi area yang rusak dan tunggu informasi resmi dari BMKG',
-          'Waspada gempa susulan (aftershock) yang bisa terjadi beberapa jam setelahnya',
+          'Terapkan prosedur baku: DUCK (merunduk), COVER (lindungi kepala & leher), HOLD ON (pegang kaki meja kokoh).',
+          'Jika di tempat tidur, jangan panik berdiri! Tengkurap dan lindungi kepala serta leher dengan bantal tebal.',
+          'DILARANG KERAS MENGGUNAKAN LIFT! Evakuasi selalu melalui tangga darurat setelah guncangan berhenti.',
+          'Jauhi jendela kaca, cermin besar, dinding rapuh, dan rak buku yang rentan runtuh.',
+          'Jika sedang mengemudi, perlambat laju, tepi kendaraan di area terbuka jauh dari flyover/tiang listrik, dan pasang rem tangan.'
         ]
       },
       {
-        heading: '🌊 Jika Gempa di Dekat Pantai — Waspadai Tsunami',
+        phase: 'after',
+        heading: '🟡 Sesudah Gempa (Evakuasi & Pemulihan)',
         steps: [
-          'Jika guncangan terasa kuat dan lama (>1 menit), langsung evakuasi ke daratan tinggi',
-          'Jangan menunggu sirine atau peringatan resmi',
-          'Naik ke ketinggian minimal 30 meter dari permukaan laut',
-          'Jangan kembali ke pantai sebelum dinyatakan aman oleh pihak berwenang',
-        ]
-      },
-      {
-        heading: '📞 Nomor Darurat',
-        steps: [
-          'BPBD Nasional: 0800-1000-3000 (bebas pulsa)',
-          'Basarnas (SAR): 115',
-          'Nomor Darurat Nasional: 112',
+          'Keluar dari bangunan secara tertib dengan melindungi kepala menggunakan tas atau kedua tangan.',
+          'Matikan sakelar MCB listrik utama dan tabung gas segera sebelum meninggalkan rumah.',
+          'Jangan menyalakan korek api atau sakelar lampu jika mencium bau gas yang bocor.',
+          'Waspadai gempa susulan (aftershock) yang kekuatannya bisa melemahkan struktur bangunan retak.',
+          'Pantau informasi resmi pembaruan magnitudo dan potensi tsunami dari BMKG TEWS melalui GeoAlert.'
         ]
       }
     ]
   },
+
+  tsunami: {
+    title: 'SOP Mitigasi Bencana Tsunami',
+    subtitle: 'Rujukan Standar Operasional Prosedur BMKG TEWS & BNPB',
+    icon: <Waves size={32} color="#0284C7" />,
+    color: '#0284C7',
+    category: 'Kelautan & Seismik',
+    sections: [
+      {
+        phase: 'before',
+        heading: '🛡️ Sebelum Tsunami (Kesiapsiagaan Pesisir)',
+        steps: [
+          'Ketahui zona rawan tsunami dan hafalkan rute menuju Tempat Evakuasi Sementara (TES) berketinggian >20 meter dpl.',
+          'Pahami tanda-tanda alam: gempa kuat >20 detik, surutnya air laut mendadak, atau suara gemuruh dari arah laut.',
+          'Siapkan pelampung atau jaket keselamatan bersama Tas Siaga Bencana (TSB) keluarga di kawasan pesisir.',
+          'Ikuti latihan simulasi evakuasi mandiri tsunami (*tsunami drill*) yang diadakan BPBD setempat.'
+        ]
+      },
+      {
+        phase: 'during',
+        heading: '🚨 Saat Terjadi Tsunami (Evakuasi Emas 20-20-20)',
+        steps: [
+          'Terapkan aturan emas 20-20-20: Gempa terasa 20 detik, Anda punya waktu emas 20 menit, segera lari ke tempat setinggi 20 meter dpl.',
+          'JANGAN PERNAH mendekati pantai untuk melihat air laut surut atau mengambil ikan yang terdampar!',
+          'Segera evakuasi dengan BERLARI, jangan gunakan mobil atau motor jika jalur evakuasi padat/macet.',
+          'Jika terperangkap dan tidak sempat ke bukit, naik ke lantai tertinggi gedung evakuasi bertulang beton kokoh (minimal lantai 3).'
+        ]
+      },
+      {
+        phase: 'after',
+        heading: '🟡 Sesudah Tsunami (Kewaspadaan Gelombang Lanjutan)',
+        steps: [
+          'Tetap berada di tempat penampungan tinggi sampai ada pernyataan resmi "Peringatan Tsunami Berakhir" dari BMKG.',
+          'Ingat: Gelombang tsunami datang berupa serangkaian gelombang, gelombang ke-2 dan ke-3 seringkali jauh lebih dahsyat dari gelombang pertama.',
+          'Jauhi muara sungai, pelabuhan, dan jembatan pesisir yang rawan ambruk pasca tersapu air.',
+          'Hindari genangan air sisa tsunami karena berisiko tersengat aliran listrik atau terkontaminasi limbah berbahaya.'
+        ]
+      }
+    ]
+  },
+
   banjir: {
-    title: 'Prosedur Lengkap Mitigasi Banjir',
+    title: 'SOP Mitigasi Banjir & Banjir Bandang',
+    subtitle: 'Rujukan Standar Operasional Prosedur BNPB & BMKG',
     icon: <Droplets size={32} color="var(--color-standby)" />,
     color: 'var(--color-standby)',
+    category: 'Hidrometeorologi',
     sections: [
       {
-        heading: '🔵 Persiapan Sebelum Banjir',
+        phase: 'before',
+        heading: '🛡️ Sebelum Banjir (Kesiapsiagaan)',
         steps: [
-          'Pantau informasi cuaca dan peringatan banjir dari BMKG secara berkala',
-          'Siapkan tas siaga dengan dokumen penting, obat-obatan, dan makanan tahan lama',
-          'Kenali jalur evakuasi dan lokasi posko banjir di sekitar rumah',
-          'Angkat barang berharga dan dokumen ke lantai atas atau tempat tinggi',
-          'Pastikan saluran drainase di sekitar rumah tidak tersumbat',
+          'Pantau peringatan dini curah hujan lebat dari BMKG dan tinggi muka air pintu air setempat.',
+          'Amankan dokumen berharga, surat tanah, dan ijazah ke dalam kantong plastik ziplock kedap air di lantai atas.',
+          'Bersihkan selokan, parit, dan gorong-gorong di lingkungan sekitar agar aliran air tidak tersumbat.',
+          'Ketahui lokasi posko pengungsian banjir dan siapkan obat pribadi serta stok air minum bersih.'
         ]
       },
       {
-        heading: '🔴 Saat Banjir Terjadi',
+        phase: 'during',
+        heading: '🚨 Saat Banjir Terjadi (Tanggap Darurat)',
         steps: [
-          'Segera matikan arus listrik dari panel utama (meteran)',
-          'Jangan mencoba menyeberangi aliran banjir yang deras — arus 15 cm saja bisa menghanyutkan',
-          'Naik ke lantai atas atau tempat yang lebih tinggi dari rumah',
-          'Ikuti arahan petugas BPBD dan jangan kembali sampai dinyatakan aman',
-          'Gunakan tali atau pelampung jika terpaksa bergerak di air',
+          'SEGERA MATIKAN sakelar MCB listrik utama pada meteran rumah sebelum air mulai masuk.',
+          'Pindahkan tabung gas ke tempat tinggi dan cabut regulator kompor.',
+          'DILARANG MENEROBOS genangan air mengalir: kedalaman 15 cm berarus kuat sanggup menjatuhkan orang dewasa.',
+          'Waspadai saluran air terbuka, gorong-gorong tanpa tutup, dan lubang tersembunyi di bawah genangan.',
+          'Segera evakuasi ke tempat yang lebih tinggi jika air naik dengan cepat (terutama bahaya banjir bandang).'
         ]
       },
       {
-        heading: '🟡 Setelah Banjir Surut',
+        phase: 'after',
+        heading: '🟡 Sesudah Banjir (Pemulihan & Sanitasi)',
         steps: [
-          'Hati-hati saat memasuki rumah — periksa struktur bangunan dan potensi listrik bocor',
-          'Gunakan hanya air bersih atau matang untuk minum dan memasak',
-          'Waspadai hewan berbisa (ular, kalajengking) yang terbawa banjir',
-          'Bersihkan rumah dan perabotan dengan disinfektan',
-          'Waspada penyakit pasca-banjir: diare, leptospirosis, dan infeksi kulit',
-        ]
-      },
-      {
-        heading: '📞 Nomor Darurat',
-        steps: [
-          'BPBD Nasional: 0800-1000-3000 (bebas pulsa)',
-          'PMI (Palang Merah): 021-7992325',
-          'Nomor Darurat Nasional: 112',
+          'Periksa instalasi kelistrikan oleh teknisi berwenang sebelum menyalakan kembali sakelar listrik.',
+          'Waspadai hewan berbisa seperti ular dan kalajengking yang sering bersarang di tumpukan perabot basah.',
+          'Gunakan hanya air bersih matang untuk minum dan memasak guna mencegah diare dan penyakit leptospirosis.',
+          'Bersihkan lumpur dan disinfeksi seluruh lantai serta perabotan rumah secara menyeluruh.'
         ]
       }
     ]
   },
-  cuaca: {
-    title: 'Prosedur Lengkap Mitigasi Cuaca Ekstrem',
-    icon: <Wind size={32} color="var(--color-status-warning)" />,
+
+  longsor: {
+    title: 'SOP Mitigasi Tanah Longsor',
+    subtitle: 'Rujukan Standar Operasional Prosedur PVMBG & BNPB',
+    icon: <Mountain size={32} color="var(--color-status-warning)" />,
     color: 'var(--color-status-warning)',
+    category: 'Geologi & Gerakan Tanah',
     sections: [
       {
-        heading: '💨 Saat Angin Kencang / Puting Beliung',
+        phase: 'before',
+        heading: '🛡️ Sebelum Longsor (Pengenalan Gejala Awal)',
         steps: [
-          'Segera masuk ke dalam bangunan yang paling kokoh terdekat',
-          'Jauhi jendela dan pintu kaca',
-          'Jika berada di luar dan tidak ada perlindungan, berbaring di parit atau tanah rendah',
-          'Hindari berlindung di bawah pohon, jembatan, atau flyover',
-          'Jauhi kabel listrik yang jatuh atau benda metal yang tinggi',
+          'Waspadai tanda awal: muncul retakan melengkung pada tanah tebing, jalan aspal retak, atau pohon dan tiang mulai miring.',
+          'Perhatikan perubahan air tanah: air sumur mendadak keruh atau muncul mata air baru yang bercampur lumpur.',
+          'Pintu atau jendela rumah mulai seret dan sulit dibuka/ditutup (indikasi pondasi tanah di bawah mulai bergeser).',
+          'Jangan mendirikan bangunan di dekat bibir tebing curam atau di bawah tebing tanpa terasering memadai.'
         ]
       },
       {
-        heading: '⚡ Saat Hujan Lebat dan Petir',
+        phase: 'during',
+        heading: '🚨 Saat Longsor Terjadi (Arah Evakuasi Nyata)',
         steps: [
-          'Segera masuk ke dalam kendaraan atau bangunan yang tertutup',
-          'Hindari berenang, memancing, atau berada di dekat badan air terbuka',
-          'Matikan dan jauhkan peralatan elektronik dari stopkontak',
-          'Jangan berbaring di atas permukaan yang basah',
-          'Jika tersambar petir, panggil bantuan darurat 118 segera',
+          'Jika mendengar suara gemuruh keras atau getaran dari bukit, SEGERA EVAKUASI KELUAR RUMAH!',
+          'EVAKUASI TEGAK LURUS (MENYAMPING): Berlari menyamping dari jalur luncuran tanah, jangan pernah lari searah longsoran!',
+          'Jika tidak sempat keluar rumah, meringkuk seperti bola di bawah meja kokoh dan lindungi kepala serta leher Anda.',
+          'Hindari berteduh di bawah lereng curam, lereng timbunan tanah galian, atau dasar lembah sempit.'
         ]
       },
       {
-        heading: '🌊 Saat Gelombang Tinggi / Badai di Pesisir',
+        phase: 'after',
+        heading: '🟡 Sesudah Longsor (Kewaspadaan Longsor Susulan)',
         steps: [
-          'Jauhi pantai dan area pesisir segera',
-          'Nelayan: kembali ke darat dan amankan kapal',
-          'Pantau peringatan dari BMKG Maritime',
-          'Jangan melaut dalam kondisi cuaca buruk',
+          'JAUHI AREA LONGSORAN! Tanah di sekitar lokasi masih sangat jenuh air dan rentan terjadi longsor susulan.',
+          'Bantu evakuasi korban hanya jika Anda berada di area aman dan memiliki peralatan yang memadai.',
+          'Laporkan segera kerusakan fasilitas jalan, pipa air, atau tiang listrik ke posko tanggap darurat BPBD.',
+          'Tetap berada di posko pengungsian sampai geolog BPBD/PVMBG menyatakan lereng aman dari pergerakan tanah.'
+        ]
+      }
+    ]
+  },
+
+  cuaca: {
+    title: 'SOP Mitigasi Cuaca Ekstrem & Angin Kencang',
+    subtitle: 'Rujukan Standar Operasional Prosedur BMKG',
+    icon: <Wind size={32} color="#D97706" />,
+    color: '#D97706',
+    category: 'Meteorologi',
+    sections: [
+      {
+        phase: 'before',
+        heading: '🛡️ Sebelum Cuaca Ekstrem (Kesiapsiagaan)',
+        steps: [
+          'Pangkas ranting dan dahan pohon yang rimbun atau rapuh di dekat atap rumah dan kabel listrik.',
+          'Periksa kekuatan rangka atap seng, genteng, dan pastikan papan reklame/antena terikat kuat.',
+          'Bersihkan talang air dan saluran drainase atap untuk menghindari luapan air hujan lebat ke plafon.',
+          'Pantau peringatan dini cuaca ekstrem harian melalui radar BMKG di aplikasi GeoAlert.'
         ]
       },
       {
-        heading: '📞 Nomor Darurat',
+        phase: 'during',
+        heading: '🚨 Saat Cuaca Ekstrem & Petir Terjadi',
         steps: [
-          'BMKG Info Cuaca: 021-6546315',
-          'Nomor Darurat Nasional: 112',
-          'PMI (Palang Merah): 021-7992325',
+          'Segera masuk ke dalam bangunan tertutup yang kokoh, jauhi jendela dan pintu kaca.',
+          'DILARANG KERAS berteduh di bawah pohon rindang tunggal, halte rapuh, atau dekat tiang listrik saat hujan petir.',
+          'Jika terperangkap angin puting beliung di luar, segera tiarap di saluran air kering atau cekungan tanah sambil melindungi kepala.',
+          'Lepaskan kabel stopkontak peralatan elektronik untuk mencegah kerusakan lonjakan arus akibat sambaran petir.'
+        ]
+      },
+      {
+        phase: 'after',
+        heading: '🟡 Sesudah Cuaca Ekstrem Mereda',
+        steps: [
+          'Waspadai kawat listrik yang putus bergelantungan atau terendam air — jangan disentuh sama sekali!',
+          'Periksa kondisi plafon dan struktur genteng yang retak sebelum beraktivitas kembali di dalam rumah.',
+          'Hindari berkendara melewati jalanan yang banyak tertutup ranting patah atau pohon tumbang yang belum dievakuasi.'
+        ]
+      }
+    ]
+  },
+
+  gunungapi: {
+    title: 'SOP Mitigasi Erupsi Gunung Api',
+    subtitle: 'Rujukan Standar Operasional Prosedur PVMBG (Pusat Vulkanologi) & BNPB',
+    icon: <Flame size={32} color="#DC2626" />,
+    color: '#DC2626',
+    category: 'Vulkanologi',
+    sections: [
+      {
+        phase: 'before',
+        heading: '🛡️ Sebelum Erupsi (Kesiapsiagaan Wilayah KRB)',
+        steps: [
+          'Ketahui tingkat aktivitas gunung api (Normal, Waspada, Siaga, Awas) dari PVMBG/Magma Indonesia.',
+          'Siapkan masker khusus partikel debu (N95/KN95) dan kacamata pelindung (*goggles*) di dalam Tas Siaga Bencana.',
+          'Ketahui batas radius bahaya (Kawasan Rawan Bencana) yang direkomendasikan dan titik kumpul evakuasi desa.',
+          'Tutup rapat tempat penampungan air bersih dan amankan pakan ternak dari paparan abu vulkanik.'
+        ]
+      },
+      {
+        phase: 'during',
+        heading: '🚨 Saat Erupsi Terjadi (Perlindungan Diri Instan)',
+        steps: [
+          'Segera kenakan masker, kacamata pelindung, baju lengan panjang, dan celana panjang untuk melindungi kulit dari abu panas.',
+          'SEGERA MENJAUH dari radius bahaya yang ditetapkan, jangan berada di lembah sungai yang berhulu di puncak gunung.',
+          'Waspadai awan panas (*wedhus gembel*) yang berkecepatan tinggi: segera bergerak menjauh tegak lurus arah luncuran.',
+          'Jika berada di dalam ruangan, tutup rapat seluruh ventilasi, pintu, dan jendela dengan kain basah untuk menyaring debu silika.'
+        ]
+      },
+      {
+        phase: 'after',
+        heading: '🟡 Sesudah Erupsi (Sanitasi & Waspada Lahar Dingin)',
+        steps: [
+          'Bersihkan timbunan abu vulkanik tebal dari atap rumah sesegera mungkin untuk mencegah atap ambruk karena beban berat.',
+          'Tetap gunakan masker saat beraktivitas di luar rumah selama abu vulkanik masih beterbangan ditiup angin.',
+          'Waspadai BAHAYA LAHAR DINGIN saat turun hujan lebat di hulu gunung — jauhi bantaran sungai!',
+          'Tunggu rekomendasi resmi PVMBG sebelum kembali ke pemukiman di sekitar kawasan lereng.'
         ]
       }
     ]
@@ -158,94 +265,147 @@ export default function MitigationModal({ type, onClose }) {
       onClick={onClose}
       style={{
         position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'rgba(14, 42, 92, 0.5)',
-        backdropFilter: 'blur(6px)',
+        background: 'rgba(14, 42, 92, 0.65)',
+        backdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '1rem',
         animation: 'fade-in-up 0.3s ease',
       }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="mitigation-modal-title"
     >
       <div
         onClick={e => e.stopPropagation()}
         style={{
           background: 'var(--color-white)',
-          borderRadius: 'var(--radius-xl)',
-          maxWidth: '680px',
+          borderRadius: '24px',
+          maxWidth: '720px',
           width: '100%',
-          maxHeight: '90vh',
+          maxHeight: '88vh',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 30px 80px rgba(14, 42, 92, 0.3)',
+          boxShadow: '0 30px 80px rgba(14, 42, 92, 0.35)',
+          border: '1px solid rgba(14, 42, 92, 0.12)'
         }}
       >
         {/* Modal Header */}
         <div style={{
-          padding: '1.5rem 2rem',
+          padding: '1.25rem 1.75rem',
           borderBottom: '1px solid var(--color-border)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          background: 'var(--color-bg)',
+          background: 'linear-gradient(to right, #F8FAFC, #F1F5F9)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ padding: '12px', background: 'white', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)' }}>
+            <div style={{ padding: '12px', background: 'white', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}>
               {data.icon}
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--color-primary)' }}>{data.title}</h3>
-              <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Sumber: BNPB & BMKG Indonesia</p>
+              <span style={{
+                display: 'inline-block', fontSize: '0.7rem', fontWeight: '700',
+                textTransform: 'uppercase', color: data.color, letterSpacing: '0.05em', marginBottom: '2px'
+              }}>
+                {data.category} • Standar SOP 3 Fase
+              </span>
+              <h3 id="mitigation-modal-title" style={{ margin: 0, fontSize: '1.25rem', color: 'var(--color-primary)', fontWeight: '800' }}>
+                {data.title}
+              </h3>
+              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{data.subtitle}</p>
             </div>
           </div>
           <button
             onClick={onClose}
             aria-label="Tutup panduan"
             style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--color-text-muted)', padding: '8px', borderRadius: '50%',
+              background: 'rgba(14,42,92,0.06)', border: 'none', cursor: 'pointer',
+              color: 'var(--color-primary)', padding: '8px', borderRadius: '50%',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'background 0.2s',
             }}
-            onMouseOver={e => e.target.style.background = 'var(--color-border)'}
-            onMouseOut={e => e.target.style.background = 'none'}
+            onMouseOver={e => e.currentTarget.style.background = 'rgba(14,42,92,0.14)'}
+            onMouseOut={e => e.currentTarget.style.background = 'rgba(14,42,92,0.06)'}
           >
-            <X size={24} />
+            <X size={20} />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div style={{ overflowY: 'auto', padding: '2rem', flex: 1 }}>
+        <div style={{ overflowY: 'auto', padding: '1.75rem', flex: 1 }}>
+          <div style={{
+            background: 'rgba(74,144,217,0.08)', borderRadius: '12px', padding: '10px 14px',
+            marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px',
+            fontSize: '0.825rem', color: '#0E2A5C', border: '1px solid rgba(74,144,217,0.2)'
+          }}>
+            <Info size={16} color="#0E2A5C" style={{ flexShrink: 0 }} />
+            <span>Panduan ini disusun berdasarkan protokol mitigasi resmi <strong>BNPB, BMKG, dan PVMBG</strong> untuk keselamatan warga.</span>
+          </div>
+
           {data.sections.map((section, si) => (
-            <div key={si} style={{ marginBottom: '2rem' }}>
-              <h4 style={{ color: 'var(--color-primary)', marginBottom: '1rem', fontSize: '1.1rem' }}>
+            <div key={si} style={{ marginBottom: '1.75rem' }}>
+              <h4 style={{
+                color: 'var(--color-primary)', marginBottom: '0.85rem', fontSize: '1.05rem',
+                fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px'
+              }}>
                 {section.heading}
               </h4>
-              <ol style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <ol style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {section.steps.map((step, i) => (
                   <li key={i} style={{
                     display: 'flex', gap: '12px', alignItems: 'flex-start',
-                    marginBottom: '10px', padding: '10px 14px',
-                    background: 'var(--color-bg)', borderRadius: 'var(--radius-md)',
-                    fontSize: '0.95rem', lineHeight: '1.5',
+                    padding: '10px 14px', background: '#F8FAFC', borderRadius: '12px',
+                    fontSize: '0.9rem', lineHeight: '1.55', border: '1px solid rgba(14,42,92,0.05)'
                   }}>
-                    <CheckCircle size={18} color={data.color} style={{ flexShrink: 0, marginTop: '2px' }} />
-                    <span>{step}</span>
+                    <span style={{
+                      width: '22px', height: '22px', borderRadius: '50%', background: 'white',
+                      border: `1.5px solid ${data.color}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '0.75rem', fontWeight: '700', color: data.color, flexShrink: 0, marginTop: '1px'
+                    }}>
+                      {i + 1}
+                    </span>
+                    <span style={{ color: '#1E293B', fontWeight: '500' }}>{step}</span>
                   </li>
                 ))}
               </ol>
             </div>
           ))}
+
+          {/* Emergency Hotline Alert Box inside Modal */}
+          <div style={{
+            padding: '12px 16px', background: '#FEF2F2', borderRadius: '14px',
+            border: '1px solid #FCA5A5', display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ShieldAlert size={18} color="#DC2626" />
+              <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#991B1B' }}>
+                Panggilan Darurat Bebas Pulsa: 112 / BASARNAS: 115
+              </span>
+            </div>
+            <a
+              href="tel:112"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                padding: '6px 14px', background: '#DC2626', color: 'white',
+                borderRadius: '20px', fontSize: '0.8rem', fontWeight: '700', textDecoration: 'none'
+              }}
+            >
+              <PhoneCall size={14} /> Hubungi 112
+            </a>
+          </div>
         </div>
 
         {/* Modal Footer */}
         <div style={{
-          padding: '1rem 2rem', borderTop: '1px solid var(--color-border)',
+          padding: '1rem 1.75rem', borderTop: '1px solid var(--color-border)',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           background: 'var(--color-bg)',
         }}>
-          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
+          <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
             Tekan <kbd style={{ padding: '2px 6px', border: '1px solid var(--color-border)', borderRadius: '4px', fontFamily: 'monospace' }}>Esc</kbd> untuk menutup
           </p>
-          <button className="btn btn-primary" onClick={onClose} style={{ padding: '0.5rem 1.5rem' }}>
-            Mengerti
+          <button className="btn btn-primary" onClick={onClose} style={{ padding: '0.6rem 1.75rem', borderRadius: '20px' }}>
+            Mengerti &amp; Siap
           </button>
         </div>
       </div>
