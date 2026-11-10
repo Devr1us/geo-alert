@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, MapPin, Sparkles } from 'lucide-react';
+import { ASSET_BASE } from '../config/baseUrl';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -84,7 +85,7 @@ export default function Navbar() {
 
         {/* Mobile Header Brand (Centered on mobile view) */}
         <Link to="/" className="nav-brand-mobile" aria-label="GeoAlert" onClick={() => setIsOpen(false)}>
-          <img src={`${import.meta.env.BASE_URL}logo-geoalert.svg`} alt="GeoAlert" className="nav-logo" />
+          <img src={`${ASSET_BASE}logo-geoalert.svg`} alt="GeoAlert" className="nav-logo" />
           <span className="nav-brand-text">GeoAlert</span>
         </Link>
 

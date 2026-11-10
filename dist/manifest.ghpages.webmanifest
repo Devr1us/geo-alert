@@ -1,0 +1,29 @@
+{
+  "name": "GeoAlert Indonesia",
+  "short_name": "GeoAlert",
+  "description": "Sistem peringatan dini bencana alam Indonesia real-time",
+  "start_url": "/GeoAlert/",
+  "display": "standalone",
+  "background_color": "#F7F2EA",
+  "theme_color": "#0E2A5C",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/GeoAlert/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["news", "utilities", "weather"],
+  "lang": "id",
+  "shortcuts": [
+    {
+      "name": "Peta Bencana",
+      "short_name": "Peta",
+      "description": "Buka peta bencana interaktif",
+      "url": "/GeoAlert/peta",
+      "icons": [{ "src": "/GeoAlert/favicon.svg", "sizes": "any" }]
+    }
+  ]
+}

@@ -28,7 +28,7 @@ class HandleExceptions
     /**
      * The application instance.
      *
-     * @var \Illuminate\Contracts\Foundation\Application
+     * @var \Illuminate\Contracts\Foundation\Application|null
      */
     protected static $app;
 
@@ -64,7 +64,7 @@ class HandleExceptions
      * @param  string  $message
      * @param  string  $file
      * @param  int  $line
-     * @return void
+     * @return false|void
      *
      * @throws \ErrorException
      */
@@ -74,6 +74,8 @@ class HandleExceptions
             $this->handleDeprecationError($message, $file, $line, $level);
         } elseif (error_reporting() & $level) {
             throw new ErrorException($message, 0, $level, $file, $line);
+        } else {
+            return false;
         }
     }
 
@@ -105,7 +107,9 @@ class HandleExceptions
 
             with($logger->channel('deprecations'), function ($log) use ($message, $file, $line, $level, $options) {
                 if ($options['trace'] ?? false) {
-                    $log->warning((string) new ErrorException($message, 0, $level, $file, $line));
+                    $log->warning($message, [
+                        'exception' => new ErrorException($message, 0, $level, $file, $line),
+                    ]);
                 } else {
                     $log->warning(sprintf('%s in %s on line %s',
                         $message, $file, $line

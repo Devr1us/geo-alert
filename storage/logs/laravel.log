@@ -946,3 +946,17 @@
 #43 E:/aziz/Lomba/GeoAlert/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('...')
 #44 {main}
 "} 
+[2026-11-10 13:52:50] local.ERROR: syntax error, unexpected token "{", expecting "," or ";" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"{\", expecting \",\" or \";\" at E:/GeoAlert/geo-alert/vendor/symfony/http-foundation/Request.php:117)
+[stacktrace]
+#0 E:/GeoAlert/geo-alert/vendor/composer/ClassLoader.php(427): Composer/Autoload/{closure}('E://GeoAlert//geo...')
+#1 E:/GeoAlert/geo-alert/vendor/laravel/framework/src/Illuminate/Http/Request.php(29): Composer/Autoload/ClassLoader->loadClass('Symfony//Compone...')
+#2 E:/GeoAlert/geo-alert/vendor/composer/ClassLoader.php(576): include('E://GeoAlert//geo...')
+#3 E:/GeoAlert/geo-alert/vendor/composer/ClassLoader.php(427): Composer/Autoload/{closure}('E://GeoAlert//geo...')
+#4 E:/GeoAlert/geo-alert/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/SetRequestForConsole.php(31): Composer/Autoload/ClassLoader->loadClass('Illuminate//Http...')
+#5 E:/GeoAlert/geo-alert/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(349): Illuminate/Foundation/Bootstrap/SetRequestForConsole->bootstrap(Object(Illuminate/Foundation/Application))
+#6 E:/GeoAlert/geo-alert/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(494): Illuminate/Foundation/Application->bootstrapWith(Array)
+#7 E:/GeoAlert/geo-alert/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(196): Illuminate/Foundation/Console/Kernel->bootstrap()
+#8 E:/GeoAlert/geo-alert/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1242): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#9 E:/GeoAlert/geo-alert/artisan(16): Illuminate/Foundation/Application->handleCommand(Object(Symfony/Component/Console/Input/ArgvInput))
+#10 {main}
+"} 

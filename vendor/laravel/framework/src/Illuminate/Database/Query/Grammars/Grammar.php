@@ -312,6 +312,20 @@ class Grammar extends BaseGrammar
     }
 
     /**
+     * Compile a "where binary" clause.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  array  $where
+     * @return string
+     *
+     * @throws \RuntimeException
+     */
+    protected function whereBinary(Builder $query, $where)
+    {
+        throw new RuntimeException('This database engine does not support binary comparison operations.');
+    }
+
+    /**
      * Compile a bitwise operator where clause.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
@@ -850,6 +864,29 @@ class Grammar extends BaseGrammar
     }
 
     /**
+     * Compile a vector distance expression for the given column.
+     *
+     * @param  string  $column
+     * @return string
+     *
+     * @throws \RuntimeException
+     */
+    public function compileVectorDistanceExpression($column)
+    {
+        throw new RuntimeException('This database engine does not support vector distance queries.');
+    }
+
+    /**
+     * Determine if the grammar supports vector distance queries.
+     *
+     * @return bool
+     */
+    public function supportsVectorDistance()
+    {
+        return false;
+    }
+
+    /**
      * Compile the "group by" portions of the query.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
@@ -1225,6 +1262,17 @@ class Grammar extends BaseGrammar
         $select = $this->compileSelect($query);
 
         return "select exists({$select}) as {$this->wrap('exists')}";
+    }
+
+    /**
+     * Compile an "exists" subquery as a selectable column.
+     *
+     * @param  string  $sql
+     * @return string
+     */
+    public function compileExistsColumn($sql)
+    {
+        return 'exists('.$sql.')';
     }
 
     /**

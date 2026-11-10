@@ -64,9 +64,16 @@ class TestResponse implements ArrayAccess
     /**
      * The streamed content of the response.
      *
-     * @var string
+     * @var string|null
      */
     protected $streamedContent;
+
+    /**
+     * The decoded response JSON.
+     *
+     * @var \Illuminate\Testing\AssertableJsonString|null
+     */
+    protected $decodedResponseJson;
 
     /**
      * Create a new test response instance.
@@ -1265,6 +1272,10 @@ class TestResponse implements ArrayAccess
      */
     public function decodeResponseJson()
     {
+        if (! is_null($this->decodedResponseJson)) {
+            return $this->decodedResponseJson;
+        }
+
         if ($this->baseResponse instanceof StreamedResponse ||
             $this->baseResponse instanceof StreamedJsonResponse) {
             $testJson = new AssertableJsonString($this->streamedContent());
@@ -1282,7 +1293,7 @@ class TestResponse implements ArrayAccess
             }
         }
 
-        return $testJson;
+        return $this->decodedResponseJson = $testJson;
     }
 
     /**

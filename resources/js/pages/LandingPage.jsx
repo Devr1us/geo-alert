@@ -3,12 +3,15 @@ import { Link } from 'react-router-dom';
 import {
   Map, Bell, Bot, Shield, ChevronRight, Activity, ArrowRight,
   Wind, Droplets, Mountain, ChevronDown, ChevronUp, MapPin, BellOff, RefreshCw,
-  Zap, Quote, Compass, MessageSquare, Clock,
+  Zap, Quote, Compass, MessageSquare, Clock, AlertTriangle, AlertOctagon, ShieldAlert
 } from 'lucide-react';
 import '../../css/LandingPage.css';
 import MitigationModal from '../components/MitigationModal';
 import RevealSection from '../components/RevealSection';
 import { BMKG_TERKINI_URL, BMKG_DIRASAKAN_URL } from '../config/bmkgApi';
+import { ASSET_BASE } from '../config/baseUrl';
+import { formatLocation } from '../utils/locationFormatter';
+import { evaluateRisk } from '../utils/riskEvaluator';
 
 // Count-up hook
 function useCountUp(end, duration = 2000) {
@@ -167,22 +170,33 @@ async function fetchBmkgEvents() {
     const coords = (g.Coordinates || '').split(',');
     const lat = parseFloat(coords[0]);
     const lng = parseFloat(coords[1]);
-    const mag = parseFloat(g.Magnitude);
-    let risk = 'standby';
-    if (mag >= 5) risk = 'warning';
-    if (mag >= 6) risk = 'danger';
+    
+    // Logika level risiko terpusat berdasar magnitudo, kedalaman, dan potensi tsunami
+    const riskInfo = evaluateRisk({
+      magnitude: g.Magnitude,
+      depth: g.Kedalaman,
+      potensi: g.Potensi,
+      dirasakan: g.Dirasakan,
+      type: 'Gempa Bumi'
+    });
+
+    // Format lokasi ramah publik: pisahkan arah mata angin, Title Case, singkatan provinsi
+    const formattedLocation = formatLocation(g.Wilayah);
+
     return {
       id: `bmkg-${idx}`,
       type: 'Gempa Bumi',
-      location: g.Wilayah || '',
+      location: formattedLocation,
+      rawLocation: g.Wilayah || '',
       lat: isNaN(lat) ? -2.5 : lat,
       lng: isNaN(lng) ? 117.5 : lng,
-      // Bug fix 2: tambahkan field time dari Tanggal + Jam (mengikuti pola MapPage.jsx)
       time: g.Tanggal && g.Jam ? `${g.Tanggal} ${g.Jam}` : '—',
-      risk,
+      risk: riskInfo.level,
+      riskLabel: riskInfo.label,
+      riskBadgeClass: riskInfo.badgeClass,
       magnitude: g.Magnitude,
-      // Bug fix 3: format Wilayah BMKG adalah "10 km BaratLaut KOTA-PROVINSI"
-      // bukan CSV — split koma salah. Ambil bagian setelah tanda "-" terakhir.
+      depth: g.Kedalaman,
+      potensi: g.Potensi,
       province: (() => {
         const wilayah = g.Wilayah || '';
         const lastDash = wilayah.lastIndexOf('-');
@@ -396,7 +410,7 @@ export default function LandingPage() {
       {/* =================== HERO =================== */}
       <section
         className="hero-section"
-        style={{ backgroundImage: `linear-gradient(rgba(247, 242, 234, 0.1), rgba(247, 242, 234, 0.2)), url("${import.meta.env.BASE_URL}images/Background utama.png")` }}
+        style={{ backgroundImage: `linear-gradient(rgba(247, 242, 234, 0.1), rgba(247, 242, 234, 0.2)), url("${ASSET_BASE}images/Background utama.png")` }}
       >
         <div className="container">
           <h1 className="hero-title hero-title-animated" style={{ fontSize: '4rem', fontWeight: '900' }}>
@@ -627,7 +641,7 @@ export default function LandingPage() {
             <RevealSection className="about-map-card" once={false}>
               <div className="map-card-graphic-wrapper">
                 <img
-                  src={`${import.meta.env.BASE_URL}images/INDONESIAN.png`}
+                  src={`${ASSET_BASE}images/INDONESIAN.png`}
                   alt="Indonesia Archipelago Map"
                   className="map-silhouette-img"
                 />
@@ -696,7 +710,7 @@ export default function LandingPage() {
       <RevealSection
         id="cara-penggunaan"
         className="how-to-use-white-section"
-        style={{ backgroundImage: `url("${import.meta.env.BASE_URL}images/bg-cara-penggunaan.jpg")`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
+        style={{ backgroundImage: `url("${ASSET_BASE}images/bg-cara-penggunaan.jpg")`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
         <div className="container relative z-10">
           <h2 className="how-to-use-heading">Cara Menggunakan GeoAlert</h2>
@@ -795,11 +809,30 @@ export default function LandingPage() {
                       </tr>
                     ))
                     : events.slice(0, 5).map((ev, i) => {
-                      const riskBadge = {
-                        danger: <span className="badge badge-danger">BAHAYA</span>,
-                        warning: <span className="badge badge-warning">WASPADA</span>,
-                        standby: <span className="badge badge-standby">SIAGA</span>,
-                      }[ev.risk] || <span className="badge badge-standby">SIAGA</span>;
+                      const riskBadge = (() => {
+                        if (ev.risk === 'danger') {
+                          return (
+                            <span className="badge badge-danger" aria-label="Tingkat Risiko: Bahaya Tinggi">
+                              <AlertOctagon size={13} aria-hidden="true" />
+                              <span>Bahaya Tinggi</span>
+                            </span>
+                          );
+                        }
+                        if (ev.risk === 'warning') {
+                          return (
+                            <span className="badge badge-warning" aria-label="Tingkat Risiko: Waspada">
+                              <AlertTriangle size={13} aria-hidden="true" />
+                              <span>Waspada</span>
+                            </span>
+                          );
+                        }
+                        return (
+                          <span className="badge badge-standby" aria-label="Tingkat Risiko: Siaga">
+                            <ShieldAlert size={13} aria-hidden="true" />
+                            <span>Siaga</span>
+                          </span>
+                        );
+                      })();
                       return (
                         <tr key={ev.id || i} className="recent-table-row">
                           <td className="mono" style={{ color: 'var(--color-primary)', fontWeight: '600' }}>

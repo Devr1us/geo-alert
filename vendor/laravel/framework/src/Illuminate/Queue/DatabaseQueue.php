@@ -5,6 +5,7 @@ namespace Illuminate\Queue;
 use Illuminate\Contracts\Queue\ClearableQueue;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Database\Connection;
+use Illuminate\Database\DetectsConcurrencyErrors;
 use Illuminate\Queue\Attributes\Delay;
 use Illuminate\Queue\Jobs\DatabaseJob;
 use Illuminate\Queue\Jobs\DatabaseJobRecord;
@@ -16,8 +17,12 @@ use Illuminate\Support\Stringable;
 use PDO;
 use Throwable;
 
+use function Illuminate\Support\enum_value;
+
 class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
 {
+    use DetectsConcurrencyErrors;
+
     /**
      * The database connection instance.
      *
@@ -79,7 +84,7 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
     /**
      * Get the size of the queue.
      *
-     * @param  string|null  $queue
+     * @param  \UnitEnum|string|null  $queue
      * @return int
      */
     public function size($queue = null)
@@ -92,7 +97,7 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
     /**
      * Get the number of pending jobs.
      *
-     * @param  string|null  $queue
+     * @param  \UnitEnum|string|null  $queue
      * @return int
      */
     public function pendingSize($queue = null)
@@ -107,7 +112,7 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
     /**
      * Get the number of delayed jobs.
      *
-     * @param  string|null  $queue
+     * @param  \UnitEnum|string|null  $queue
      * @return int
      */
     public function delayedSize($queue = null)
@@ -122,7 +127,7 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
     /**
      * Get the number of reserved jobs.
      *
-     * @param  string|null  $queue
+     * @param  \UnitEnum|string|null  $queue
      * @return int
      */
     public function reservedSize($queue = null)
@@ -134,9 +139,57 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
     }
 
     /**
+     * Get the number of jobs across every queue.
+     *
+     * @return int
+     */
+    public function totalSize()
+    {
+        return $this->database->table($this->table)->count();
+    }
+
+    /**
+     * Get the number of pending jobs across every queue.
+     *
+     * @return int
+     */
+    public function totalPendingSize()
+    {
+        return $this->database->table($this->table)
+            ->whereNull('reserved_at')
+            ->where('available_at', '<=', $this->currentTime())
+            ->count();
+    }
+
+    /**
+     * Get the number of delayed jobs across every queue.
+     *
+     * @return int
+     */
+    public function totalDelayedSize()
+    {
+        return $this->database->table($this->table)
+            ->whereNull('reserved_at')
+            ->where('available_at', '>', $this->currentTime())
+            ->count();
+    }
+
+    /**
+     * Get the number of reserved jobs across every queue.
+     *
+     * @return int
+     */
+    public function totalReservedSize()
+    {
+        return $this->database->table($this->table)
+            ->whereNotNull('reserved_at')
+            ->count();
+    }
+
+    /**
      * Get the pending jobs for the given queue.
      *
-     * @param  string|null  $queue
+     * @param  \UnitEnum|string|null  $queue
      * @return \Illuminate\Support\Collection<int, \Illuminate\Queue\Jobs\InspectedJob>
      */
     public function pendingJobs($queue = null): Collection
@@ -152,7 +205,7 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
     /**
      * Get the delayed jobs for the given queue.
      *
-     * @param  string|null  $queue
+     * @param  \UnitEnum|string|null  $queue
      * @return \Illuminate\Support\Collection<int, \Illuminate\Queue\Jobs\InspectedJob>
      */
     public function delayedJobs($queue = null): Collection
@@ -168,7 +221,7 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
     /**
      * Get the reserved jobs for the given queue.
      *
-     * @param  string|null  $queue
+     * @param  \UnitEnum|string|null  $queue
      * @return \Illuminate\Support\Collection<int, \Illuminate\Queue\Jobs\InspectedJob>
      */
     public function reservedJobs($queue = null): Collection
@@ -224,7 +277,7 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
     /**
      * Get the creation timestamp of the oldest pending job, excluding delayed jobs.
      *
-     * @param  string|null  $queue
+     * @param  \UnitEnum|string|null  $queue
      * @return int|null
      */
     public function creationTimeOfOldestPendingJob($queue = null)
@@ -242,7 +295,7 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
      *
      * @param  string  $job
      * @param  mixed  $data
-     * @param  string|null  $queue
+     * @param  \UnitEnum|string|null  $queue
      * @return mixed
      */
     public function push($job, $data = '', $queue = null)
@@ -262,7 +315,7 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
      * Push a raw payload onto the queue.
      *
      * @param  string  $payload
-     * @param  string|null  $queue
+     * @param  \UnitEnum|string|null  $queue
      * @param  array  $options
      * @return mixed
      */
@@ -277,7 +330,7 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
      * @param  \DateTimeInterface|\DateInterval|int  $delay
      * @param  string  $job
      * @param  mixed  $data
-     * @param  string|null  $queue
+     * @param  \UnitEnum|string|null  $queue
      * @return mixed
      */
     public function later($delay, $job, $data = '', $queue = null)
@@ -298,26 +351,61 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
      *
      * @param  array  $jobs
      * @param  mixed  $data
-     * @param  string|null  $queue
+     * @param  \UnitEnum|string|null  $queue
      * @return mixed
      */
     public function bulk($jobs, $data = '', $queue = null)
     {
         $queue = $this->getQueue($queue);
 
-        $now = $this->availableAt();
+        [$afterCommit, $immediate] = $this->partitionJobsByAfterCommit((array) $jobs);
 
-        return $this->database->table($this->table)->insert((new Collection((array) $jobs))->map(
-            function ($job) use ($queue, $data, $now) {
+        $result = null;
+
+        if (! empty($immediate) || empty($afterCommit)) {
+            $now = $this->availableAt();
+
+            $result = $this->database->table($this->table)->insert((new Collection($immediate))->map(
+                function ($job) use ($queue, $data, $now) {
+                    $delay = is_object($job) ? $this->getAttributeValue($job, Delay::class, 'delay') : null;
+
+                    return $this->buildDatabaseRecord(
+                        $queue,
+                        $this->createPayload($job, $this->getQueue($queue), $data),
+                        isset($delay) ? $this->availableAt($delay) : $now,
+                    );
+                }
+            )->all());
+        }
+
+        if (! empty($afterCommit)) {
+            foreach ($afterCommit as $job) {
+                $this->registerRollbackCallbacksForJobsThatDispatchAfterCommit($job);
+            }
+
+            $jobs = (new Collection($afterCommit))->map(function ($job) use ($queue, $data) {
                 $delay = is_object($job) ? $this->getAttributeValue($job, Delay::class, 'delay') : null;
 
-                return $this->buildDatabaseRecord(
-                    $queue,
-                    $this->createPayload($job, $this->getQueue($queue), $data),
-                    isset($delay) ? $this->availableAt($delay) : $now,
-                );
-            }
-        )->all());
+                return [
+                    'payload' => $this->createPayload($job, $this->getQueue($queue), $data),
+                    'delay' => $delay,
+                ];
+            })->all();
+
+            $this->container->make('db.transactions')->addCallback(function () use ($queue, $jobs) {
+                $now = $this->availableAt();
+
+                $this->database->table($this->table)->insert((new Collection($jobs))->map(
+                    fn ($job) => $this->buildDatabaseRecord(
+                        $queue,
+                        $job['payload'],
+                        isset($job['delay']) ? $this->availableAt($job['delay']) : $now,
+                    )
+                )->all());
+            });
+        }
+
+        return $result;
     }
 
     /**
@@ -336,7 +424,7 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
     /**
      * Push a raw payload to the database with a given delay of (n) seconds.
      *
-     * @param  string|null  $queue
+     * @param  \UnitEnum|string|null  $queue
      * @param  string  $payload
      * @param  \DateTimeInterface|\DateInterval|int  $delay
      * @param  int  $attempts
@@ -376,7 +464,7 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
     /**
      * Pop the next job off of the queue.
      *
-     * @param  string|null  $queue
+     * @param  \UnitEnum|string|null  $queue
      * @return \Illuminate\Contracts\Queue\Job|null
      *
      * @throws \Throwable
@@ -395,7 +483,7 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
             });
         } catch (Throwable $e) {
             // Potentially invalid job that we need to fail (#58978)...
-            if ($jobRecord) {
+            if ($jobRecord && ! $this->causedByConcurrencyError($e)) {
                 try {
                     (new DatabaseJob(
                         $this->container, $this, $jobRecord, $this->connectionName, $queue
@@ -570,7 +658,7 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
     /**
      * Delete all of the jobs from the queue.
      *
-     * @param  string|null  $queue
+     * @param  \UnitEnum|string|null  $queue
      * @return int
      */
     public function clear($queue = null)
@@ -583,12 +671,12 @@ class DatabaseQueue extends Queue implements QueueContract, ClearableQueue
     /**
      * Get the queue or return the default.
      *
-     * @param  string|null  $queue
+     * @param  \UnitEnum|string|null  $queue
      * @return string
      */
     public function getQueue($queue)
     {
-        return $queue ?: $this->default;
+        return $this->resolveQueue(enum_value($queue) ?: $this->default);
     }
 
     /**

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MessageSquare, Globe, CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { ASSET_BASE } from '../config/baseUrl';
 
 export default function Footer() {
   const [email, setEmail] = useState('');
@@ -48,7 +49,7 @@ export default function Footer() {
           {/* Column 1: Brand Info & Social Icons */}
           <div className="footer-brand-col">
             <Link to="/" className="footer-logo-wrap">
-              <img src={`${import.meta.env.BASE_URL}logo-geoalert.svg`} alt="GeoAlert" className="footer-logo-img" />
+              <img src={`${ASSET_BASE}logo-geoalert.svg`} alt="GeoAlert" className="footer-logo-img" />
               <span className="footer-brand-title">GeoAlert</span>
             </Link>
             

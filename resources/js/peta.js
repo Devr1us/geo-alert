@@ -135,13 +135,27 @@
       const coords = g.Coordinates ? g.Coordinates.split(',').map(Number) : null;
       if (!coords || coords.length < 2) return;
       const magnitude = parseFloat(g.Magnitude) || 0;
+      const depthKm = parseFloat(g.Kedalaman) || 10;
+      const potensi = (g.Potensi || '').toLowerCase();
+      const hasTsunami = potensi.includes('tsunami') && !potensi.includes('tidak berpotensi');
+
       let risk = 'siaga';
-      if (magnitude >= 6.0) risk = 'danger';
-      else if (magnitude >= 5.0) risk = 'warning';
+      if (hasTsunami || magnitude >= 7.0 || (magnitude >= 6.0 && depthKm <= 50)) {
+        risk = 'danger';
+      } else if ((magnitude >= 6.0 && depthKm <= 300) || (magnitude >= 5.0 && depthKm <= 50)) {
+        risk = 'warning';
+      }
+
+      // Format nama lokasi rapi
+      let rawLoc = (g.Wilayah || 'Tidak diketahui')
+        .replace(/\bBaratLaut\b/gi, 'Barat Laut')
+        .replace(/\bBaratDaya\b/gi, 'Barat Daya')
+        .replace(/\bTimurLaut\b/gi, 'Timur Laut');
+
       earthquakes.push({
         type: 'gempa',
         label: 'Gempa Bumi',
-        location: g.Wilayah || 'Tidak diketahui',
+        location: rawLoc,
         coords: [coords[0], coords[1]],
         time: `${g.Tanggal}, ${g.Jam}`,
         magnitude: g.Magnitude,
@@ -152,9 +166,13 @@
         severity: `M${g.Magnitude} — ${g.Kedalaman}`,
         risk: risk,
         source: source,
-        action: magnitude >= 6.0
-          ? 'Segera berlindung di bawah meja atau furnitur kokoh. Jauhi jendela dan benda berat yang dapat jatuh. Setelah guncangan berhenti, segera keluar ke area terbuka.'
-          : 'Tetap tenang dan waspada. Perhatikan instruksi dari BMKG. Jauhi bangunan yang terlihat rusak. Siapkan tas darurat.',
+        action: risk === 'danger'
+          ? (hasTsunami
+              ? 'BAHAYA TSUNAMI: Segera evakuasi ke tempat tinggi (>20 meter)! Jauhi pantai dan bantaran sungai.'
+              : 'Segera berlindung di bawah meja kokoh. Jauhi jendela dan benda berat. Keluar ke area terbuka setelah guncangan reda.')
+          : (risk === 'warning'
+              ? 'Tetap tenang dan waspada. Jauhi bangunan yang terlihat retak. Siapkan tas siaga bencana.'
+              : 'Kondisi relatif stabil. Pantau informasi resmi BMKG.'),
         isSample: false
       });
     });

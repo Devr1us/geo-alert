@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, AlertTriangle, RefreshCw, Activity, Droplets, Wind, Mountain, Bot, Map as MapIcon, Info, X } from 'lucide-react';
+import { Search, AlertTriangle, AlertOctagon, ShieldAlert, RefreshCw, Activity, Droplets, Wind, Mountain, Bot, Map as MapIcon, Info, X } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -8,6 +8,8 @@ import '../../css/LandingPage.css';
 import AIChat from '../components/AIChat';
 import RevealSection from '../components/RevealSection';
 import { BMKG_TERKINI_URL, BMKG_DIRASAKAN_URL } from '../config/bmkgApi';
+import { formatLocation } from '../utils/locationFormatter';
+import { evaluateRisk } from '../utils/riskEvaluator';
 
 // Fix for default leaflet icons in React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -190,29 +192,42 @@ export default function MapPage() {
         .map(time => allGempa.find(g => g.DateTime === time));
 
       const formattedData = uniqueGempa.map((g, index) => {
-        const coords = g.Coordinates.split(',');
+        const coords = (g.Coordinates || '').split(',');
         const lat = parseFloat(coords[0]);
         const lng = parseFloat(coords[1]);
-        const mag = parseFloat(g.Magnitude);
-        let risk = 'standby';
-        if (mag >= 5) risk = 'warning';
-        if (mag >= 6) risk = 'danger';
+
+        // Logika level risiko terpusat
+        const riskInfo = evaluateRisk({
+          magnitude: g.Magnitude,
+          depth: g.Kedalaman,
+          potensi: g.Potensi,
+          dirasakan: g.Dirasakan,
+          type: 'Gempa Bumi'
+        });
+
+        // Format lokasi terpusat (arah mata angin, Title Case, mapping provinsi)
+        const formattedLoc = formatLocation(g.Wilayah);
 
         return {
           id: `bmkg-${index}`,
           type: 'Gempa Bumi',
-          location: g.Wilayah,
+          location: formattedLoc,
+          rawLocation: g.Wilayah || '',
           lat: isNaN(lat) ? -2.5 : lat,
           lng: isNaN(lng) ? 117.5 : lng,
           time: `${g.Tanggal} ${g.Jam}`,
-          risk,
+          risk: riskInfo.level,
+          riskLabel: riskInfo.label,
           magnitude: g.Magnitude,
           depth: g.Kedalaman,
-          step: mag >= 6
-            ? 'BAHAYA: Segera berlindung! Jauhi bangunan rapuh. Jika di pesisir, evakuasi ke dataran tinggi segera!'
-            : mag >= 5
-            ? 'Berlindung di bawah meja kuat. Jauhi kaca dan perabotan. Waspada gempa susulan.'
-            : 'Tetap tenang. Pantau informasi resmi BMKG. Tidak berpotensi tsunami.',
+          potensi: g.Potensi,
+          step: riskInfo.level === 'danger'
+            ? (riskInfo.reason.toLowerCase().includes('tsunami')
+                ? 'BAHAYA TSUNAMI: Segera evakuasi ke tempat tinggi (>20 m)! Jauhi pantai dan sungai.'
+                : 'BAHAYA TINGGI: Segera berlindung di bawah meja kokoh! Jauhi bangunan rapuh dan kaca.')
+            : riskInfo.level === 'warning'
+            ? 'WASPADA: Berlindung di bawah meja kuat. Jauhi perabot tinggi. Waspada gempa susulan.'
+            : 'SIAGA: Tetap tenang dan pantau informasi resmi BMKG. Pastikan akses pintu terbuka.',
           isSample: false,
         };
       });
@@ -223,8 +238,8 @@ export default function MapPage() {
       console.error('[GeoAlert] Gagal mengambil data BMKG:', err.message);
       setError(`Gagal memuat data BMKG: ${err.message}. Menampilkan contoh tampilan data.`);
       setData([
-        { id: 's1', type: 'Gempa Bumi', location: 'Selatan Jawa Barat', lat: -7.5, lng: 107.0, time: '(contoh data)', risk: 'danger', magnitude: '5.2', depth: '10 km', step: 'Berlindung di bawah meja kuat.', isSample: true },
-        { id: 's4', type: 'Gempa Bumi', location: 'Palu, Sulawesi Tengah', lat: -0.9, lng: 119.87, time: '(contoh data)', risk: 'standby', magnitude: '4.1', depth: '30 km', step: 'Tetap tenang.', isSample: true },
+        { id: 's1', type: 'Gempa Bumi', location: formatLocation('Selatan Jawa Barat'), lat: -7.5, lng: 107.0, time: '(contoh data)', risk: 'danger', magnitude: '6.2', depth: '10 km', step: 'Berlindung di bawah meja kuat.', isSample: true },
+        { id: 's4', type: 'Gempa Bumi', location: formatLocation('Palu, Sulawesi Tengah'), lat: -0.9, lng: 119.87, time: '(contoh data)', risk: 'standby', magnitude: '4.1', depth: '30 km', step: 'Tetap tenang.', isSample: true },
         ...SAMPLE_FLOOD_LANDSLIDE,
       ]);
       setIsSampleData(true);
@@ -273,9 +288,28 @@ export default function MapPage() {
   };
 
   const getRiskLabel = (risk) => {
-    if (risk === 'danger') return <span className="badge badge-danger">BAHAYA</span>;
-    if (risk === 'warning') return <span className="badge badge-warning">WASPADA</span>;
-    return <span className="badge badge-standby">SIAGA</span>;
+    if (risk === 'danger') {
+      return (
+        <span className="badge badge-danger" aria-label="Tingkat Risiko: Bahaya Tinggi">
+          <AlertOctagon size={13} aria-hidden="true" />
+          <span>Bahaya Tinggi</span>
+        </span>
+      );
+    }
+    if (risk === 'warning') {
+      return (
+        <span className="badge badge-warning" aria-label="Tingkat Risiko: Waspada">
+          <AlertTriangle size={13} aria-hidden="true" />
+          <span>Waspada</span>
+        </span>
+      );
+    }
+    return (
+      <span className="badge badge-standby" aria-label="Tingkat Risiko: Siaga">
+        <ShieldAlert size={13} aria-hidden="true" />
+        <span>Siaga</span>
+      </span>
+    );
   };
 
   const getIcon = (type) => {

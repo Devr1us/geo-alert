@@ -3,79 +3,139 @@ import {
   Bot, Send, RefreshCw, Paperclip, Camera, ChevronDown,
   RotateCcw, Sparkles, ShieldCheck
 } from 'lucide-react';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
+
+// Konfigurasi renderer marked: pastikan link selalu target _blank dan rel noopener noreferrer
+const markedRenderer = new marked.Renderer();
+markedRenderer.link = ({ href, title, text }) => {
+  const titleAttr = title ? ` title="${title}"` : '';
+  return `<a href="${href}" target="_blank" rel="noopener noreferrer"${titleAttr}>${text}</a>`;
+};
+
+marked.setOptions({
+  renderer: markedRenderer,
+  breaks: true,
+  gfm: true,
+});
+
+/**
+ * Sanitasi HTML hasil render markdown dengan DOMPurify
+ */
+function renderMarkdown(rawText) {
+  if (!rawText) return '';
+  const rawHtml = marked.parse(rawText);
+  return DOMPurify.sanitize(rawHtml, {
+    ADD_ATTR: ['target', 'rel'],
+  });
+}
 
 // Keyword-based AI response engine with realistic logical reasoning (BMKG & BNPB Official Guidance)
 const AI_RESPONSES = [
   {
-    keywords: ['halo', 'hai', 'helo', 'pagi', 'siang', 'sore', 'malam', 'siapa kamu', 'siapa anda', 'tentang ai', 'siapa ini', 'apa kabar'],
-    answer: `Salam! Saya **GeoAlert AI**, asisten cerdas kesiapsiagaan dan mitigasi bencana alam Indonesia.\n\nSaya mengintegrasikan data real-time dari **BMKG & BNPB** untuk memberikan saran yang praktis, logis, dan berbasis sains:\n\n1. 🚨 **Analisis Risiko & Prosedur Keselamatan:** Gempa bumi, Tsunami, Banjir, Longsor, & Cuaca Ekstrem.\n2. 🎒 **Panduan Kesiapsiagaan:** Penyusunan Tas Siaga Bencana (TSB) & Rencana Evakuasi.\n3. 📞 **Akses Kontak Darurat:** Menghubungkan ke BPBD, BASARNAS (115), Damkar (113), & Ambulans (118/119).\n\n*Ada situasi atau pertanyaan spesifik yang ingin Anda konsultasikan hari ini?*`
-  },
-  {
     keywords: ['terima kasih', 'terimakasih', 'makasih', 'thanks', 'thank you', 'ok', 'oke', 'sip', 'mantap', 'keren'],
-    answer: `Sama-sama! Tetap waspada dan utamakan keselamatan keluarga Anda.\n\n💡 **Tips Logis Hari Ini:** Simpan nomor panggilan darurat **112** dan **115** di kontak panggilan cepat (*speed dial*) ponsel Anda, serta pastikan Tas Siaga Bencana (TSB) sudah siap di dekat pintu keluar utama.\n\n*Jika ada pertanyaan mitigasi lainnya, saya siap membantu kapan saja!*`
+    answer: `Sama-sama! Tetap waspada dan utamakan keselamatan diri serta keluarga.\n\n💡 **Tips Keselamatan Hari Ini:**\n1. Simpan nomor darurat **112** dan **115** pada panggilan cepat ponsel Anda.\n2. Pastikan Tas Siaga Bencana (TSB) siap di dekat akses pintu keluar utama.\n\n*Jika ada pertanyaan mitigasi lainnya, saya siap membantu kapan saja!*`
   },
   {
     keywords: ['tidur', 'kasur', 'kamar', 'malam hari', 'tempat tidur'],
-    answer: `🛌 **Logika Keselamatan Gempa Saat Berada di Tempat Tidur:**\n\n**Mengapa Jangan Langsung Lari Keluar?**\nDalam kegelapan atau kondisi panik malam hari, berlari di tengah guncangan justru meningkatkan risiko tertimpa plafon, benda jatuh, atau terpleset patah tulang.\n\n**Langkah Logis & Efektif (SOP BMKG):**\n1. 🛡️ **Merunduk & Lindungi Kepala:** Jangan berdiri! Tetap di tempat tidur, tengkurap, dan lindungi kepala & leher dengan bantal tebal.\n2. 🛏️ **Posisi Samping Kasur:** Jika atap/plafon terlihat ringkih, bergulinglah ke lantai di samping kasur (posisi *triangle of life*).\n3. 🔦 **Senter Tampak Tempat Tidur:** Selalu siapkan senter kecil di dekat kasur (bukan HP yang mudah terselip).\n4. 🚪 **Buka Pintu Kamar:** Setelah guncangan mereda, segera buka pintu kamar karena struktur dinding yang bergeser dapat mengunci engsel pintu.`
+    answer: `🛌 **Panduan Keselamatan Gempa Saat di Tempat Tidur (SOP BMKG):**\n\nJangan panik berlari keluar di tengah guncangan karena risiko tinggi tertimpa reruntuhan plafon atau terjatuh.\n\n**Langkah Tindakan:**\n1. **Lindungi Kepala:** Tetap di tempat tidur, posisi tengkurap, lindungi kepala dan leher dengan bantal tebal.\n2. **Posisi Samping Kasur:** Jika atap ringkih, segera turun ke samping ranjang (posisi *triangle of life*).\n3. **Siapkan Senter:** Selalu letakkan senter kecil dekat tempat tidur untuk penerangan saat listrik padam.\n4. **Buka Pintu:** Setelah guncangan mereda, segera buka pintu kamar sebelum kusen terkunci akibat pergeseran dinding.`
   },
   {
     keywords: ['mobil', 'motor', 'kendaraan', 'jalan raya', 'mengemudi', 'menyetir'],
-    answer: `🚗 **Logika Keselamatan Gempa Saat Mengemudi:**\n\n**Analisis Risiko:** Guncangan gempa merusak kestabilan kemudi, membuat permukaan jalan bergelombang/retak, serta berisiko merobohkan flyover atau tiang listrik.\n\n**Prosedur Tindakan Logis:**\n1. 🛑 **Tepi & Hentikan Kendaraan:** Nyalakan lampu hazard, perlambat kecepatan, dan tepi kendaraan di area terbuka (jauhi jembatan, flyover, tiang listrik, & pohon besar).\n2. 🔑 **Tinggalkan Kunci di Dalam:** Matikan mesin dan tarik rem tangan. Biarkan kunci tetap di dalam mobil agar tim evakuasi dapat memindahkan kendaraan jika terjadi kondisi darurat.\n3. 📱 **Tetap di Dalam Kabin:** Kabin mobil memberikan perlindungan dari reruntuhan kecil hingga guncangan mereda.\n4. 🌊 **Jauhi Pesisir:** Jika mengemudi di dekat pantai dan merasakan guncangan kuat, segera tinggalkan mobil dan lari ke dataran tinggi.`
+    answer: `🚗 **Prosedur Keselamatan Gempa Saat Mengemudi:**\n\n1. **Tepi & Hentikan Kendaraan:** Nyalakan lampu hazard, perlambat laju, dan berhenti di area terbuka (jauhi flyover, jembatan, tiang listrik, dan papan reklame).\n2. **Tarik Rem Tangan:** Matikan mesin, pasang rem tangan, dan tinggalkan kunci kontak di dalam agar mobil dapat digeser petugas evakuasi darurat.\n3. **Tetap di Dalam Kabin:** Lindungi diri di dalam kabin mobil sampai getaran berhenti total.\n4. **Waspada Pantai:** Jika berkendara di pesisir dan guncangan kuat, segera tinggalkan kendaraan dan evakuasi ke tempat tinggi.`
   },
   {
     keywords: ['gedung', 'bertingkat', 'lantai', 'lift', 'tangga darurat'],
-    answer: `🏢 **Logika Keselamatan Gempa di Gedung Tinggi:**\n\n**Mengapa Lift Dilarang Keras?**\nSaat gempa, aliran listrik gedung sering mati otomatis (*power outage*) atau rel jalur lift mengalami deformasi. Menggunakan lift berisiko tinggi terjebak di dalam relik hampa udara.\n\n**Langkah Logis & Terstruktur:**\n1. 🛡️ **Duck, Cover, Hold On:** Jangan panik berlari ke pintu keluar. Segera merunduk di bawah meja kantor yang kokoh dan pegang kaki meja.\n2. 🪟 **Jauhi Kaca Jendela:** Dinding kaca gedung tinggi rentan pecah akibat gaya geser guncangan.\n3. 🏃 **Gunakan Tangga Darurat:** Setelah guncangan berhenti total, evakuasi secara tertib melalui tangga darurat tanpa membawa barang berat.\n4. 🌳 **Titik Kumpul (Assembly Point):** Menjauhlah dari dinding luar gedung untuk menghindari jatuhnya pecahan kaca atau ornamen dinding.`
+    answer: `🏢 **Prosedur Keselamatan Gempa di Gedung Bertingkat:**\n\n⚠️ **DILARANG MENGGUNAKAN LIFT!** Lift berisiko macet seketika akibat pemadaman listrik otomatis atau deformasi rel sangkar.\n\n**Langkah Cepat:**\n1. **Drop, Cover, Hold On:** Merunduk di bawah meja kokoh, lindungi kepala, dan pegang erat kaki meja.\n2. **Jauhi Dinding Kaca:** Hindari jendela kaca luar yang rentan pecah akibat gaya geser guncangan.\n3. **Gunakan Tangga Darurat:** Setelah guncangan selesai, turun melalui tangga darurat secara tertib tanpa saling mendorong.\n4. **Menuju Titik Kumpul:** Jauhi area luar gedung untuk menghindari jatuhnya pecahan kaca dan dinding ornamen.`
   },
   {
     keywords: ['magnitudo', 'kedalaman', 'skala richter', 'dangkal', 'dalam', 'kerusakan'],
-    answer: `📊 **Logika & Fisika Kebencanaan: Mengapa Kedalaman Gempa Sangat Menentukan Kerusakan?**\n\nDua gempa dengan Magnitudo yang sama (misal 6.0 M) bisa memberikan dampak yang sangat berbeda di permukaan:\n\n• 🔴 **Gempa Dangkal (< 30 km):** Energi gempa dilepaskan dekat permukaan tanah. Gelombang seismik belum teredam sehingga guncangan sangat destruktif terhadap fondasi bangunan.\n• 🟡 **Gempa Menengah (30 - 300 km):** Guncangan terasa di area yang luas, namun tingkat kerusakan fisik cenderung sedang.\n• 🟢 **Gempa Dalam (> 300 km):** Energi gempa sebagian besar terserap oleh mantel bumi sehingga jarang merusak struktur di permukaan.\n\n💡 **Kesimpulan Logis:** Nilai Skala Magnitudo mengukur energi awal pusat gempa, sedangkan **Kedalaman + Jarak Episentrum** menentukan seberapa kuat guncangan yang sebenarnya merusak rumah Anda.`
+    answer: `📊 **Pengaruh Kedalaman Gempa Terhadap Tingkat Kerusakan:**\n\n1. 🔴 **Gempa Dangkal (< 50 km):** Energi gempa dilepaskan dekat permukaan tanah sehingga guncangan sangat merusak fondasi dan bangunan.\n2. 🟡 **Gempa Menengah (50 - 300 km):** Getaran dirasakan luas, namun dampak kerusakan fisik di permukaan relatif sedang.\n3. 🟢 **Gempa Dalam (> 300 km):** Sebagian besar energi seismik teredam oleh mantel bumi sehingga jarang menimbulkan kerusakan di permukaan.\n\n💡 **Kesimpulan:** Magnitudo mengukur energi di pusat gempa, sedangkan kedalaman dan jarak episentrum menentukan keparahan dampak di pemukiman.`
   },
   {
     keywords: ['tsunami', 'ombak', 'pantai', 'surut', '20-20-20'],
-    answer: `🌊 **Prinsip Logika Evakuasi Tsunami: Aturan Gold Standard 20-20-20**\n\nJika Anda berada di pesisir pantai dan merasakan gempa bumi:\n\n1. ⏱️ **20 Detik Guncangan:** Jika gempa berlangsung kuat selama 20 detik atau lebih (hingga Anda kesulitan berdiri).\n2. 🏃 **20 Menit Evakuasi:** Anda memiliki waktu emas (*golden window*) sekitar 20 menit sebelum gelombang tsunami pertama mencapai daratan.\n3. ⛰️ **20 Meter Ketinggian:** Segera lari menuju lokasi dengan ketinggian minimal 20 meter di atas permukaan laut atau ke Bangunan Evakuasi Sementara (TES).\n\n**Logika Air Surut:** Surutnya air laut drastis adalah tanda gelombang pertama sedang ditarik oleh palung laut. **Jangan terpancing melihat ikan terdampar**, segera lari ke tempat tinggi tanpa menunggu bunyi sirine!`
+    answer: `🌊 **Prinsip Evakuasi Tsunami — Aturan Emas 20-20-20:**\n\nJika berada di pesisir pantai dan merasakan gempa bumi kuat:\n1. ⏱️ **20 Detik Guncangan:** Jika gempa berlangsung kuat selama 20 detik atau lebih hingga sulit berdiri.\n2. 🏃 **20 Menit Evakuasi:** Waktu emas evakuasi sekitar 20 menit sebelum gelombang pertama mencapai daratan.\n3. ⛰️ **20 Meter Ketinggian:** Segera lari menuju dataran dengan ketinggian minimal 20 meter dpl atau Tempat Evakuasi Sementara (TES).\n\n⚠️ **Penting:** Jika air laut surut tiba-tiba, jangan mendekat untuk melihat ikan terdampar. Segera evakuasi ke tempat tinggi tanpa menunggu sirine!`
   },
   {
     keywords: ['banjir', 'flood', 'listrik', 'ular', 'setrum', 'genangan'],
-    answer: `🔵 **Logika Keselamatan Banjir & Bahaya Tersembunyi:**\n\n**1. Risiko Penyetruman (Electrocuting):**\nAir banjir mengandung mineral yang menjadikannya konduktor listrik kuat. Sebelum genangan masuk rumah, **segera matikan sakelar MCB utama di meteran listrik**.\n\n**2. Risiko Arus Deras (Hydrodynamics):**\nKedalaman air 15 cm yang mengalir memiliki gaya dorong hidrodinamis yang sanggup menjatuhkan orang dewasa. Kedalaman 50 cm dapat mengapungkan mobil. Hindari menerobos genangan air mengalir.\n\n**3. Ancaman Hewan Berbisa:**\nSaat banjir, sarang ular dan kelabang terendam sehingga mereka mencari tempat kering (masuk ke dalam rumah/celah barang). Gunakan tongkat saat memeriksa tumpukan barang basah.`
+    answer: `🔵 **Langkah Keselamatan Bahaya Banjir:**\n\n1. ⚡ **Bahaya Listrik:** Matikan sakelar MCB utama meteran listrik sebelum air masuk ke dalam rumah.\n2. 🌊 **Arus Air Mengalir:** Hindari menerobos genangan air mengalir setinggi 15 cm ke atas karena sanggup menjatuhkan orang dewasa.\n3. 🐍 **Ancaman Hewan Berbisa:** Waspadai ular atau serangga yang mencari tempat kering di tumpukan perabotan basah. Gunakan tongkat kayu saat memeriksa.\n4. 📞 **Panggilan Darurat:** Hubungi **112** atau BPBD setempat jika air terus meningkat melampaui ambang batas aman.`
   },
   {
     keywords: ['longsor', 'tanah longsor', 'lereng', 'retakan', 'tebing', 'miring'],
-    answer: `🟠 **Logika & Geometri Evakuasi Tanah Longsor:**\n\n**Tanda-Tanda Geologis Sebelum Longsor:**\n• Muncul retakan lengkung pada permukaan tanah atau tebing.\n• Pintu dan jendela rumah mulai sulit dibuka (indikasi fondasi tanah mulai miring/bergeser).\n• Air sumur mendadak keruh atau muncul mata air baru membawa lumpur.\n\n**Arah Evakuasi Logis:**\n⚠️ **Berlari Tegak Lurus (Siku-siku) Sisi Lereng!** Berlari searah luncuran material longsor sangat berbahaya karena kecepatan longsoran dapat mencapai >50 km/jam. Lari menyamping menghindari koridor luncuran tanah.`
+    answer: `🟠 **Panduan Evakuasi Tanah Longsor:**\n\n**Tanda-Tanda Awal:**\n1. Muncul retakan tanah melengkung pada lereng atau jalan.\n2. Pintu/jendela rumah mendadak seret atau sulit dibuka karena fondasi bergeser.\n3. Air sumur mendadak keruh atau muncul mata air baru berlumpur.\n\n**Arah Evakuasi:**\n⚠️ **Lari Tegak Lurus (Menyamping) dari Jalur Luncuran!** Jangan berlari searah luncuran longsoran karena kecepatannya bisa mencapai lebih dari 50 km/jam.`
   },
   {
     keywords: ['cuaca', 'angin', 'puting beliung', 'petir', 'pohon', 'badai', 'topan'],
-    answer: `⚡ **Logika Keselamatan Cuaca Ekstrem & Badai Petir:**\n\n**1. Petir & Bangunan:**\nPetir selalu mencari jalur konduktif terpendek menuju tanah (objek tertinggi). **Dilarang berteduh di bawah pohon rindang tunggal**, tiang besi, atau berada di lapangan terbuka saat hujan deras.\n\n**2. Angin Puting Beliung:**\nJika terperangkap angin kencang di luar ruangan, tiaraplah di cekungan tanah/parit kering dan lindungi kepala Anda. Jauhi atap seng, papan reklame, dan perabotan melayang.\n\n**3. Keamanan Elektronik:**\nCabut stop kontak listrik utama dan lepas kabel sambungan antena untuk mencegah kerusakan akibat lonjakan arus listrik (*power surge*) dari petir.`
+    answer: `⚡ **Langkah Keselamatan Cuaca Ekstrem & Petir:**\n\n1. 🚫 **Jauhi Pohon & Tiang:** Dilarang keras berteduh di bawah pohon tunggal atau tiang besi di tempat terbuka saat hujan deras.\n2. 🌪️ **Angin Puting Beliung:** Jika di luar ruangan, segera tiarap di cekungan tanah atau parit kering sambil melindungi kepala.\n3. 🔌 **Cabut Stopkontak:** Lepaskan kabel alat elektronik dan antena untuk menghindari bahaya lonjakan arus akibat petir.`
   },
   {
     keywords: ['tas siaga', 'tas darurat', 'emergency kit', 'perlengkapan', 'tsb', '72 jam'],
-    answer: `🎒 **Logika Penyusunan Tas Siaga Bencana (TSB) 72 Jam:**\n\n**Prinsip 72 Jam:** Berdasarkan data BNPB, 72 jam pertama adalah waktu kritis yang dibutuhkan tim SAR gabungan untuk mencapai lokasi bencana dan mendistribusikan bantuan logistik awal.\n\n**Isi Utama & Logika Penyusunan:**\n1. 💧 **Air & Makanan:** Minimal 3 Liter air/orang + makanan siap makan berkalori tinggi (biskuit/makanan kaleng).\n2. 📄 **Dokumen Kedap Air:** Simpan fotokopi KTP, KK, Ijazah, & dokumen berharga dalam kantong plastik *ziplock* ganda.\n3. 🩺 **Obat-obatan Khusus:** Stok obat pribadi selama 7 hari (asma, diabetes, atau hipertensi).\n4. 🔦 **Alat Komunikasi Non-Internet:** Senter LED, radio FM portabel, powerbank terisi penuh, & peluit darurat (frekuensi suara peluit menembus reruntuhan jauh lebih efektif dibanding berteriak).\n\n*Rekomendasi:* Gantung TSB tepat di dekat pintu keluar utama rumah agar mudah disambar saat evakuasi!`
+    answer: `🎒 **Isi Wajib Tas Siaga Bencana (TSB) untuk 72 Jam Pertama:**\n\n1. 💧 **Air & Makanan:** Minimal 3 liter air/orang dan makanan siap santap berkalori tinggi (biskuit, makanan kaleng).\n2. 📄 **Dokumen Penting:** Salinan identitas, KK, dan ijazah dalam kantong plastik ziplock kedap air.\n3. 🩺 **Kotak P3K & Obat Khusus:** Obat pribadi untuk 7 hari (asma, hipertensi, diabetes) dan perban antiseptik.\n4. 🔦 **Peralatan Darurat:** Senter LED, baterai cadangan, peluit darurat, radio portabel, dan powerbank.\n\n💡 Gantung TSB di dekat pintu keluar agar mudah dibawa saat evakuasi mendesak.`
   },
   {
     keywords: ['nomor darurat', 'telepon darurat', 'kontak', 'hubungi', 'call center', '112', '115', '118', 'basarnas'],
-    answer: `📞 **Daftar Nomor Panggilan Darurat Resmi Indonesia:**\n\n• 🚨 **112** — Layanan Darurat Tunggal Bebas Pulsa (Dapat dihubungi tanpa SIM card)\n• 🌊 **115** — BASARNAS (Pencarian & Pertolongan Korban Bencana)\n• 🏥 **118 / 119** — Ambulans & Layanan Kesehatan Kemenkes\n• 🔥 **113** — Pemadam Kebakaran (Damkar)\n• 👮 **110** — Kepolisian Republik Indonesia\n• 🌋 **0800-1000-3000** — Posko BNPB Pusat\n• 🌤️ **196** — BMKG Call Center\n\n💡 **Tips Keselamatan:** Simpan nomor **112** dan **115** pada panggilan cepat (*speed dial*) ponsel Anda sekarang juga!`
+    answer: `📞 **Daftar Nomor Panggilan Darurat Nasional Resmi Indonesia:**\n\n1. 🚨 **112** — Layanan Panggilan Darurat Tunggal Bebas Pulsa (Dapat dihubungi tanpa pulsa/SIM)\n2. 🌊 **115** — BASARNAS (Pencarian & Pertolongan Korban Bencana)\n3. 🏥 **118 / 119** — Ambulans & Layanan Kesehatan\n4. 🔥 **113** — Pemadam Kebakaran (Damkar)\n5. 👮 **110** — Kepolisian RI\n6. 🌋 **0800-1000-3000** — Posko BNPB Pusat\n7. 🌤️ **196** — Call Center BMKG`
   },
   {
     keywords: ['sumber data', 'bmkg', 'bnpb', 'inarisk', 'akurasi', 'aplikasi', 'geoalert'],
-    answer: `📡 **Integrasi Data Real-time & Logika Sistem GeoAlert:**\n\nGeoAlert terhubung secara langsung melalui API resmi pemerintah untuk memastikan akurasi data tinggi:\n\n• 🔴 **BMKG TEWS (Tsunami Early Warning System):** Menyinkronkan data gempa bumi real-time (koordinat episentrum, magnitudo, kedalaman, & potensi tsunami) setiap 5 menit.\n• 🗺️ **InaRISK BNPB:** Memetakan indeks tingkat kerawanan bencana wilayah Indonesia.\n• 🤖 **GeoAlert AI Advisory:** Mengolah standar operasional prosedur (SOP) resmi mitigasi bencana dari pakar geologi & BNPB.`
+    answer: `📡 **Sumber Informasi & Standar Panduan GeoAlert:**\n\nGeoAlert mengintegrasikan panduan mitigasi resmi pemerintah:\n\n1. 🔴 **Data Gempa BMKG:** Menampilkan data gempa bumi resmi dari BMKG TEWS (*Tsunami Early Warning System*) yang diperbarui berkala pada peta dan tabel.\n2. 🗺️ **Indeks Risiko InaRISK BNPB:** Rujukan tingkat kerentanan bencana wilayah Indonesia.\n3. 🤖 **GeoAlert AI Advisory:** Panduan kesiapsiagaan terstruktur berdasarkan SOP mitigasi resmi BMKG dan BNPB.`
   }
 ];
 
-function getAIResponse(message) {
+// Daftar kata kunci darurat & panik
+const EMERGENCY_KEYWORDS = [
+  'tolong', 'terjebak', 'darurat', 'gempa sekarang', 'tsunami datang',
+  'air naik', 'banjir parah', 'tertimbun', 'evakuasi darurat', 'bantuan segera',
+  'panik', 'posko darurat', 'korban'
+];
+
+// Daftar kata kunci sapaan
+const GREETING_KEYWORDS = [
+  'halo', 'hai', 'helo', 'pagi', 'siang', 'sore', 'malam', 'siapa kamu',
+  'siapa anda', 'tentang ai', 'siapa ini', 'apa kabar'
+];
+
+/**
+ * Logika respons AI dengan penanganan riwayat percakapan dan situasi darurat
+ * @param {string} message - Pesan saat ini dari user
+ * @param {Array} history - Riwayat pesan sebelumnya [{ role: 'user'|'ai', text: string }]
+ */
+function getAIResponse(message, history = []) {
   const lower = message.toLowerCase().trim();
-  
-  // Direct match search
+  const hasHistory = Array.isArray(history) && history.length > 0;
+  const hasIntroduced = hasHistory && history.some(m => m.role === 'ai');
+
+  // 1. PRIORITAS TERTINGGI: SITUASI DARURAT ATAU PANIK
+  const isEmergency = EMERGENCY_KEYWORDS.some(kw => lower.includes(kw));
+  if (isEmergency) {
+    return `🚨 **SEGERA HUBUNGI NOMOR DARURAT 112 (BEBAS PULSA) ATAU BASARNAS 115!**\n\nJika Anda sedang dalam ancaman bahaya langsung, lakukan langkah keselamatan cepat berikut:\n\n1. 🛡️ **Lindungi Diri:** Merunduk di bawah meja kokoh (*Drop, Cover, Hold On*) jika terjadi gempa. Jika di pesisir, segera lari ke tempat tinggi (>20 meter).\n2. ⚡ **Amankan Jalur:** Matikan MCB listrik utama dan jauhi dinding kaca serta barang yang mudah roboh.\n3. 📞 **Panggilan Darurat Langsung:**\n   - **112** — Layanan Darurat Bebas Pulsa (Semua operator)\n   - **115** — BASARNAS (Pencarian & Pertolongan)\n   - **118 / 119** — Ambulans & Pertolongan Medis\n   - **113** — Pemadam Kebakaran\n4. 📢 **Beri Sinyal Suara:** Jika terjebak, tiup peluit atau ketuk benda padat untuk memandu tim evakuasi tanpa membuang energi berteriak.`;
+  }
+
+  // 2. DETEKSI SAPAAN (Anti-Pengulangan)
+  const isGreeting = GREETING_KEYWORDS.some(kw => lower.includes(kw));
+  if (isGreeting) {
+    if (hasIntroduced) {
+      // Sapaan lanjutan dibalas singkat dan ramah
+      return `Halo kembali! Ada informasi keselamatan, panduan gempa/tsunami, atau nomor darurat yang perlu kami bantu?`;
+    }
+
+    // Perkenalan pertama (ringkas, tanpa klaim data real-time)
+    return `Salam! Saya **GeoAlert AI**, asisten kesiapsiagaan dan panduan mitigasi bencana alam Indonesia berbasis SOP resmi BMKG & BNPB.\n\nSaya siap membantu Anda dengan:\n1. 🚨 **Prosedur Keselamatan:** Panduan evakuasi gempa, tsunami, banjir, longsor, & cuaca ekstrem.\n2. 🎒 **Kesiapsiagaan:** Penyusunan Tas Siaga Bencana (TSB) 72 jam & rencana evakuasi keluarga.\n3. 📞 **Nomor Darurat Resmi:** Informasi nomor telepon 112, 115 (BASARNAS), 118, dan 113.\n\n*Ada situasi atau pertanyaan mitigasi yang ingin Anda konsultasikan?*`;
+  }
+
+  // 3. MATCH KNOWLEDGE BASE MITIGASI
   const match = AI_RESPONSES.find(r => r.keywords.some(kw => lower.includes(kw)));
   if (match) return match.answer;
 
-  // Intelligent Contextual Reasoning Engine (Fallback)
+  // 4. CONTEXTUAL REASONING ENGINE (FALLBACK)
   const isQuestion = lower.includes('apakah') || lower.includes('kenapa') || lower.includes('mengapa') || lower.includes('bagaimana') || lower.includes('berapa') || lower.includes('dimana');
   const isSafetyRelated = lower.includes('aman') || lower.includes('bahaya') || lower.includes('selamat') || lower.includes('evakuasi') || lower.includes('korban');
 
   if (isSafetyRelated || isQuestion) {
-    return `🧠 **Analisis & Panduan Logis GeoAlert AI:**\n\nMengenai pertanyaan Anda: *"_${message}_"*\n\n**1. Prinsip Utama Keselamatan:**\nDalam setiap ancaman bencana alam, keselamatan jiwa merupakan prioritas tertinggi melebihi harta benda. Selalu prioritaskan langkah perlindungan diri mandiri (*self-evacuation*).\n\n**2. Langkah Tindakan Terstruktur:**\n• 📋 **Verifikasi Data Resmi:** Cek peta interaktif GeoAlert untuk melihat data gempa & peringatan BMKG terkini.\n• 🏃 **Jalur Evakuasi Bebas Rintangan:** Pastikan akses ke luar rumah atau gedung tidak terhalang barang berat.\n• 📞 **Kontak Darurat:** Hubungi **112** (Layanan Darurat Nasional) jika membutuhkan pertolongan mendesak.\n\n*Jika pertanyaan Anda berkaitan dengan gempa, banjir, longsor, atau TSB, cobalah mengetik kata kunci spesifik seperti "gempa", "banjir", atau "tas siaga".*`;
+    return `🧠 **Panduan Keselamatan GeoAlert AI:**\n\nMengenai pertanyaan Anda: *"_${message}_"*\n\n1. 🛡️ **Prioritas Keselamatan Jiwa:** Keselamatan diri dan keluarga adalah hal utama. Jangan menunda evakuasi demi menyelamatkan barang berharga.\n2. 📋 **Cek Informasi Resmi:** Pantau data peringatan resmi BMKG pada peta dan tabel GeoAlert.\n3. 📞 **Hubungi Bantuan Segera:** Jika terjadi bahaya mendesak, segera hubungi **112** (Darurat Bebas Pulsa) atau **115** (BASARNAS).\n\n*Ketik topik spesifik seperti "gempa", "banjir", "tsunami", atau "tas siaga" untuk panduan langkah demi langkah.*`;
   }
 
-  return `Terima kasih atas pertanyaan Anda. **GeoAlert AI** siap membantu dengan panduan mitigasi bencana yang logis & realistis:\n\n• 🎒 **Tas Siaga Bencana (TSB):** Jenis barang & pertimbangan 72 jam pertama\n• 🔴 **Gempa Bumi:** Prosedur Duck-Cover-Hold, keselamatan saat tidur & di mobil\n• 📊 **Fisika Gempa:** Perbedaan dampak Gempa Dangkal vs Gempa Dalam\n• 🌊 **Tsunami:** Aturan emas 20-20-20 & tanda surut air laut\n• 🔵 **Banjir & Longsor:** Penanganan bahaya listrik & geometri evakuasi lereng\n• 📞 **Nomor Darurat:** Kontak cepat 112, 115 (BASARNAS), Damkar & Ambulans\n\n*Silakan ketik pertanyaan spesifik Anda di bawah!*`;
+  return `Terima kasih atas pertanyaan Anda. **GeoAlert AI** siap membantu dengan panduan mitigasi bencana terstruktur:\n\n1. 🎒 **Tas Siaga Bencana (TSB):** Perlengkapan wajib 72 jam pertama\n2. 🔴 **Gempa Bumi:** Prosedur perlindungan di gedung, rumah, dan mobil\n3. 🌊 **Tsunami:** Aturan evakuasi 20-20-20 & tanda air laut surut\n4. 🔵 **Banjir & Longsor:** Penanganan arus listrik & arah lari lereng\n5. 📞 **Nomor Darurat:** Kontak cepat 112, 115 (BASARNAS), 118, dan 113\n\n*Silakan ketik pertanyaan spesifik Anda seputar mitigasi bencana di atas.*`;
 }
 
 // Interactive Prompt Suggestion Sets for "Refresh Prompts"
@@ -150,13 +210,14 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
     const query = (textToSend || input).trim();
     if (!query) return;
 
+    const currentHistory = [...messages];
     setInput('');
     setMessages(prev => [...prev, { role: 'user', text: query }]);
     setIsTyping(true);
 
-    await new Promise(r => setTimeout(r, 700 + Math.random() * 500));
+    await new Promise(r => setTimeout(r, 600 + Math.random() * 400));
     setIsTyping(false);
-    setMessages(prev => [...prev, { role: 'ai', text: getAIResponse(query) }]);
+    setMessages(prev => [...prev, { role: 'ai', text: getAIResponse(query, currentHistory) }]);
   };
 
   const handleKeyDown = (e) => {
@@ -372,10 +433,18 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                   color: '#FFFFFF',
                   fontSize: '0.92rem',
                   lineHeight: '1.65',
-                  whiteSpace: 'pre-wrap',
                   boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)'
                 }}>
-                  {msg.text}
+                  {msg.role === 'ai' ? (
+                    <div
+                      className="ai-chat-bubble-markdown"
+                      dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.text) }}
+                    />
+                  ) : (
+                    <div style={{ whiteSpace: 'pre-wrap' }}>
+                      {msg.text}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

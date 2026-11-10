@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import '../css/index.css';
 import '../css/components.css';
+import { ROUTER_BASENAME } from './config/baseUrl';
 
 // Nonaktifkan scroll restoration otomatis browser SEBELUM React mount,
 // supaya Firefox/Chrome tidak sempat me-restore posisi scroll dari sesi
@@ -22,7 +23,7 @@ if ('serviceWorker' in navigator && (window.location.hostname === 'localhost' ||
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter basename={import.meta.env.BASE_URL ? import.meta.env.BASE_URL.replace(/\/$/, '') : ''}>
+    <BrowserRouter basename={ROUTER_BASENAME}>
       <App />
     </BrowserRouter>
   </React.StrictMode>
