@@ -69,6 +69,31 @@ export function parseMagnitude(magInput) {
 }
 
 /**
+ * Ekstrak skala MMI tertinggi dari string BMKG (contoh: "VI Pasaman, IV Padang", "III - IV Banda Aceh")
+ * @param {string} dirasakan 
+ * @returns {number}
+ */
+export function parseMaxMMI(dirasakan) {
+  if (!dirasakan || typeof dirasakan !== 'string') return 0;
+
+  const mmiValues = {
+    'xii': 12, 'xi': 11, 'x': 10, 'ix': 9, 'viii': 8, 'vii': 7,
+    'vi': 6, 'v': 5, 'iv': 4, 'iii': 3, 'ii': 2, 'i': 1
+  };
+
+  // Cocokkan angka romawi I - XII
+  const matches = dirasakan.match(/\b(xii|xi|x|ix|viii|vii|vi|v|iv|iii|ii|i)\b/gi);
+  if (!matches) return 0;
+
+  let max = 0;
+  for (const m of matches) {
+    const val = mmiValues[m.toLowerCase()] || 0;
+    if (val > max) max = val;
+  }
+  return max;
+}
+
+/**
  * Cek apakah string potensi mengindikasikan tsunami aktif
  * @param {string} potensi 
  * @returns {boolean}
@@ -111,6 +136,7 @@ export function evaluateRisk({ magnitude, depth, potensi, dirasakan, type = 'gem
   const mag = parseMagnitude(magnitude);
   const depthKm = parseDepth(depth);
   const isTsunami = hasTsunamiThreat(potensi);
+  const maxMmi = parseMaxMMI(dirasakan);
 
   // 1. EVALUASI BAHAYA TINGGI
   if (isTsunami) {
@@ -146,6 +172,18 @@ export function evaluateRisk({ magnitude, depth, potensi, dirasakan, type = 'gem
     };
   }
 
+  // Skala MMI VI ke atas berpotensi menimbulkan kerusakan struktural
+  if (maxMmi >= 6) {
+    return {
+      level: RISK_LEVELS.DANGER,
+      label: 'Bahaya Tinggi',
+      color: '#C0492B',
+      textColor: '#FFFFFF',
+      badgeClass: 'badge-danger',
+      reason: `Getaran dirasakan kuat (Skala MMI ${maxMmi}) berpotensi merusak bangunan`
+    };
+  }
+
   // 2. EVALUASI WASPADA
   if (mag >= RISK_THRESHOLDS.MAGNITUDE_STRONG && depthKm <= RISK_THRESHOLDS.DEPTH_DEEP_KM) {
     // Gempa kuat (M >= 6.0) tetapi kedalaman menengah (50 - 300 km)
@@ -171,23 +209,20 @@ export function evaluateRisk({ magnitude, depth, potensi, dirasakan, type = 'gem
     };
   }
 
-  // Jika dirasakan skala MMI III-V
-  if (dirasakan && typeof dirasakan === 'string') {
-    const dLower = dirasakan.toLowerCase();
-    if (dLower.includes('v') || dLower.includes('iv') || dLower.includes('iii')) {
-      return {
-        level: RISK_LEVELS.WARNING,
-        label: 'Waspada',
-        color: '#F57C00',
-        textColor: '#FFFFFF',
-        badgeClass: 'badge-warning',
-        reason: `Gempa dirasakan nyata di daratan (${dirasakan})`
-      };
-    }
+  // Skala MMI III - V (getaran dirasakan nyata di daratan)
+  if (maxMmi >= 3 && maxMmi <= 5) {
+    return {
+      level: RISK_LEVELS.WARNING,
+      label: 'Waspada',
+      color: '#F57C00',
+      textColor: '#FFFFFF',
+      badgeClass: 'badge-warning',
+      reason: `Gempa dirasakan nyata di daratan (Skala MMI ${maxMmi})`
+    };
   }
 
   // 3. EVALUASI SIAGA (Standby / Rendah)
-  // Termasuk gempa M < 5.0, atau gempa dalam > 300 km
+  // Termasuk gempa M < 5.0, gempa dalam > 300 km, atau MMI I - II
   return {
     level: RISK_LEVELS.STANDBY,
     label: 'Siaga',
@@ -196,7 +231,7 @@ export function evaluateRisk({ magnitude, depth, potensi, dirasakan, type = 'gem
     badgeClass: 'badge-standby',
     reason: depthKm > RISK_THRESHOLDS.DEPTH_DEEP_KM
       ? `Gempa dalam (${depthKm} km), energi teredam mantel bumi`
-      : `Getaran ringan tanpa ancaman struktural (M ${mag.toFixed(1)})`
+      : (maxMmi > 0 ? `Getaran ringan tercatat (Skala MMI ${maxMmi})` : `Getaran ringan tanpa ancaman struktural (M ${mag.toFixed(1)})`)
   };
 }
 

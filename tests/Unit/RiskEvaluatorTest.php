@@ -48,6 +48,20 @@ class RiskEvaluatorTest extends TestCase
     }
 
     #[Test]
+    public function evaluasi_bahaya_tinggi_saat_mmi_vi_ke_atas(): void
+    {
+        $res = RiskEvaluator::evaluate([
+            'magnitude' => '5.6',
+            'depth'     => '10 km',
+            'dirasakan' => 'VI Cianjur, IV Sukabumi',
+            'potensi'   => 'Tidak berpotensi tsunami',
+        ]);
+
+        $this->assertSame(RiskEvaluator::LEVEL_DANGER, $res['level']);
+        $this->assertSame('Bahaya Tinggi', $res['label']);
+    }
+
+    #[Test]
     public function evaluasi_waspada_saat_gempa_sedang_dangkal(): void
     {
         $res = RiskEvaluator::evaluate([

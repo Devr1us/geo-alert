@@ -42,6 +42,17 @@ test('RiskEvaluator — Evaluasi Skenario Bahaya Tinggi', async (t) => {
     assert.equal(res.level, RISK_LEVELS.DANGER);
     assert.equal(res.label, 'Bahaya Tinggi');
   });
+
+  await t.test('Gempa dengan skala dirasakan MMI VI ke atas adalah Bahaya Tinggi', () => {
+    const res = evaluateRisk({
+      magnitude: '5.6',
+      depth: '10 km',
+      dirasakan: 'VI Cianjur, IV Sukabumi',
+      potensi: 'Tidak berpotensi tsunami',
+    });
+    assert.equal(res.level, RISK_LEVELS.DANGER);
+    assert.equal(res.label, 'Bahaya Tinggi');
+  });
 });
 
 test('RiskEvaluator — Evaluasi Skenario Waspada', async (t) => {
