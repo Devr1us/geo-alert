@@ -11,7 +11,7 @@ import RevealSection from '../components/RevealSection';
 import MitigationModal from '../components/MitigationModal';
 import { BMKG_TERKINI_URL, BMKG_DIRASAKAN_URL } from '../config/bmkgApi';
 import { formatLocation } from '../utils/locationFormatter';
-import { evaluateRisk } from '../utils/riskEvaluator';
+import { evaluateRisk, hasTsunamiThreat } from '../utils/riskEvaluator';
 
 // Fix for default leaflet icons in React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -102,6 +102,45 @@ const createFlameMarkerIcon = (level, pointCount = 1) => {
     iconSize: [34, 34],
     iconAnchor: [17, 17],
     popupAnchor: [0, -17],
+  });
+};
+
+// Create tsunami marker icon (waves symbol in blue)
+const createTsunamiMarkerIcon = (level) => {
+  const colors = {
+    danger: '#C0492B',
+    warning: '#F57C00',
+    standby: '#0284C7',
+  };
+  const color = colors[level] || '#0284C7';
+  return L.divIcon({
+    className: 'tsunami-marker-divicon',
+    html: `
+      <div style="position:relative;width:32px;height:32px;display:flex;align-items:center;justify-content:center;">
+        <div style="
+          position:absolute;inset:-2px;border-radius:50%;
+          background:${color}33;
+          animation:marker-pulse 1.8s infinite;
+        "></div>
+        <div style="
+          width:26px;height:26px;border-radius:50%;
+          background:${color};
+          border:2px solid #ffffff;
+          box-shadow:0 3px 8px rgba(0,0,0,0.3);
+          display:flex;align-items:center;justify-content:center;
+          position:relative;z-index:2;
+        ">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+            <path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+            <path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+          </svg>
+        </div>
+      </div>
+    `,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16],
   });
 };
 
@@ -481,7 +520,10 @@ export default function MapPage() {
     } else if (activeFilter === 'Karhutla') {
       matchesFilter = item.type === 'Karhutla';
     } else if (activeFilter === 'Tsunami') {
-      matchesFilter = item.type.includes('Tsunami') || (item.potensi && item.potensi.toLowerCase().includes('tsunami'));
+      // Hanya tampilkan jika bertipe Tsunami atau ada peringatan tsunami aktif (mengecualikan "Tidak berpotensi tsunami")
+      matchesFilter = item.type.includes('Tsunami') || hasTsunamiThreat(item.potensi);
+    } else if (activeFilter === 'Gempa') {
+      matchesFilter = item.type.includes('Gempa');
     } else if (activeFilter === 'Gunung Api') {
       matchesFilter = item.type.includes('Gunung Api') || item.type.includes('Erupsi');
     } else {
@@ -678,7 +720,13 @@ export default function MapPage() {
 
                       <Marker
                         position={[item.lat, item.lng]}
-                        icon={isKarhutla ? createFlameMarkerIcon(item.risk, item.jumlah_titik) : createCustomIcon(item.risk)}
+                        icon={
+                          isKarhutla
+                            ? createFlameMarkerIcon(item.risk, item.jumlah_titik)
+                            : (item.type === 'Tsunami' || hasTsunamiThreat(item.potensi))
+                            ? createTsunamiMarkerIcon(item.risk)
+                            : createCustomIcon(item.risk)
+                        }
                       >
                         <Popup maxWidth={320}>
                           <div style={{ minWidth: '240px', fontFamily: 'Inter, sans-serif' }}>
@@ -829,22 +877,6 @@ export default function MapPage() {
                 </div>
                 <div className="legend-chip standby">
                   <span className="legend-chip-dot"></span> Siaga
-                </div>
-              </div>
-
-              {/* Simbol Kategori & Area */}
-              <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid var(--color-border)', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <Flame size={14} color="#EA580C" style={{ flexShrink: 0 }} />
-                  <span><strong>Ikon api:</strong> Titik panas karhutla (NASA FIRMS)</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <span style={{ display: 'inline-block', width: 14, height: 14, borderRadius: '50%', border: '1.5px dashed #F57C00', background: 'rgba(245,124,0,0.15)', flexShrink: 0 }} />
-                  <span><strong>Lingkaran putus-putus:</strong> Area terdampak sebaran api</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Activity size={14} color="var(--color-primary)" style={{ flexShrink: 0 }} />
-                  <span><strong>Titik bulat:</strong> Gempa bumi tektonik (BMKG)</span>
                 </div>
               </div>
 
