@@ -26,17 +26,30 @@ class ChatController extends Controller
     {
         $startTime = microtime(true);
 
-        // 1. Validasi Input
-        $messages = $request->input('messages');
-        if (!is_array($messages) || empty($messages)) {
+        // 1. Validasi Input & Pembersihan Riwayat Percakapan
+        $rawMessages = $request->input('messages');
+        if (!is_array($rawMessages) || empty($rawMessages)) {
             return response()->json([
                 'error' => 'Format pesan tidak valid. Harap sertakan array messages.'
             ], 422);
         }
 
-        // Potong ke maksimal 20 pesan terakhir
-        if (count($messages) > 20) {
-            $messages = array_slice($messages, -20);
+        // Saring riwayat: buang pesan error, fallback, atau kosong agar tidak mencemari konteks LLM
+        $messages = array_values(array_filter($rawMessages, function ($m) {
+            if (!is_array($m)) return false;
+            if (!empty($m['isError']) || !empty($m['is_error'])) return false;
+            $text = trim($m['content'] ?? '');
+            if ($text === '') return false;
+            // Buang pesan fallback yang mungkin tersimpan di state client
+            if (str_contains($text, 'kendala koneksi') || str_contains($text, 'lonjakan antrean') || str_contains($text, 'Batas Kuota') || str_contains($text, 'Server Sibuk')) {
+                return false;
+            }
+            return true;
+        }));
+
+        // Batasi riwayat percakapan ke maksimal 8 pesan terakhir
+        if (count($messages) > 8) {
+            $messages = array_slice($messages, -8);
         }
 
         // Validasi pesan terakhir user
@@ -68,7 +81,8 @@ class ChatController extends Controller
         $fullSystemPrompt = $baseSystemPrompt . "\n\n" . $dataTerkini;
 
         // 4. Return SSE Streaming Response
-        return response()->stream(function () use ($messages, $fullSystemPrompt, $startTime, $userText, $sessionId) {
+        $requestedModel = $request->input('model', 'gemini-3.8-flash');
+        return response()->stream(function () use ($messages, $fullSystemPrompt, $startTime, $userText, $sessionId, $requestedModel) {
             // Nonaktifkan output buffering
             if (function_exists('apache_setenv')) {
                 @apache_setenv('no-gzip', '1');
@@ -93,7 +107,8 @@ class ChatController extends Controller
                 },
                 [
                     'temperature' => 0.4,
-                    'max_tokens' => 800,
+                    'max_tokens' => 1500, // Minimal 1024 token
+                    'model' => $requestedModel,
                 ]
             );
 
@@ -114,20 +129,42 @@ class ChatController extends Controller
                     'status' => 'success',
                 ]);
             } else {
-                // Fallback ramah jika penyedia gagal atau kuota habis
-                $fallbackMessage = "Maaf, asisten GeoAlert AI sedang mengalami lonjakan antrean atau kendala jaringan.\n\nUntuk situasi darurat keselamatan segera hubungi:\n- 🚨 **112** (Layanan Darurat Nasional - Bebas Pulsa)\n- 🌊 **115** (BASARNAS)\n- 🌋 **117** (Posko BNPB)\n- 🚒 **113** (Pemadam Kebakaran)\n\nSilakan coba tanyakan kembali beberapa saat lagi.";
+                // Diagnosis detail error dari LlmClient
+                $lastError = $this->llmClient->getLastError();
+                $errType = $lastError['type'] ?? 'unknown';
+                $errCode = $lastError['code'] ?? 500;
+                $errModel = $lastError['model'] ?? $requestedModel;
+
+                // Bangun pesan fallback jujur dan informatif sesuai akar masalah
+                $reasonHeadline = match ($errType) {
+                    'rate_limit' => "Kuota penyedia AI saat ini sedang mencapai batas sesaat (Rate Limit 429). Mohon tunggu beberapa detik lalu tekan tombol **Coba lagi**.",
+                    'overloaded' => "Server penyedia AI sedang mengalami lonjakan beban tinggi (Server Overload 503). Silakan coba kirim ulang pertanyaan Anda sebentar lagi.",
+                    'safety'     => "Pertanyaan atau respon terdeteksi oleh penyaring keamanan konten (Safety Filter). Silakan coba formulasikan pertanyaan Anda dengan kalimat berbeda.",
+                    'not_found'  => "Model AI sedang dalam pembaruan berkala. Silakan coba beberapa saat lagi.",
+                    default      => "Koneksi ke asisten GeoAlert AI mengalami kendala atau batas waktu (Timeout). Silakan periksa jaringan Anda lalu coba lagi."
+                };
+
+                $fallbackMessage = "⚠️ **{$reasonHeadline}**\n\nUntuk situasi darurat keselamatan segera hubungi:\n- 🚨 **112** (Layanan Darurat Nasional - Bebas Pulsa)\n- 🌊 **115** (BASARNAS)\n- 🌋 **117** (Posko BNPB)\n- 🚒 **113** (Pemadam Kebakaran)";
 
                 echo "event: token\n";
                 echo "data: " . json_encode(['token' => $fallbackMessage], JSON_UNESCAPED_UNICODE) . "\n\n";
                 echo "event: done\n";
-                echo "data: " . json_encode(['status' => 'fallback']) . "\n\n";
+                echo "data: " . json_encode([
+                    'status' => 'fallback',
+                    'error_type' => $errType,
+                    'http_code' => $errCode,
+                    'model' => $errModel,
+                ]) . "\n\n";
                 if (ob_get_level() > 0) ob_flush();
                 flush();
 
                 Log::warning('[GeoAlert AI] Chat fallback triggered', [
                     'session_id' => $sessionId,
                     'latency_ms' => $latencyMs,
-                    'status' => 'fallback',
+                    'error_type' => $errType,
+                    'http_code' => $errCode,
+                    'model' => $errModel,
+                    'error_message' => $lastError['message'] ?? null,
                 ]);
             }
         }, 200, [

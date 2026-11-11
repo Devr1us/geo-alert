@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Bot, Send, RefreshCw, Paperclip, Camera, ChevronDown,
   RotateCcw, Sparkles, ShieldCheck, Square, Copy, Check,
-  ThumbsUp, ThumbsDown, AlertTriangle, AlertCircle
+  ThumbsUp, ThumbsDown, AlertTriangle
 } from 'lucide-react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
@@ -161,8 +161,19 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
     setMessages([...newMessages, assistantMsg]);
     setIsStreaming(true);
 
+    // Filter dan sanitasi riwayat percakapan: buang pesan error/fallback, batasi 8 pesan terakhir
+    const cleanHistory = newMessages
+      .filter(m => !m.isError && m.content && !m.content.startsWith('⚠️'))
+      .slice(-8)
+      .map(m => ({ role: m.role, content: m.content }));
+
     const controller = new AbortController();
     abortControllerRef.current = controller;
+
+    // Timeout otomatis 30 detik untuk permintaan
+    const timeoutId = setTimeout(() => {
+      controller.abort(new Error('Batas waktu 30 detik terlampaui.'));
+    }, 30000);
 
     try {
       const response = await fetch('/api/chat', {
@@ -173,16 +184,17 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
         },
         body: JSON.stringify({
-          messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+          messages: cleanHistory,
           session_id: 'sess_' + (sessionStorage.getItem('geoalert_session_id') || Math.random().toString(36).substring(7)),
-          lokasi_kota: 'Indonesia'
+          lokasi_kota: 'Indonesia',
+          model: selectedModel.includes('Pro') ? 'gemini-3.8-flash' : 'gemini-3.8-flash'
         }),
         signal: controller.signal
       });
 
       if (!response.ok) {
         if (response.status === 429) {
-          throw new Error('Terlalu banyak permintaan. Silakan tunggu 1 menit sebelum mengirim pesan lagi.');
+          throw new Error('Kuota penyedia AI sedang mencapai batas sesaat (Rate Limit 429). Silakan tunggu sebentar.');
         }
         const errJson = await response.json().catch(() => ({}));
         throw new Error(errJson.error || `Server merespons error (HTTP ${response.status})`);
@@ -243,7 +255,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
       });
 
     } catch (err) {
-      if (err.name === 'AbortError') {
+      if (err.name === 'AbortError' && !err.message.includes('30 detik')) {
         // User menekan tombol "Hentikan"
         setMessages(prev => {
           const updated = [...prev];
@@ -259,13 +271,14 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
       } else {
         // Tampilkan pesan error ramah
         console.error('[GeoAlert AI] Stream error:', err);
-        setErrorMessage(err.message || 'Gagal terhubung ke layanan GeoAlert AI.');
+        const errMsg = err.message || 'Gagal terhubung ke layanan GeoAlert AI.';
+        setErrorMessage(errMsg);
         setMessages(prev => {
           const updated = [...prev];
           if (updated[assistantIndex]) {
             updated[assistantIndex] = {
               ...updated[assistantIndex],
-              content: `⚠️ **Maaf, terjadi kendala koneksi.**\n\n${err.message || 'Asisten tidak dapat merespons saat ini.'}\n\nUntuk bantuan darurat segera hubungi **112** atau BPBD setempat.`,
+              content: `⚠️ **Maaf, terjadi kendala koneksi.**\n\n${errMsg}\n\nUntuk bantuan darurat segera hubungi **112** atau BPBD setempat.`,
               isStreaming: false,
               isError: true
             };
@@ -274,6 +287,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
         });
       }
     } finally {
+      clearTimeout(timeoutId);
       setIsStreaming(false);
       abortControllerRef.current = null;
     }
@@ -333,7 +347,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        minHeight: messages.length === 0 ? '600px' : '550px',
+        width: '100%',
         background: 'linear-gradient(135deg, #0E2A5C 0%, #0a1f44 60%, #061530 100%)',
         color: '#FFFFFF',
         fontFamily: "'Inter', sans-serif",
@@ -353,7 +367,8 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
         borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
         background: 'rgba(14, 42, 92, 0.4)',
         backdropFilter: 'blur(12px)',
-        zIndex: 10
+        zIndex: 10,
+        flexShrink: 0
       }}>
         {/* Logo & Header Badge */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
@@ -406,6 +421,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
         className="ai-chat-scroll-area dark-scroll"
         style={{
           flex: 1,
+          minHeight: 0,
           display: 'flex',
           flexDirection: 'column',
           overflowY: 'auto',
@@ -422,7 +438,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
             width: '100%', boxSizing: 'border-box'
           }}>
             {/* Glowing Orb */}
-            <div style={{ position: 'relative', marginBottom: '1rem' }}>
+            <div style={{ position: 'relative', marginBottom: '1rem', flexShrink: 0 }}>
               <div style={{
                 position: 'absolute', inset: '-10px', borderRadius: '50%',
                 border: '1px solid rgba(0, 210, 255, 0.3)',
@@ -587,7 +603,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                     )}
                   </div>
 
-                  {/* Action Toolbar on Assistant Response (Copy & Feedback) */}
+                  {/* Action Toolbar on Assistant Response (Copy, Feedback & Coba Lagi) */}
                   {msg.role === 'assistant' && msg.content && !msg.isStreaming && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '4px', marginTop: '2px' }}>
                       <button
@@ -653,7 +669,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
       </div>
 
       {/* ================= INPUT FOOTER BAR ================= */}
-      <div className="thinkai-bottom-container">
+      <div className="thinkai-bottom-container" style={{ flexShrink: 0 }}>
         <div className="thinkai-input-box">
           {/* Main Input Textarea */}
           <textarea
@@ -705,7 +721,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                   boxShadow: '0 10px 30px rgba(0,0,0,0.5)', zIndex: 50
                 }}>
                   {[
-                    { label: "Mode Cepat (Flash)", desc: "Respon instan standar" },
+                    { label: "Mode Cepat (Flash)", desc: "Respon instan standar (Gemini Flash)" },
                     { label: "Mode Teliti (Pro)", desc: "Analisis mitigasi mendalam" }
                   ].map(m => (
                     <button
