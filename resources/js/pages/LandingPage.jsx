@@ -88,10 +88,11 @@ const FAQ_DATA = [
   },
 ];
 
-// Education content — 6 Bencana Utama Indonesia (BMKG, BNPB, PVMBG)
+// Education content — Bencana Utama Indonesia (BMKG, BNPB, PVMBG, NASA FIRMS)
 const EDUCATION_DATA = [
   { icon: <Activity size={32} color="var(--color-alert)" />, bg: 'rgba(192, 73, 43, 0.1)', accentColor: 'var(--color-alert)', title: 'Gempa Bumi', desc: 'Getaran tektonik tiba-tiba akibat pelepasan energi lempeng bumi. Indonesia berada di Cincin Api Pasifik dengan ribuan sesar aktif yang memerlukan kewaspadaan tinggi.' },
   { icon: <Waves size={32} color="#0284C7" />, bg: 'rgba(2, 132, 199, 0.1)', accentColor: '#0284C7', title: 'Tsunami', desc: 'Gelombang laut raksasa yang dipicu oleh gempa bumi dangkal di dasar laut, longsor bawah laut, atau letusan gunung api. Terapkan evakuasi emas 20-20-20 di pesisir.' },
+  { icon: <Flame size={32} color="#EA580C" />, bg: 'rgba(234, 88, 12, 0.12)', accentColor: '#EA580C', title: 'Karhutla (Kebakaran Hutan & Lahan)', desc: 'Penyebab utama adalah pembakaran lahan ilegal dan kemarau di lahan gambut. Berdampak kabut asap beracun, lonjakan ISPA, dan gangguan transportasi darat/udara. Wajib pakai masker N95 dan laporkan titik api ke satgas BPBD/Manggala Agni.' },
   { icon: <Droplets size={32} color="var(--color-standby)" />, bg: 'rgba(74, 144, 217, 0.1)', accentColor: 'var(--color-standby)', title: 'Banjir & Banjir Bandang', desc: 'Luapan air berlebih akibat curah hujan ekstrem atau kegagalan tanggul. Aliran air deras membawa material lumpur dan puing yang membahayakan nyawa dan kelistrikan.' },
   { icon: <Mountain size={32} color="var(--color-status-warning)" />, bg: 'rgba(245, 124, 0, 0.1)', accentColor: 'var(--color-status-warning)', title: 'Tanah Longsor', desc: 'Pergerakan massa batuan atau tanah menuruni lereng saat kondisi tanah jenuh air. Selalu evakuasi secara tegak lurus (menyamping) dari jalur luncuran tebing.' },
   { icon: <Wind size={32} color="#D97706" />, bg: 'rgba(217, 119, 6, 0.1)', accentColor: '#D97706', title: 'Cuaca Ekstrem & Puting Beliung', desc: 'Fenomena hidrometeorologi berbahaya seperti angin puting beliung, petir hebat, dan hujan es. Berlindung di bangunan kokoh dan jauhi pohon tunggal serta tiang tinggi.' },
@@ -115,23 +116,54 @@ function haversineKm(lat1, lng1, lat2, lng2) {
 
 // ============================================================
 // Hitung status wilayah berdasarkan jarak ke event terdekat
+// Termasuk aturan 50 km untuk Karhutla berstatus warning/danger
 // ============================================================
 function calcAreaStatus(userLat, userLng, events) {
-  if (!events || events.length === 0) return 'safe';
+  if (!events || events.length === 0) {
+    return { status: 'safe', reason: 'Wilayah terpantau aman dari anomali bencana.' };
+  }
+
   let minDist = Infinity;
-  let worstRisk = 'standby';
-  const riskOrder = { danger: 3, warning: 2, standby: 1 };
+  let worstRisk = 'safe';
+  let reason = 'Wilayah terpantau aman dari potensi bencana terdekat.';
+  const riskOrder = { danger: 3, warning: 2, standby: 1, safe: 0 };
+
   for (const ev of events) {
     if (isNaN(ev.lat) || isNaN(ev.lng)) continue;
     const dist = haversineKm(userLat, userLng, ev.lat, ev.lng);
-    if (dist < minDist) minDist = dist;
-    const r = ev.risk;
-    if ((riskOrder[r] || 0) > (riskOrder[worstRisk] || 0)) worstRisk = r;
+
+    if (ev.type === 'Karhutla') {
+      // Spesifikasi: jika user dalam radius 50 km dari cluster karhutla warning / danger
+      if (dist <= 50) {
+        if (ev.risk === 'danger') {
+          return {
+            status: 'danger',
+            reason: `Titik panas Karhutla Bahaya Tinggi terdeteksi berjarak ${Math.round(dist)} km (${ev.location}). Gunakan masker N95 dan kurangi aktivitas luar.`
+          };
+        }
+        if (ev.risk === 'warning' && riskOrder[worstRisk] < riskOrder.warning) {
+          worstRisk = 'warning';
+          reason = `Titik panas Karhutla Waspada terdeteksi berjarak ${Math.round(dist)} km (${ev.location}).`;
+        }
+      }
+    } else {
+      // BMKG Gempa Bumi / simulasi
+      if (dist < minDist) minDist = dist;
+      const r = ev.risk;
+      if (r === 'danger' && dist < 100) {
+        worstRisk = 'danger';
+        reason = `Gempa bumi signifikan ${ev.magnitude ? 'M ' + ev.magnitude : ''} terdeteksi berjarak ${Math.round(dist)} km (${ev.location}).`;
+      } else if (dist < 200 && riskOrder[r] >= 2 && riskOrder[worstRisk] < 2) {
+        worstRisk = 'warning';
+        reason = `Aktivitas seismik berjarak ${Math.round(dist)} km (${ev.location}).`;
+      }
+    }
   }
-  // Radius threshold: danger <100 km dari event berbahaya, warning <200 km
-  if (worstRisk === 'danger' && minDist < 100) return 'danger';
-  if (minDist < 200) return 'warning';
-  return 'safe';
+
+  return {
+    status: worstRisk === 'safe' ? 'safe' : worstRisk,
+    reason
+  };
 }
 
 // ============================================================
@@ -154,60 +186,109 @@ async function reverseGeocode(lat, lng) {
 }
 
 // ============================================================
-// Fetch BMKG events (shared dengan MapPage via window cache)
+// Fetch Disaster events (BMKG Earthquakes + NASA FIRMS Karhutla)
 // ============================================================
-async function fetchBmkgEvents() {
-  const [resTerkini, resDirasakan] = await Promise.all([
+async function fetchDisasterEvents() {
+  const [resTerkini, resDirasakan, resKarhutla] = await Promise.allSettled([
     fetch(BMKG_TERKINI_URL),
     fetch(BMKG_DIRASAKAN_URL),
+    fetch('/api/karhutla'),
   ]);
-  const parsedTerkini = await resTerkini.json();
-  const parsedDirasakan = await resDirasakan.json();
 
-  const listTerkini = parsedTerkini.Infogempa?.gempa || [];
-  const listDirasakan = parsedDirasakan.Infogempa?.gempa || [];
-  const allGempa = [...listTerkini, ...listDirasakan];
-  const uniqueGempa = Array.from(new Set(allGempa.map(g => g.DateTime)))
-    .map(time => allGempa.find(g => g.DateTime === time));
+  let allEvents = [];
 
-  return uniqueGempa.map((g, idx) => {
-    const coords = (g.Coordinates || '').split(',');
-    const lat = parseFloat(coords[0]);
-    const lng = parseFloat(coords[1]);
-    
-    // Logika level risiko terpusat berdasar magnitudo, kedalaman, dan potensi tsunami
-    const riskInfo = evaluateRisk({
-      magnitude: g.Magnitude,
-      depth: g.Kedalaman,
-      potensi: g.Potensi,
-      dirasakan: g.Dirasakan,
-      type: 'Gempa Bumi'
-    });
+  // 1. Olah data BMKG
+  if (
+    resTerkini.status === 'fulfilled' &&
+    resDirasakan.status === 'fulfilled' &&
+    resTerkini.value.ok &&
+    resDirasakan.value.ok
+  ) {
+    try {
+      const parsedTerkini = await resTerkini.value.json();
+      const parsedDirasakan = await resDirasakan.value.json();
 
-    // Format lokasi ramah publik: pisahkan arah mata angin, Title Case, singkatan provinsi
-    const formattedLocation = formatLocation(g.Wilayah);
+      const listTerkini = parsedTerkini.Infogempa?.gempa || [];
+      const listDirasakan = parsedDirasakan.Infogempa?.gempa || [];
+      const allGempa = [...listTerkini, ...listDirasakan];
+      const uniqueGempa = Array.from(new Set(allGempa.map(g => g.DateTime)))
+        .map(time => allGempa.find(g => g.DateTime === time));
 
-    return {
-      id: `bmkg-${idx}`,
-      type: 'Gempa Bumi',
-      location: formattedLocation,
-      rawLocation: g.Wilayah || '',
-      lat: isNaN(lat) ? -2.5 : lat,
-      lng: isNaN(lng) ? 117.5 : lng,
-      time: g.Tanggal && g.Jam ? `${g.Tanggal} ${g.Jam}` : '—',
-      risk: riskInfo.level,
-      riskLabel: riskInfo.label,
-      riskBadgeClass: riskInfo.badgeClass,
-      magnitude: g.Magnitude,
-      depth: g.Kedalaman,
-      potensi: g.Potensi,
-      province: (() => {
-        const wilayah = g.Wilayah || '';
-        const lastDash = wilayah.lastIndexOf('-');
-        return lastDash !== -1 ? wilayah.slice(lastDash + 1).trim() : wilayah.trim();
-      })(),
-    };
-  });
+      const bmkgEvents = uniqueGempa.map((g, idx) => {
+        const coords = (g.Coordinates || '').split(',');
+        const lat = parseFloat(coords[0]);
+        const lng = parseFloat(coords[1]);
+        
+        const riskInfo = evaluateRisk({
+          magnitude: g.Magnitude,
+          depth: g.Kedalaman,
+          potensi: g.Potensi,
+          dirasakan: g.Dirasakan,
+          type: 'Gempa Bumi'
+        });
+
+        const formattedLocation = formatLocation(g.Wilayah);
+
+        return {
+          id: `bmkg-${idx}`,
+          type: 'Gempa Bumi',
+          location: formattedLocation,
+          rawLocation: g.Wilayah || '',
+          lat: isNaN(lat) ? -2.5 : lat,
+          lng: isNaN(lng) ? 117.5 : lng,
+          time: g.Tanggal && g.Jam ? `${g.Tanggal} ${g.Jam}` : '—',
+          risk: riskInfo.level,
+          riskLabel: riskInfo.label,
+          riskBadgeClass: riskInfo.badgeClass,
+          scale: g.Magnitude ? `M ${g.Magnitude}` : '—',
+          magnitude: g.Magnitude,
+          depth: g.Kedalaman,
+          potensi: g.Potensi,
+          province: (() => {
+            const wilayah = g.Wilayah || '';
+            const lastDash = wilayah.lastIndexOf('-');
+            return lastDash !== -1 ? wilayah.slice(lastDash + 1).trim() : wilayah.trim();
+          })(),
+        };
+      });
+
+      allEvents.push(...bmkgEvents);
+    } catch (err) {
+      console.warn('[GeoAlert] Gagal mengolah data BMKG:', err);
+    }
+  }
+
+  // 2. Olah data Karhutla (NASA FIRMS)
+  if (resKarhutla.status === 'fulfilled' && resKarhutla.value.ok) {
+    try {
+      const khJson = await resKarhutla.value.json();
+      if (Array.isArray(khJson.events)) {
+        const karhutlaEvents = khJson.events.map((ev) => ({
+          id: ev.id,
+          type: 'Karhutla',
+          location: ev.location || `${ev.wilayah?.kabupaten}, ${ev.wilayah?.provinsi}`,
+          rawLocation: ev.location,
+          province: ev.wilayah?.provinsi || '',
+          lat: ev.lat,
+          lng: ev.lon,
+          time: ev.waktu || '—',
+          risk: ev.risk,
+          riskLabel: ev.status,
+          riskBadgeClass: ev.risk === 'danger' ? 'badge-danger' : ev.risk === 'warning' ? 'badge-warning' : 'badge-standby',
+          scale: `${ev.jumlah_titik} titik (${ev.frp_total} MW)`,
+          jumlah_titik: ev.jumlah_titik,
+          frp_total: ev.frp_total,
+          radius_km: ev.radius_km || 5,
+        }));
+
+        allEvents.push(...karhutlaEvents);
+      }
+    } catch (khErr) {
+      console.warn('[GeoAlert] Gagal mengolah data Karhutla:', khErr);
+    }
+  }
+
+  return allEvents;
 }
 
 // ============================================================
@@ -271,6 +352,7 @@ export default function LandingPage() {
   const [locationName, setLocationName] = useState(() => savedLocData?.name || null);
   const [locationStatus, setLocationStatus] = useState(() => savedLocData ? 'ready' : 'prompt'); // 'prompt' | 'detecting' | 'ready' | 'denied'
   const [areaStatus, setAreaStatus] = useState(() => savedLocData?.areaStatus || 'none'); // 'none' | 'safe' | 'warning' | 'danger'
+  const [areaReason, setAreaReason] = useState(() => savedLocData?.areaReason || '');
   const [lastUpdatedTime, setLastUpdatedTime] = useState(() => savedLocData?.updatedAt || null);
 
   // Modals state
@@ -292,11 +374,11 @@ export default function LandingPage() {
   const [modal, setModal] = useState(null);
 
   // ============================================================
-  // Fetch BMKG events & hitung statistik
+  // Fetch Disaster events (BMKG + NASA FIRMS Karhutla)
   // ============================================================
   useEffect(() => {
     let cancelled = false;
-    fetchBmkgEvents()
+    fetchDisasterEvents()
       .then((data) => {
         if (cancelled) return;
         setEvents(data);
@@ -318,13 +400,14 @@ export default function LandingPage() {
   // Re-kalkulasi status wilayah jika events selesai dimuat & koordinat tersedia
   useEffect(() => {
     if (events.length === 0 || !userCoords) return;
-    const status = calcAreaStatus(userCoords[0], userCoords[1], events);
-    setAreaStatus(status);
+    const res = calcAreaStatus(userCoords[0], userCoords[1], events);
+    setAreaStatus(res.status);
+    setAreaReason(res.reason);
 
-    if (localStorage.getItem(NOTIF_KEY) === 'true' && status === 'danger') {
+    if (localStorage.getItem(NOTIF_KEY) === 'true' && res.status === 'danger') {
       sendBrowserNotification(
         '⚠️ GeoAlert — Peringatan Bahaya',
-        'Terdapat bencana tingkat BAHAYA di dekat wilayah Anda. Cek peta GeoAlert sekarang.'
+        res.reason || 'Terdapat bencana tingkat BAHAYA di dekat wilayah Anda. Cek peta GeoAlert sekarang.'
       );
     }
   }, [events, userCoords]);
@@ -349,8 +432,9 @@ export default function LandingPage() {
           setLocationName(name);
 
           const currentEvents = events.length > 0 ? events : [];
-          const status = calcAreaStatus(latitude, longitude, currentEvents);
-          setAreaStatus(status);
+          const res = calcAreaStatus(latitude, longitude, currentEvents);
+          setAreaStatus(res.status);
+          setAreaReason(res.reason);
 
           const nowStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
           setLastUpdatedTime(nowStr);
@@ -360,7 +444,8 @@ export default function LandingPage() {
             localStorage.setItem('geoalert_user_location', JSON.stringify({
               coords,
               name,
-              areaStatus: status,
+              areaStatus: res.status,
+              areaReason: res.reason,
               updatedAt: nowStr
             }));
           } catch {}
@@ -392,8 +477,9 @@ export default function LandingPage() {
     setLocationName(city.name);
 
     const currentEvents = events.length > 0 ? events : [];
-    const status = calcAreaStatus(city.lat, city.lng, currentEvents);
-    setAreaStatus(status);
+    const res = calcAreaStatus(city.lat, city.lng, currentEvents);
+    setAreaStatus(res.status);
+    setAreaReason(res.reason);
 
     const nowStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
     setLastUpdatedTime(nowStr);
@@ -403,7 +489,8 @@ export default function LandingPage() {
       localStorage.setItem('geoalert_user_location', JSON.stringify({
         coords,
         name: city.name,
-        areaStatus: status,
+        areaStatus: res.status,
+        areaReason: res.reason,
         updatedAt: nowStr
       }));
     } catch {}
@@ -560,7 +647,11 @@ export default function LandingPage() {
             <div className="status-pill-col">
               <span className="status-pill-label">STATUS WILAYAH</span>
               {locationStatus === 'ready' ? (
-                <div className="status-pill-val area-val" style={{ color: currentStatus.color }}>
+                <div
+                  className="status-pill-val area-val"
+                  style={{ color: currentStatus.color, cursor: areaReason ? 'help' : 'default' }}
+                  title={areaReason || `Status wilayah: ${currentStatus.label}`}
+                >
                   <span
                     className="status-dot-glow"
                     style={{
@@ -614,12 +705,12 @@ export default function LandingPage() {
               {
                 value: eventsLoading ? '…' : alertsCount,
                 label: 'Peringatan Aktif',
-                note: eventsLoading ? null : '(dari data BMKG)',
+                note: eventsLoading ? null : '(BMKG & NASA FIRMS)',
               },
               {
                 value: eventsLoading ? '…' : provincesCount,
                 label: 'Provinsi Terpantau',
-                note: eventsLoading ? null : '(dari data BMKG)',
+                note: eventsLoading ? null : '(seluruh Indonesia)',
               },
               { value: `< ${speedCount}s`, label: 'Kecepatan Notifikasi' },
               { value: '24/7', label: 'Pemantauan Aktif' },
@@ -651,6 +742,14 @@ export default function LandingPage() {
               <a href="https://inarisk.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
                 <span className="trust-badge-inline trust-inarisk-inline">InaRISK</span>
                 <span>Portal Risiko Bencana</span>
+              </a>
+              <a href="https://firms.modaps.eosdis.nasa.gov" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
+                <span className="trust-badge-inline" style={{ background: '#EA580C', color: '#fff', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>NASA FIRMS</span>
+                <span>Data Titik Panas Satelit Global</span>
+              </a>
+              <a href="https://sipongi.menlhk.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
+                <span className="trust-badge-inline" style={{ background: '#059669', color: '#fff', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>SiPongi KLHK</span>
+                <span>Sistem Monitoring Karhutla KLHK</span>
               </a>
             </div>
           </div>
@@ -904,7 +1003,7 @@ export default function LandingPage() {
               <table className="recent-table">
                 <thead>
                   <tr>
-                    {['Waktu', 'Jenis Bencana', 'Lokasi', 'Status'].map(h => (
+                    {['Waktu', 'Jenis Bencana', 'Lokasi', 'Skala / Titik', 'Status'].map(h => (
                       <th key={h}>{h}</th>
                     ))}
                   </tr>
@@ -913,12 +1012,13 @@ export default function LandingPage() {
                   {eventsLoading
                     ? [1, 2, 3].map(i => (
                       <tr key={i}>
-                        <td colSpan={4}>
+                        <td colSpan={5}>
                           <div className="skeleton" style={{ height: '48px', margin: '4px 0' }} />
                         </td>
                       </tr>
                     ))
-                    : events.slice(0, 5).map((ev, i) => {
+                    : events.slice(0, 6).map((ev, i) => {
+                      const isKarhutla = ev.type === 'Karhutla';
                       const riskBadge = (() => {
                         if (ev.risk === 'danger') {
                           return (
@@ -950,13 +1050,31 @@ export default function LandingPage() {
                           </td>
                           <td>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: '600' }}>
-                              <div style={{ background: 'rgba(14,42,92,0.08)', padding: '6px', borderRadius: '50%' }}>
-                                <Activity size={16} color="var(--color-primary)" />
+                              <div style={{
+                                background: isKarhutla ? 'rgba(234, 88, 12, 0.12)' : 'rgba(14,42,92,0.08)',
+                                padding: '6px',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}>
+                                {isKarhutla ? (
+                                  <Flame size={16} color="#EA580C" />
+                                ) : (
+                                  <Activity size={16} color="var(--color-primary)" />
+                                )}
                               </div>
-                              {ev.type}
+                              <span>{ev.type}</span>
                             </div>
                           </td>
                           <td style={{ fontWeight: '500' }}>{ev.location}</td>
+                          <td className="mono" style={{ fontSize: '0.875rem', fontWeight: '600', color: isKarhutla ? '#EA580C' : 'var(--color-primary)' }}>
+                            {isKarhutla
+                              ? `${ev.jumlah_titik} titik (${ev.frp_total} MW)`
+                              : ev.magnitude
+                              ? `M ${ev.magnitude}`
+                              : (ev.scale || '—')}
+                          </td>
                           <td>{riskBadge}</td>
                         </tr>
                       );
@@ -1010,9 +1128,15 @@ export default function LandingPage() {
             Langkah taktis yang dapat Anda ambil sebelum, saat, dan sesudah bencana terjadi berdasarkan standar BMKG &amp; BNPB.
           </p>
 
-          {/* 6 Disaster Cards Grid */}
+          {/* Disaster Cards Grid */}
           <div className="grid md:grid-cols-3 gap-8">
             {[
+              {
+                key: 'karhutla',
+                icon: <Flame size={44} color="#EA580C" />,
+                title: 'Karhutla & Kabut Asap',
+                desc: 'Gunakan masker N95 dan tutup ventilasi ruangan saat kabut asap pekat. Kurangi aktivitas luar, siapkan obat pernapasan, ikuti instruksi evakuasi BPBD, dan laporkan titik api ke 112 / Manggala Agni.',
+              },
               {
                 key: 'gempa',
                 icon: <Activity size={44} color="var(--color-alert)" />,

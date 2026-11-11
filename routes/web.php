@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use App\Http\Controllers\SubscriberController;
+use App\Http\Controllers\KarhutlaController;
 
 // Serve React SPA for all non-API routes
 Route::get('/', function () {
@@ -144,6 +145,12 @@ Route::middleware(['throttle:60,1'])->get('/api/bmkg/cuaca-ekstrem', function ()
         return response()->json(['status' => 'sample', 'message' => 'Data cuaca ekstrem tidak tersedia via API publik.'], 200);
     }
 });
+
+// =============================================
+// NASA FIRMS API — Karhutla
+// Rate-limited: 60 requests/minute per IP
+// =============================================
+Route::middleware(['throttle:60,1'])->get('/api/karhutla', [KarhutlaController::class, 'index']);
 
 // =============================================
 // NEWSLETTER SUBSCRIBE

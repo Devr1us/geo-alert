@@ -73,6 +73,10 @@ const AI_RESPONSES = [
     answer: `🌋 **Panduan Mitigasi Erupsi Gunung Api (SOP PVMBG & BNPB):**\n\n1. 😷 **Lindungi Saluran Napas:** Wajib kenakan masker khusus partikel debu (N95/KN95) atau kain basah untuk menyaring abu silika vulkanik yang berbahaya bagi paru-paru.\n2. 🥽 **Lindungi Mata & Kulit:** Kenakan kacamata pelindung (*goggles*) dan pakaian tertutup lengan panjang. Hindari menggunakan lensa kontak.\n3. 🚫 **Patuhi Radius Bahaya (KRB):** Dilarang beraktivitas di dalam radius Kawasan Rawan Bencana yang ditetapkan pos pemantauan PVMBG.\n4. 🌊 **Waspada Lahar Dingin:** Jauhi bantaran sungai yang berhulu di lereng gunung api saat terjadi hujan lebat di kawasan puncak.`
   },
   {
+    keywords: ['karhutla', 'kebakaran hutan', 'kebakaran lahan', 'titik panas', 'hotspot', 'kabut asap', 'asap', 'ispa', 'manggala agni', 'sipongi', 'n95', 'gambut'],
+    answer: `🔥 **Panduan Mitigasi Kebakaran Hutan & Lahan (Karhutla) & Kabut Asap:**\n\n📡 **Titik Panas Satelit vs Kebakaran:**\nData titik panas (*thermal hotspot*) dari satelit NASA FIRMS (VIIRS) mendeteksi anomali suhu permukaan bumi. Titik panas mengindikasikan potensi karhutla, namun perlu verifikasi lapangan oleh posko Manggala Agni / BPBD.\n\n😷 **Perlindungan Terhadap Kabut Asap (Bahaya PM2.5 & ISPA):**\n1. **Gunakan Masker N95 / KN95:** Masker kain atau bedah biasa tidak cukup rapat menyaring partikel mikro PM2.5 yang memicu ISPA.\n2. **Tutup Ventilasi Ruangan:** Tutup rapat jendela dan pintu, sumbat celah dengan handuk/kain basah untuk memerangkap asap.\n3. **Kurangi Aktivitas Luar Ruang:** Terutama bagi balita, ibu hamil, lansia, dan penderita asma/jantung.\n4. **Banyak Minum Air Putih:** Membantu mengencerkan lendir dan membersihkan partikel debu halus di saluran tenggorokan.\n\n🚨 **Nomor Darurat & Laporan Karhutla:**\n- 🚨 **112** — Layanan Darurat Terpadu Bebas Pulsa\n- 🚒 **113** — Pemadam Kebakaran\n- 🌲 **Manggala Agni KLHK / SiPongi:** Posko Pengendalian Kebakaran Hutan & Lahan`
+  },
+  {
     keywords: ['tas siaga', 'tas darurat', 'emergency kit', 'perlengkapan', 'tsb', '72 jam'],
     answer: `🎒 **Isi Wajib Tas Siaga Bencana (TSB) untuk 72 Jam Pertama:**\n\n1. 💧 **Air & Makanan:** Minimal 3 liter air/orang dan makanan siap santap berkalori tinggi (biskuit, makanan kaleng).\n2. 📄 **Dokumen Penting:** Salinan identitas, KK, dan ijazah dalam kantong plastik ziplock kedap air.\n3. 🩺 **Kotak P3K & Obat Khusus:** Obat pribadi untuk 7 hari (asma, hipertensi, diabetes) dan perban antiseptik.\n4. 🔦 **Peralatan Darurat:** Senter LED, baterai cadangan, peluit darurat, radio portabel, dan powerbank.\n\n💡 Gantung TSB di dekat pintu keluar agar mudah dibawa saat evakuasi mendesak.`
   },
@@ -145,10 +149,10 @@ function getAIResponse(message, history = []) {
 // Interactive Prompt Suggestion Sets for "Refresh Prompts"
 const PROMPT_SETS = [
   [
+    { text: "Cara melindungi diri dari kabut asap karhutla", category: "Karhutla" },
     { text: "Apa saja barang wajib dalam Tas Siaga Bencana (TSB)?", category: "Kesiapsiagaan" },
     { text: "Prosedur keselamatan saat terjadi gempa bumi di gedung tinggi", category: "Gempa Bumi" },
-    { text: "Cara mengetahui potensi tsunami setelah guncangan kuat di pantai", category: "Tsunami" },
-    { text: "Daftar nomor telepon darurat BPBD, BASARNAS & SAR", category: "Kontak Darurat" }
+    { text: "Cara mengetahui potensi tsunami setelah guncangan kuat di pantai", category: "Tsunami" }
   ],
   [
     { text: "Langkah evakuasi mandiri saat timbul tanda-tanda banjir", category: "Banjir" },

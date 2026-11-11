@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Search, AlertTriangle, AlertOctagon, ShieldAlert, RefreshCw, Activity, Droplets, Wind, Mountain, Waves, Flame, Bot, Map as MapIcon, Info, X } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import '../../css/MapPage.css';
 import '../../css/LandingPage.css';
 import AIChat from '../components/AIChat';
 import RevealSection from '../components/RevealSection';
+import MitigationModal from '../components/MitigationModal';
 import { BMKG_TERKINI_URL, BMKG_DIRASAKAN_URL } from '../config/bmkgApi';
 import { formatLocation } from '../utils/locationFormatter';
 import { evaluateRisk } from '../utils/riskEvaluator';
@@ -20,7 +21,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Create custom pulsing icon
+// Create custom pulsing icon for earthquakes & generic points
 const createCustomIcon = (level) => {
   const colors = {
     danger: '#C0492B',
@@ -53,10 +54,61 @@ const createCustomIcon = (level) => {
   });
 };
 
-// Indonesia bounds — prevents panning away
+// Create flame marker icon for Karhutla hotspot clusters
+const createFlameMarkerIcon = (level, pointCount = 1) => {
+  const colors = {
+    danger: '#C0492B',
+    warning: '#F57C00',
+    standby: '#4A90D9',
+  };
+  const color = colors[level] || '#F57C00';
+  const isDanger = level === 'danger';
+  const countBadge = pointCount > 1 ? (pointCount > 99 ? '99+' : pointCount) : null;
+
+  return L.divIcon({
+    className: 'karhutla-flame-divicon',
+    html: `
+      <div style="position:relative;width:34px;height:34px;display:flex;align-items:center;justify-content:center;">
+        ${isDanger ? `
+          <div style="
+            position:absolute;inset:-2px;border-radius:50%;
+            background:${color}33;
+            animation:karhutla-flame-pulse 1.8s infinite;
+          "></div>
+        ` : ''}
+        <div style="
+          width:28px;height:28px;border-radius:50%;
+          background:${color};
+          border:2px solid #ffffff;
+          box-shadow:0 3px 8px rgba(0,0,0,0.3);
+          display:flex;align-items:center;justify-content:center;
+          position:relative;z-index:2;
+        ">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+          </svg>
+        </div>
+        ${countBadge ? `
+          <div style="
+            position:absolute;top:-4px;right:-4px;
+            background:#0E2A5C;color:#ffffff;
+            font-family:'Fira Code', monospace;font-size:10px;font-weight:700;
+            padding:1px 5px;border-radius:10px;border:1.5px solid #ffffff;
+            z-index:3;line-height:1.2;
+          ">${countBadge}</div>
+        ` : ''}
+      </div>
+    `,
+    iconSize: [34, 34],
+    iconAnchor: [17, 17],
+    popupAnchor: [0, -17],
+  });
+};
+
+// Indonesia bounds — limits panning and sets initial view
 const INDONESIA_BOUNDS = L.latLngBounds(
-  L.latLng(-11.5, 94.0),  // SW corner
-  L.latLng(6.5, 141.0)    // NE corner
+  L.latLng(-11.0, 95.0),  // SW corner
+  L.latLng(6.0, 141.0)    // NE corner
 );
 const INDONESIA_CENTER = [-2.5, 117.5];
 
@@ -122,6 +174,8 @@ function SetBounds() {
   useEffect(() => {
     map.setMaxBounds(INDONESIA_BOUNDS);
     map.setMinZoom(4);
+    // Langsung set tampilan awal peta ke batas Indonesia
+    map.fitBounds(INDONESIA_BOUNDS, { padding: [10, 10] });
   }, [map]);
   return null;
 }
@@ -184,6 +238,13 @@ export default function MapPage() {
   const [mapZoom, setMapZoom] = useState(5);
   const [sidebarTab, setSidebarTab] = useState('map');
   const [noticeDismissed, setNoticeDismissed] = useState(false);
+  const [mitigationModal, setMitigationModal] = useState(null);
+  const [karhutlaInfo, setKarhutlaInfo] = useState({
+    stale: false,
+    updatedAt: null,
+    totalPoints: 0,
+    notice: null,
+  });
 
   // Auto-pan map jika diarahkan dari tombol "Cek Bencana Terdekat" / CTA di LandingPage
   useEffect(() => {
@@ -204,73 +265,129 @@ export default function MapPage() {
     setIsSampleData(false);
 
     try {
-      const [resTerkini, resDirasakan] = await Promise.all([
+      const [resTerkini, resDirasakan, resKarhutla] = await Promise.allSettled([
         fetch(BMKG_TERKINI_URL),
         fetch(BMKG_DIRASAKAN_URL),
+        fetch('/api/karhutla'),
       ]);
 
-      if (!resTerkini.ok || !resDirasakan.ok) throw new Error('Proxy API gagal');
+      let formattedData = [];
 
-      const parsedTerkini = await resTerkini.json();
-      const parsedDirasakan = await resDirasakan.json();
+      // Process BMKG Earthquakes
+      if (
+        resTerkini.status === 'fulfilled' &&
+        resDirasakan.status === 'fulfilled' &&
+        resTerkini.value.ok &&
+        resDirasakan.value.ok
+      ) {
+        const parsedTerkini = await resTerkini.value.json();
+        const parsedDirasakan = await resDirasakan.value.json();
 
-      if (parsedTerkini.error || parsedDirasakan.error) {
-        throw new Error(parsedTerkini.error || parsedDirasakan.error);
+        if (!parsedTerkini.error && !parsedDirasakan.error) {
+          const listTerkini = parsedTerkini.Infogempa?.gempa || [];
+          const listDirasakan = parsedDirasakan.Infogempa?.gempa || [];
+
+          const allGempa = [...listTerkini, ...listDirasakan];
+          const uniqueGempa = Array.from(new Set(allGempa.map(g => g.DateTime)))
+            .map(time => allGempa.find(g => g.DateTime === time));
+
+          formattedData = uniqueGempa.map((g, index) => {
+            const coords = (g.Coordinates || '').split(',');
+            const lat = parseFloat(coords[0]);
+            const lng = parseFloat(coords[1]);
+
+            // Logika level risiko terpusat
+            const riskInfo = evaluateRisk({
+              magnitude: g.Magnitude,
+              depth: g.Kedalaman,
+              potensi: g.Potensi,
+              dirasakan: g.Dirasakan,
+              type: 'Gempa Bumi'
+            });
+
+            // Format lokasi terpusat (arah mata angin, Title Case, mapping provinsi)
+            const formattedLoc = formatLocation(g.Wilayah);
+
+            return {
+              id: `bmkg-${index}`,
+              type: 'Gempa Bumi',
+              location: formattedLoc,
+              rawLocation: g.Wilayah || '',
+              lat: isNaN(lat) ? -2.5 : lat,
+              lng: isNaN(lng) ? 117.5 : lng,
+              time: `${g.Tanggal} ${g.Jam}`,
+              risk: riskInfo.level,
+              riskLabel: riskInfo.label,
+              magnitude: g.Magnitude,
+              depth: g.Kedalaman,
+              potensi: g.Potensi,
+              step: riskInfo.level === 'danger'
+                ? (riskInfo.reason.toLowerCase().includes('tsunami')
+                    ? 'BAHAYA TSUNAMI: Segera evakuasi ke tempat tinggi (>20 m)! Jauhi pantai dan sungai.'
+                    : 'BAHAYA TINGGI: Segera berlindung di bawah meja kokoh! Jauhi bangunan rapuh dan kaca.')
+                : riskInfo.level === 'warning'
+                ? 'WASPADA: Berlindung di bawah meja kuat. Jauhi perabot tinggi. Waspada gempa susulan.'
+                : 'SIAGA: Tetap tenang dan pantau informasi resmi BMKG. Pastikan akses pintu terbuka.',
+              isSample: false,
+            };
+          });
+        }
       }
 
-      const listTerkini = parsedTerkini.Infogempa?.gempa || [];
-      const listDirasakan = parsedDirasakan.Infogempa?.gempa || [];
+      // Process NASA FIRMS Karhutla Clusters
+      let karhutlaData = [];
+      if (resKarhutla.status === 'fulfilled' && resKarhutla.value.ok) {
+        try {
+          const khJson = await resKarhutla.value.json();
+          setKarhutlaInfo({
+            stale: khJson.stale || false,
+            updatedAt: khJson.updated_at || null,
+            totalPoints: khJson.total_titik || 0,
+            notice: khJson.notice || null,
+          });
 
-      const allGempa = [...listTerkini, ...listDirasakan];
-      const uniqueGempa = Array.from(new Set(allGempa.map(g => g.DateTime)))
-        .map(time => allGempa.find(g => g.DateTime === time));
+          if (Array.isArray(khJson.events)) {
+            karhutlaData = khJson.events.map((ev) => ({
+              id: ev.id,
+              type: 'Karhutla',
+              location: ev.location || `${ev.wilayah?.kabupaten}, ${ev.wilayah?.provinsi}`,
+              rawLocation: ev.location,
+              lat: ev.lat,
+              lng: ev.lon,
+              time: ev.waktu,
+              risk: ev.risk,
+              riskLabel: ev.status,
+              jumlah_titik: ev.jumlah_titik,
+              frp_total: ev.frp_total,
+              frp_max: ev.frp_max,
+              radius_km: ev.radius_km || 5,
+              wilayah: ev.wilayah,
+              titik: ev.titik || [],
+              satellite: ev.titik?.[0]?.satelit || 'VIIRS (NASA FIRMS)',
+              confidence: ev.titik?.[0]?.confidence || 'Nominal / High',
+              step: ev.risk === 'danger'
+                ? 'BAHAYA TINGGI: Kualitas udara berbahaya akibat konsentrasi titik api pekat. Gunakan masker N95, tetap di dalam ruangan, dan segera hubungi BPBD / Manggala Agni jika api mendekati pemukiman.'
+                : ev.risk === 'warning'
+                ? 'WASPADA: Titik panas aktif terdeteksi di sekitar area. Tutup ventilasi rumah jika ada kabut asap, gunakan masker saat keluar, dan pantau arah angin.'
+                : 'SIAGA: Titik panas terdeteksi satelit. Jangan membakar lahan atau sampah. Laporkan titik api ke aparat terdekat.',
+              isSample: false,
+            }));
+          }
+        } catch (khErr) {
+          console.warn('[GeoAlert] Gagal membaca data Karhutla:', khErr);
+        }
+      }
 
-      const formattedData = uniqueGempa.map((g, index) => {
-        const coords = (g.Coordinates || '').split(',');
-        const lat = parseFloat(coords[0]);
-        const lng = parseFloat(coords[1]);
+      if (formattedData.length === 0 && karhutlaData.length === 0) {
+        throw new Error('Gagal memuat data live bencana');
+      }
 
-        // Logika level risiko terpusat
-        const riskInfo = evaluateRisk({
-          magnitude: g.Magnitude,
-          depth: g.Kedalaman,
-          potensi: g.Potensi,
-          dirasakan: g.Dirasakan,
-          type: 'Gempa Bumi'
-        });
-
-        // Format lokasi terpusat (arah mata angin, Title Case, mapping provinsi)
-        const formattedLoc = formatLocation(g.Wilayah);
-
-        return {
-          id: `bmkg-${index}`,
-          type: 'Gempa Bumi',
-          location: formattedLoc,
-          rawLocation: g.Wilayah || '',
-          lat: isNaN(lat) ? -2.5 : lat,
-          lng: isNaN(lng) ? 117.5 : lng,
-          time: `${g.Tanggal} ${g.Jam}`,
-          risk: riskInfo.level,
-          riskLabel: riskInfo.label,
-          magnitude: g.Magnitude,
-          depth: g.Kedalaman,
-          potensi: g.Potensi,
-          step: riskInfo.level === 'danger'
-            ? (riskInfo.reason.toLowerCase().includes('tsunami')
-                ? 'BAHAYA TSUNAMI: Segera evakuasi ke tempat tinggi (>20 m)! Jauhi pantai dan sungai.'
-                : 'BAHAYA TINGGI: Segera berlindung di bawah meja kokoh! Jauhi bangunan rapuh dan kaca.')
-            : riskInfo.level === 'warning'
-            ? 'WASPADA: Berlindung di bawah meja kuat. Jauhi perabot tinggi. Waspada gempa susulan.'
-            : 'SIAGA: Tetap tenang dan pantau informasi resmi BMKG. Pastikan akses pintu terbuka.',
-          isSample: false,
-        };
-      });
-
-      setData([...formattedData, ...SAMPLE_DISASTERS]);
+      // Gabungkan event gempa bumi BMKG dan karhutla NASA FIRMS
+      setData([...formattedData, ...karhutlaData, ...SAMPLE_DISASTERS]);
       setLastUpdate(new Date());
     } catch (err) {
-      console.error('[GeoAlert] Gagal mengambil data BMKG:', err.message);
-      setError(`Gagal memuat data BMKG: ${err.message}. Menampilkan contoh tampilan data.`);
+      console.error('[GeoAlert] Gagal mengambil data:', err.message);
+      setError(`Gagal memuat data live: ${err.message}. Menampilkan contoh tampilan data.`);
       setData([
         { id: 's1', type: 'Gempa Bumi', location: formatLocation('Selatan Jawa Barat'), lat: -7.5, lng: 107.0, time: '(contoh data)', risk: 'danger', magnitude: '6.2', depth: '10 km', step: 'Berlindung di bawah meja kuat.', isSample: true },
         { id: 's4', type: 'Gempa Bumi', location: formatLocation('Palu, Sulawesi Tengah'), lat: -0.9, lng: 119.87, time: '(contoh data)', risk: 'standby', magnitude: '4.1', depth: '30 km', step: 'Tetap tenang.', isSample: true },
@@ -347,6 +464,7 @@ export default function MapPage() {
   };
 
   const getIcon = (type) => {
+    if (type.includes('Karhutla')) return <Flame size={16} color="#EA580C" />;
     if (type.includes('Gempa')) return <Activity size={16} />;
     if (type.includes('Tsunami')) return <Waves size={16} />;
     if (type.includes('Banjir')) return <Droplets size={16} />;
@@ -360,6 +478,8 @@ export default function MapPage() {
     let matchesFilter = false;
     if (activeFilter === 'Semua') {
       matchesFilter = true;
+    } else if (activeFilter === 'Karhutla') {
+      matchesFilter = item.type === 'Karhutla';
     } else if (activeFilter === 'Tsunami') {
       matchesFilter = item.type.includes('Tsunami') || (item.potensi && item.potensi.toLowerCase().includes('tsunami'));
     } else if (activeFilter === 'Gunung Api') {
@@ -386,6 +506,14 @@ export default function MapPage() {
           @keyframes marker-ring {
             0%   { transform: scale(1); opacity: 0.5; }
             100% { transform: scale(2.5); opacity: 0; }
+          }
+          @keyframes karhutla-flame-pulse {
+            0%   { transform: scale(1); opacity: 0.7; }
+            50%  { transform: scale(1.6); opacity: 0.25; }
+            100% { transform: scale(2.2); opacity: 0; }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .karhutla-flame-divicon div { animation: none !important; }
           }
           @keyframes spin { 100% { transform: rotate(360deg); } }
         `}</style>
@@ -433,22 +561,61 @@ export default function MapPage() {
 
               {/* Filter chips pills */}
               <div className="filter-chips-pill">
-                {['Semua', 'Gempa', 'Tsunami', 'Banjir', 'Longsor', 'Cuaca Ekstrem', 'Gunung Api'].map(chip => (
+                {['Semua', 'Gempa', 'Tsunami', 'Karhutla', 'Banjir', 'Longsor', 'Cuaca Ekstrem', 'Gunung Api'].map(chip => (
                   <button
                     key={chip}
                     className={`chip-pill ${activeFilter === chip ? 'active' : ''}`}
                     onClick={() => setActiveFilter(chip)}
                     aria-pressed={activeFilter === chip}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                   >
-                    {chip}
+                    {chip === 'Karhutla' && <Flame size={13} color="#EA580C" />}
+                    <span>{chip}</span>
                   </button>
                 ))}
               </div>
             </div>
 
+            {/* Permanent Satellite Disclaimer Banner */}
+            <div
+              className="map-firms-permanent-banner"
+              style={{
+                position: 'absolute',
+                top: '72px',
+                left: '16px',
+                right: '16px',
+                maxWidth: '620px',
+                zIndex: 999,
+                background: 'rgba(255, 255, 255, 0.94)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(234, 88, 12, 0.3)',
+                borderRadius: 'var(--radius-md)',
+                padding: '6px 12px',
+                fontSize: '0.78rem',
+                color: '#334155',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                pointerEvents: 'auto',
+              }}
+            >
+              <Flame size={15} color="#EA580C" style={{ flexShrink: 0 }} />
+              <div style={{ flex: 1, lineHeight: '1.4' }}>
+                <span>
+                  <strong>Informasi Satelit:</strong> Titik panas = indikasi anomali suhu dari satelit, belum tentu kebakaran terkonfirmasi. Sumber: NASA FIRMS.
+                </span>
+                {karhutlaInfo.stale && karhutlaInfo.updatedAt && (
+                  <span style={{ color: '#C0492B', fontWeight: 600, display: 'inline-block', marginLeft: '6px' }}>
+                    • Data terakhir diperbarui: {karhutlaInfo.updatedAt}
+                  </span>
+                )}
+              </div>
+            </div>
+
             {/* Floating Notice Toast */}
             {!noticeDismissed && (hasSampleItems || error) && (
-              <div className="map-notice-toast">
+              <div className="map-notice-toast" style={{ top: '120px' }}>
                 <Info size={16} color="var(--color-standby)" style={{ flexShrink: 0 }} />
                 <div style={{ flex: 1 }}>
                   {error ? (
@@ -488,52 +655,129 @@ export default function MapPage() {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
-                {!loading && filteredData.map(item => (
-                  <Marker
-                    key={item.id}
-                    position={[item.lat, item.lng]}
-                    icon={createCustomIcon(item.risk)}
-                  >
-                    <Popup maxWidth={300}>
-                      <div style={{ minWidth: '240px', fontFamily: 'Inter, sans-serif' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                          <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1rem' }}>
-                            {getIcon(item.type)} {item.type}
-                          </strong>
-                          {getRiskLabel(item.risk)}
-                        </div>
-                        <div style={{ fontSize: '0.875rem', marginBottom: '6px' }}>
-                          <strong>Lokasi:</strong> {item.location}
-                        </div>
-                        <div style={{ fontFamily: 'Fira Code, monospace', fontSize: '0.8rem', color: '#777', marginBottom: '8px' }}>
-                          {item.time}
-                        </div>
-                        {item.isSample && (
-                          <div style={{
-                            background: 'rgba(74,144,217,0.1)', borderRadius: '4px',
-                            padding: '4px 8px', fontSize: '0.72rem', color: '#4A90D9',
-                            marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px',
-                          }}>
-                            <Info size={11} /> contoh tampilan data
+                {!loading && filteredData.map(item => {
+                  const isKarhutla = item.type === 'Karhutla';
+                  const circleColor = item.risk === 'danger' ? '#C0492B' : item.risk === 'warning' ? '#F57C00' : '#4A90D9';
+
+                  return (
+                    <React.Fragment key={item.id}>
+                      {/* Lingkaran penanda daerah terdampak karhutla */}
+                      {isKarhutla && (
+                        <Circle
+                          center={[item.lat, item.lng]}
+                          radius={(item.radius_km || 5) * 1000}
+                          pathOptions={{
+                            color: circleColor,
+                            fillColor: circleColor,
+                            fillOpacity: 0.16,
+                            weight: 1.5,
+                            dashArray: '6, 6',
+                          }}
+                        />
+                      )}
+
+                      <Marker
+                        position={[item.lat, item.lng]}
+                        icon={isKarhutla ? createFlameMarkerIcon(item.risk, item.jumlah_titik) : createCustomIcon(item.risk)}
+                      >
+                        <Popup maxWidth={320}>
+                          <div style={{ minWidth: '240px', fontFamily: 'Inter, sans-serif' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                              <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1rem', color: isKarhutla ? '#EA580C' : 'inherit' }}>
+                                {getIcon(item.type)} {isKarhutla ? 'Titik Panas Karhutla' : item.type}
+                              </strong>
+                              {getRiskLabel(item.risk)}
+                            </div>
+
+                            <div style={{ fontSize: '0.875rem', marginBottom: '6px' }}>
+                              <strong>Wilayah:</strong> {item.location}
+                            </div>
+
+                            <div style={{ fontFamily: 'Fira Code, monospace', fontSize: '0.8rem', color: '#777', marginBottom: '8px' }}>
+                              Waktu: {item.time}
+                            </div>
+
+                            {isKarhutla ? (
+                              <>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
+                                  <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
+                                    <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>Titik Panas</div>
+                                    <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.1rem', color: '#EA580C' }}>
+                                      {item.jumlah_titik} Titik
+                                    </div>
+                                  </div>
+                                  <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
+                                    <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>Total FRP</div>
+                                    <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.1rem', color: '#0E2A5C' }}>
+                                      {item.frp_total} MW
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '8px', background: '#f1f5f9', padding: '6px 10px', borderRadius: '6px' }}>
+                                  <span>Satelit: <strong>{item.satellite || 'VIIRS'}</strong></span>
+                                  <span style={{ margin: '0 6px' }}>•</span>
+                                  <span>Radius sebaran: <strong>~{item.radius_km} km</strong></span>
+                                </div>
+
+                                <div style={{ fontSize: '0.85rem', padding: '10px', background: 'rgba(234,88,12,0.08)', borderRadius: '8px', borderLeft: '3px solid #EA580C', lineHeight: '1.5', marginBottom: '10px' }}>
+                                  <strong>⚠️ Rekomendasi:</strong><br />{item.step}
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={() => setMitigationModal('karhutla')}
+                                  style={{
+                                    width: '100%',
+                                    padding: '8px 12px',
+                                    background: '#0E2A5C',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '6px',
+                                  }}
+                                >
+                                  <Flame size={14} /> Lihat Panduan Mitigasi Karhutla
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                {item.isSample && (
+                                  <div style={{
+                                    background: 'rgba(74,144,217,0.1)', borderRadius: '4px',
+                                    padding: '4px 8px', fontSize: '0.72rem', color: '#4A90D9',
+                                    marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px',
+                                  }}>
+                                    <Info size={11} /> contoh tampilan data
+                                  </div>
+                                )}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
+                                  <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
+                                    <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>Magnitudo</div>
+                                    <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.1rem', color: '#0E2A5C' }}>{item.magnitude}</div>
+                                  </div>
+                                  <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
+                                    <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>Kedalaman</div>
+                                    <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.1rem', color: '#0E2A5C' }}>{item.depth}</div>
+                                  </div>
+                                </div>
+                                <div style={{ fontSize: '0.85rem', padding: '10px', background: 'rgba(192,73,43,0.08)', borderRadius: '8px', borderLeft: '3px solid #C0492B', lineHeight: '1.5' }}>
+                                  <strong>⚠️ Rekomendasi:</strong><br />{item.step}
+                                </div>
+                              </>
+                            )}
                           </div>
-                        )}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
-                          <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>Magnitudo</div>
-                            <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.1rem', color: '#0E2A5C' }}>{item.magnitude}</div>
-                          </div>
-                          <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>Kedalaman</div>
-                            <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.1rem', color: '#0E2A5C' }}>{item.depth}</div>
-                          </div>
-                        </div>
-                        <div style={{ fontSize: '0.85rem', padding: '10px', background: 'rgba(192,73,43,0.08)', borderRadius: '8px', borderLeft: '3px solid #C0492B', lineHeight: '1.5' }}>
-                          <strong>⚠️ Rekomendasi:</strong><br />{item.step}
-                        </div>
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))}
+                        </Popup>
+                      </Marker>
+                    </React.Fragment>
+                  );
+                })}
               </MapContainer>
 
               {loading && (
@@ -544,7 +788,7 @@ export default function MapPage() {
                   gap: '16px', borderRadius: 'var(--radius-xl)'
                 }}>
                   <RefreshCw size={32} color="var(--color-primary)" style={{ animation: 'spin 1s linear infinite' }} />
-                  <p style={{ color: 'var(--color-primary)', fontWeight: '600' }}>Memuat data BMKG…</p>
+                  <p style={{ color: 'var(--color-primary)', fontWeight: '600' }}>Memuat data real-time…</p>
                 </div>
               )}
             </div>
@@ -585,6 +829,22 @@ export default function MapPage() {
                 </div>
                 <div className="legend-chip standby">
                   <span className="legend-chip-dot"></span> Siaga
+                </div>
+              </div>
+
+              {/* Simbol Kategori & Area */}
+              <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid var(--color-border)', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <Flame size={14} color="#EA580C" style={{ flexShrink: 0 }} />
+                  <span><strong>Ikon api:</strong> Titik panas karhutla (NASA FIRMS)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <span style={{ display: 'inline-block', width: 14, height: 14, borderRadius: '50%', border: '1.5px dashed #F57C00', background: 'rgba(245,124,0,0.15)', flexShrink: 0 }} />
+                  <span><strong>Lingkaran putus-putus:</strong> Area terdampak sebaran api</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Activity size={14} color="var(--color-primary)" style={{ flexShrink: 0 }} />
+                  <span><strong>Titik bulat:</strong> Gempa bumi tektonik (BMKG)</span>
                 </div>
               </div>
 
@@ -647,11 +907,15 @@ export default function MapPage() {
                       </div>
                       <div style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span className="mono" style={{ color: 'var(--color-text-muted)' }}>{item.time}</span>
-                        {item.magnitude && item.magnitude !== '-' && !item.isSample && (
+                        {item.type === 'Karhutla' ? (
+                          <span className="mono" style={{ color: '#EA580C', fontWeight: '700', background: 'rgba(234,88,12,0.1)', padding: '2px 6px', borderRadius: '4px' }}>
+                            {item.jumlah_titik} Titik ({item.frp_total} MW)
+                          </span>
+                        ) : item.magnitude && item.magnitude !== '-' && !item.isSample ? (
                           <span className="mono" style={{ color: 'var(--color-primary)', fontWeight: '700', background: 'rgba(14,42,92,0.05)', padding: '2px 6px', borderRadius: '4px' }}>
                             M {item.magnitude}
                           </span>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   ))
@@ -670,6 +934,11 @@ export default function MapPage() {
           </div>
         </div>
       </RevealSection>
+
+      {/* Modal Mitigasi Terintegrasi */}
+      {mitigationModal && (
+        <MitigationModal type={mitigationModal} onClose={() => setMitigationModal(null)} />
+      )}
     </>
   );
 }

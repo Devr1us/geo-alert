@@ -118,6 +118,7 @@ export default function Footer() {
             <h4 className="footer-col-title">Mitigasi Bencana</h4>
             <ul className="footer-links-list">
               <li><Link to="/peta" className="footer-link-item">Gempa Bumi</Link></li>
+              <li><Link to="/peta" className="footer-link-item">Karhutla (Titik Panas)</Link></li>
               <li><Link to="/peta" className="footer-link-item">Banjir Bandang</Link></li>
               <li><Link to="/peta" className="footer-link-item">Tanah Longsor</Link></li>
               <li><Link to="/peta" className="footer-link-item">Cuaca Ekstrem</Link></li>

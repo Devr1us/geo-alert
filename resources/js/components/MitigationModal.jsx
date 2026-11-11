@@ -243,6 +243,48 @@ export const MITIGATION_DATA = {
         ]
       }
     ]
+  },
+
+  karhutla: {
+    title: 'SOP Mitigasi Kebakaran Hutan & Lahan (Karhutla)',
+    subtitle: 'Rujukan Standar Operasional Prosedur KLHK (SiPongi), BNPB & BMKG',
+    icon: <Flame size={32} color="#EA580C" />,
+    color: '#EA580C',
+    category: 'Lingkungan & Atmosfer',
+    sections: [
+      {
+        phase: 'before',
+        heading: '🛡️ Sebelum Bencana (Pencegahan & Kesiapsiagaan)',
+        steps: [
+          'DILARANG KERAS membuka lahan perkebunan atau pertanian dengan cara membakar semak belukar.',
+          'Jangan membuang puntung rokok sembarangan di area hutan, lahan gambut, atau padang ilalang kering.',
+          'Sediakan masker respirator partikel halus (N95 / KN95) di rumah untuk mengantisipasi bencana kabut asap pekat.',
+          'Siapkan stok obat-obatan esensial (obat asma, inhaler, tetes mata steril, obat flu) dan perbekalan air bersih.',
+          'Simpan nomor darurat 112, Posko Damkar 113, atau Brigade Pengendalian Karhutla Manggala Agni KLHK di ponsel.'
+        ]
+      },
+      {
+        phase: 'during',
+        heading: '🚨 Saat Karhutla & Kabut Asap Terjadi (Perlindungan Diri)',
+        steps: [
+          'Wajib kenakan masker N95/KN95 saat keluar rumah guna menyaring partikel mikro berbahaya PM2.5 dari kabut asap.',
+          'Tutup rapat seluruh jendela, pintu, dan ventilasi udara. Tutup celah bawah pintu menggunakan handuk/kain basah.',
+          'Batasi atau tunda kegiatan fisik berat di luar ruangan, terutama bagi anak-anak, lansia, dan penderita riwayat ISPA/asma.',
+          'Gunakan air purifier atau basahi gorden/kain di dalam ruangan untuk membantu mengikat partikel debu asap.',
+          'Jika api mendekati pemukiman, segera evakuasi ke tempat aman searah menjauhi hembusan angin api dan patuhi instruksi BPBD.'
+        ]
+      },
+      {
+        phase: 'after',
+        heading: '🟡 Sesudah Karhutla (Pemulihan & Sanitasi Lingkungan)',
+        steps: [
+          'Tetap gunakan masker pelindung hingga Indeks Standar Pencemar Udara (ISPU) resmi kembali ke status Baik atau Sedang.',
+          'Bersihkan jelaga dan abu sisa pembakaran pada lantai serta perabot rumah tangga menggunakan kain lap basah (jangan disapu kering).',
+          'Segera periksakan diri ke puskesmas atau rumah sakit jika mengalami batuk berdarah, pusing parah, atau sesak napas berat.',
+          'Laporkan segera ke petugas damkar/BPBD jika melihat titik api yang menyala kembali pada lapisan bawah lahan gambut.'
+        ]
+      }
+    ]
   }
 };
 
