@@ -335,6 +335,7 @@ export default function MapPage() {
   const [mapZoom, setMapZoom] = useState(5);
   const [sidebarTab, setSidebarTab] = useState('map');
   const [noticeDismissed, setNoticeDismissed] = useState(false);
+  const [satelliteNoticeDismissed, setSatelliteNoticeDismissed] = useState(false);
   const [mitigationModal, setMitigationModal] = useState(null);
   const [karhutlaInfo, setKarhutlaInfo] = useState({
     stale: false,
@@ -667,7 +668,7 @@ export default function MapPage() {
 
               {/* Filter chips pills */}
               <div className="filter-chips-pill">
-                {['Semua', 'Gempa', 'Tsunami', 'Karhutla', 'Banjir', 'Longsor', 'Cuaca Ekstrem', 'Gunung Api'].map(chip => (
+                {['Semua', 'Gempa', 'Tsunami', 'Karhutla', 'Banjir', 'Longsor', 'Gunung Api'].map(chip => (
                   <button
                     key={chip}
                     className={`chip-pill ${activeFilter === chip ? 'active' : ''}`}
@@ -682,46 +683,76 @@ export default function MapPage() {
               </div>
             </div>
 
-            {/* Permanent Satellite Disclaimer Banner */}
-            <div
-              className="map-firms-permanent-banner"
-              style={{
-                position: 'absolute',
-                top: '72px',
-                left: '16px',
-                right: '16px',
-                maxWidth: '620px',
-                zIndex: 999,
-                background: 'rgba(255, 255, 255, 0.94)',
-                backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(234, 88, 12, 0.3)',
-                borderRadius: 'var(--radius-md)',
-                padding: '6px 12px',
-                fontSize: '0.78rem',
-                color: '#334155',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                pointerEvents: 'auto',
-              }}
-            >
-              <Flame size={15} color="#EA580C" style={{ flexShrink: 0 }} />
-              <div style={{ flex: 1, lineHeight: '1.4' }}>
-                <span>
-                  <strong>Informasi Satelit:</strong> Titik panas = indikasi anomali suhu dari satelit, belum tentu kebakaran terkonfirmasi. Sumber: NASA FIRMS.
-                </span>
-                {karhutlaInfo.stale && karhutlaInfo.updatedAt && (
-                  <span style={{ color: '#C0492B', fontWeight: 600, display: 'inline-block', marginLeft: '6px' }}>
-                    • Data terakhir diperbarui: {karhutlaInfo.updatedAt}
+            {/* Satellite Disclaimer Banner */}
+            {!satelliteNoticeDismissed && (
+              <div
+                className="map-firms-permanent-banner"
+                style={{
+                  position: 'absolute',
+                  top: '72px',
+                  left: '16px',
+                  right: '16px',
+                  maxWidth: '620px',
+                  zIndex: 999,
+                  background: 'rgba(255, 255, 255, 0.94)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(234, 88, 12, 0.3)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '6px 12px',
+                  fontSize: '0.78rem',
+                  color: '#334155',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  pointerEvents: 'auto',
+                }}
+              >
+                <Flame size={15} color="#EA580C" style={{ flexShrink: 0 }} />
+                <div style={{ flex: 1, lineHeight: '1.4' }}>
+                  <span>
+                    <strong>Informasi Satelit:</strong> Titik panas = indikasi anomali suhu dari satelit, belum tentu kebakaran terkonfirmasi. Sumber: NASA FIRMS.
                   </span>
-                )}
+                  {karhutlaInfo.stale && karhutlaInfo.updatedAt && (
+                    <span style={{ color: '#C0492B', fontWeight: 600, display: 'inline-block', marginLeft: '6px' }}>
+                      • Data terakhir diperbarui: {karhutlaInfo.updatedAt}
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => setSatelliteNoticeDismissed(true)}
+                  title="Tutup informasi satelit"
+                  aria-label="Tutup informasi satelit"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#64748b',
+                    padding: '4px',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    transition: 'color 0.2s, background 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#0E2A5C';
+                    e.currentTarget.style.background = 'rgba(0,0,0,0.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#64748b';
+                    e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <X size={15} />
+                </button>
               </div>
-            </div>
+            )}
 
             {/* Floating Notice Toast */}
             {!noticeDismissed && (hasSampleItems || error) && (
-              <div className="map-notice-toast" style={{ top: '120px' }}>
+              <div className="map-notice-toast" style={{ top: !satelliteNoticeDismissed ? '120px' : '72px' }}>
                 <Info size={16} color="var(--color-standby)" style={{ flexShrink: 0 }} />
                 <div style={{ flex: 1 }}>
                   {error ? (
