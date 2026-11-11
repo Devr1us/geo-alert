@@ -823,48 +823,56 @@ export default function MapPage() {
                             : createCustomIcon(item.risk)
                         }
                       >
-                        <Popup maxWidth={320}>
-                          <div style={{ minWidth: '240px', fontFamily: 'Inter, sans-serif' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                              <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1rem', color: isKarhutla ? '#EA580C' : 'inherit' }}>
+                        <Popup
+                          maxWidth={270}
+                          minWidth={220}
+                          autoPan={true}
+                          autoPanPaddingTopLeft={[20, 115]}
+                          autoPanPaddingBottomRight={[20, 20]}
+                          className="custom-compact-popup"
+                        >
+                          <div style={{ minWidth: '220px', maxWidth: '260px', fontFamily: 'Inter, sans-serif' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', paddingRight: '14px' }}>
+                              <strong style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.86rem', color: isKarhutla ? '#EA580C' : '#0E2A5C' }}>
                                 {getIcon(item.type)} {isKarhutla ? 'Titik Panas Karhutla' : item.type}
                               </strong>
-                              {getRiskLabel(item.risk)}
+                              <div style={{ transform: 'scale(0.85)', transformOrigin: 'right center' }}>
+                                {getRiskLabel(item.risk)}
+                              </div>
                             </div>
 
-                            <div style={{ fontSize: '0.875rem', marginBottom: '6px' }}>
-                              <strong>Wilayah:</strong> {item.location}
+                            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#1e293b', lineHeight: 1.25, marginBottom: '2px' }}>
+                              {item.location}
                             </div>
 
-                            <div style={{ fontFamily: 'Fira Code, monospace', fontSize: '0.8rem', color: '#777', marginBottom: '8px' }}>
-                              Waktu: {item.time}
+                            <div style={{ fontFamily: 'Fira Code, monospace', fontSize: '0.7rem', color: '#64748b', marginBottom: '5px' }}>
+                              {item.time}
                             </div>
 
                             {isKarhutla ? (
                               <>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
-                                  <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
-                                    <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>Titik Panas</div>
-                                    <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.1rem', color: '#EA580C' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', marginBottom: '5px' }}>
+                                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '4px 6px', borderRadius: '6px', textAlign: 'center' }}>
+                                    <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Titik Panas</div>
+                                    <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '0.92rem', color: '#EA580C' }}>
                                       {item.jumlah_titik} Titik
                                     </div>
                                   </div>
-                                  <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
-                                    <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>Total FRP</div>
-                                    <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.1rem', color: '#0E2A5C' }}>
+                                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '4px 6px', borderRadius: '6px', textAlign: 'center' }}>
+                                    <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Total FRP</div>
+                                    <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '0.92rem', color: '#0E2A5C' }}>
                                       {item.frp_total} MW
                                     </div>
                                   </div>
                                 </div>
 
-                                <div style={{ fontSize: '0.75rem', color: '#555', marginBottom: '8px', background: '#f1f5f9', padding: '6px 10px', borderRadius: '6px' }}>
+                                <div style={{ fontSize: '0.68rem', color: '#475569', marginBottom: '5px', background: '#f1f5f9', padding: '3px 6px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                   <span>Satelit: <strong>{item.satellite || 'VIIRS'}</strong></span>
-                                  <span style={{ margin: '0 6px' }}>•</span>
-                                  <span>Radius sebaran: <strong>~{item.radius_km} km</strong></span>
+                                  <span>Radius: <strong>~{item.radius_km} km</strong></span>
                                 </div>
 
-                                <div style={{ fontSize: '0.85rem', padding: '10px', background: 'rgba(234,88,12,0.08)', borderRadius: '8px', borderLeft: '3px solid #EA580C', lineHeight: '1.5', marginBottom: '10px' }}>
-                                  <strong>⚠️ Rekomendasi:</strong><br />{item.step}
+                                <div style={{ fontSize: '0.72rem', padding: '5px 7px', background: 'rgba(234,88,12,0.06)', borderRadius: '6px', borderLeft: '3px solid #EA580C', lineHeight: '1.3', marginBottom: '6px' }}>
+                                  <strong style={{ color: '#C0492B' }}>⚠️ Tindakan:</strong> {item.step}
                                 </div>
 
                                 <button
@@ -872,21 +880,21 @@ export default function MapPage() {
                                   onClick={() => setMitigationModal('karhutla')}
                                   style={{
                                     width: '100%',
-                                    padding: '8px 12px',
+                                    padding: '5px 8px',
                                     background: '#0E2A5C',
                                     color: '#ffffff',
                                     border: 'none',
-                                    borderRadius: '6px',
-                                    fontSize: '0.8rem',
+                                    borderRadius: '5px',
+                                    fontSize: '0.72rem',
                                     fontWeight: 600,
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    gap: '6px',
+                                    gap: '5px',
                                   }}
                                 >
-                                  <Flame size={14} /> Lihat Panduan Mitigasi Karhutla
+                                  <Flame size={13} /> Panduan Mitigasi Karhutla
                                 </button>
                               </>
                             ) : (
@@ -894,33 +902,33 @@ export default function MapPage() {
                                 {item.isSample && (
                                   <div style={{
                                     background: 'rgba(74,144,217,0.1)', borderRadius: '4px',
-                                    padding: '4px 8px', fontSize: '0.72rem', color: '#4A90D9',
-                                    marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px',
+                                    padding: '2px 6px', fontSize: '0.65rem', color: '#4A90D9',
+                                    marginBottom: '5px', display: 'flex', alignItems: 'center', gap: '4px',
                                   }}>
-                                    <Info size={11} /> contoh tampilan data
+                                    <Info size={10} /> contoh tampilan data
                                   </div>
                                 )}
                                 {(() => {
                                   const metrics = getDisasterMetrics(item);
                                   return (
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
-                                      <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>{metrics.label1}</div>
-                                        <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.05rem', color: '#0E2A5C' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', marginBottom: '5px' }}>
+                                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '4px 6px', borderRadius: '6px', textAlign: 'center' }}>
+                                        <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>{metrics.label1}</div>
+                                        <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '0.92rem', color: '#0E2A5C' }}>
                                           {metrics.value1}
                                         </div>
                                       </div>
-                                      <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
-                                        <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>{metrics.label2}</div>
-                                        <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.05rem', color: '#0E2A5C' }}>
+                                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '4px 6px', borderRadius: '6px', textAlign: 'center' }}>
+                                        <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>{metrics.label2}</div>
+                                        <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '0.92rem', color: '#0E2A5C' }}>
                                           {metrics.value2}
                                         </div>
                                       </div>
                                     </div>
                                   );
                                 })()}
-                                <div style={{ fontSize: '0.85rem', padding: '10px', background: 'rgba(192,73,43,0.08)', borderRadius: '8px', borderLeft: '3px solid #C0492B', lineHeight: '1.5' }}>
-                                  <strong>⚠️ Rekomendasi:</strong><br />{item.step}
+                                <div style={{ fontSize: '0.72rem', padding: '5px 7px', background: 'rgba(192,73,43,0.06)', borderRadius: '6px', borderLeft: '3px solid #C0492B', lineHeight: '1.3' }}>
+                                  <strong style={{ color: '#C0492B' }}>⚠️ Tindakan:</strong> {item.step}
                                 </div>
                               </>
                             )}

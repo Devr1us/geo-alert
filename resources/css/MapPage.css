@@ -506,3 +506,42 @@
   }
 }
 
+/* ============================================================
+   CUSTOM COMPACT POPUP FOR MAP
+   ============================================================ */
+.custom-compact-popup .leaflet-popup-content-wrapper {
+  border-radius: 12px !important;
+  padding: 0 !important;
+  background: #ffffff !important;
+  box-shadow: 0 10px 25px -5px rgba(14, 42, 92, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid rgba(224, 217, 205, 0.9) !important;
+}
+
+.custom-compact-popup .leaflet-popup-content {
+  margin: 10px 12px !important;
+  line-height: 1.35 !important;
+}
+
+.custom-compact-popup .leaflet-popup-close-button {
+  top: 6px !important;
+  right: 6px !important;
+  color: #94a3b8 !important;
+  padding: 2px !important;
+  width: 22px !important;
+  height: 22px !important;
+  font-size: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: color 0.15s ease !important;
+}
+
+.custom-compact-popup .leaflet-popup-close-button:hover {
+  color: #0E2A5C !important;
+}
+
+.custom-compact-popup .leaflet-popup-tip-container {
+  margin-top: -1px !important;
+}
+
+
