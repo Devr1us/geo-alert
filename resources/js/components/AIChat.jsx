@@ -1,12 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Bot, Send, RefreshCw, Paperclip, Camera, ChevronDown,
-  RotateCcw, Sparkles, ShieldCheck
+  RotateCcw, Sparkles, ShieldCheck, Square, Copy, Check,
+  ThumbsUp, ThumbsDown, AlertTriangle, AlertCircle
 } from 'lucide-react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 
-// Konfigurasi renderer marked: pastikan link selalu target _blank dan rel noopener noreferrer
+// Konfigurasi renderer marked: link selalu target _blank dan rel noopener noreferrer
 const markedRenderer = new marked.Renderer();
 markedRenderer.link = ({ href, title, text }) => {
   const titleAttr = title ? ` title="${title}"` : '';
@@ -30,171 +31,92 @@ function renderMarkdown(rawText) {
   });
 }
 
-// Keyword-based AI response engine with realistic logical reasoning (BMKG & BNPB Official Guidance)
-const AI_RESPONSES = [
-  {
-    keywords: ['terima kasih', 'terimakasih', 'makasih', 'thanks', 'thank you', 'ok', 'oke', 'sip', 'mantap', 'keren'],
-    answer: `Sama-sama! Tetap waspada dan utamakan keselamatan diri serta keluarga.\n\n💡 **Tips Keselamatan Hari Ini:**\n1. Simpan nomor darurat **112** dan **115** pada panggilan cepat ponsel Anda.\n2. Pastikan Tas Siaga Bencana (TSB) siap di dekat akses pintu keluar utama.\n\n*Jika ada pertanyaan mitigasi lainnya, saya siap membantu kapan saja!*`
-  },
-  {
-    keywords: ['tidur', 'kasur', 'kamar', 'malam hari', 'tempat tidur'],
-    answer: `🛌 **Panduan Keselamatan Gempa Saat di Tempat Tidur (SOP BMKG):**\n\nJangan panik berlari keluar di tengah guncangan karena risiko tinggi tertimpa reruntuhan plafon atau terjatuh.\n\n**Langkah Tindakan:**\n1. **Lindungi Kepala:** Tetap di tempat tidur, posisi tengkurap, lindungi kepala dan leher dengan bantal tebal.\n2. **Posisi Samping Kasur:** Jika atap ringkih, segera turun ke samping ranjang (posisi *triangle of life*).\n3. **Siapkan Senter:** Selalu letakkan senter kecil dekat tempat tidur untuk penerangan saat listrik padam.\n4. **Buka Pintu:** Setelah guncangan mereda, segera buka pintu kamar sebelum kusen terkunci akibat pergeseran dinding.`
-  },
-  {
-    keywords: ['mobil', 'motor', 'kendaraan', 'jalan raya', 'mengemudi', 'menyetir'],
-    answer: `🚗 **Prosedur Keselamatan Gempa Saat Mengemudi:**\n\n1. **Tepi & Hentikan Kendaraan:** Nyalakan lampu hazard, perlambat laju, dan berhenti di area terbuka (jauhi flyover, jembatan, tiang listrik, dan papan reklame).\n2. **Tarik Rem Tangan:** Matikan mesin, pasang rem tangan, dan tinggalkan kunci kontak di dalam agar mobil dapat digeser petugas evakuasi darurat.\n3. **Tetap di Dalam Kabin:** Lindungi diri di dalam kabin mobil sampai getaran berhenti total.\n4. **Waspada Pantai:** Jika berkendara di pesisir dan guncangan kuat, segera tinggalkan kendaraan dan evakuasi ke tempat tinggi.`
-  },
-  {
-    keywords: ['gedung', 'bertingkat', 'lantai', 'lift', 'tangga darurat'],
-    answer: `🏢 **Prosedur Keselamatan Gempa di Gedung Bertingkat:**\n\n⚠️ **DILARANG MENGGUNAKAN LIFT!** Lift berisiko macet seketika akibat pemadaman listrik otomatis atau deformasi rel sangkar.\n\n**Langkah Cepat:**\n1. **Drop, Cover, Hold On:** Merunduk di bawah meja kokoh, lindungi kepala, dan pegang erat kaki meja.\n2. **Jauhi Dinding Kaca:** Hindari jendela kaca luar yang rentan pecah akibat gaya geser guncangan.\n3. **Gunakan Tangga Darurat:** Setelah guncangan selesai, turun melalui tangga darurat secara tertib tanpa saling mendorong.\n4. **Menuju Titik Kumpul:** Jauhi area luar gedung untuk menghindari jatuhnya pecahan kaca dan dinding ornamen.`
-  },
-  {
-    keywords: ['magnitudo', 'kedalaman', 'skala richter', 'dangkal', 'dalam', 'kerusakan'],
-    answer: `📊 **Pengaruh Kedalaman Gempa Terhadap Tingkat Kerusakan:**\n\n1. 🔴 **Gempa Dangkal (< 50 km):** Energi gempa dilepaskan dekat permukaan tanah sehingga guncangan sangat merusak fondasi dan bangunan.\n2. 🟡 **Gempa Menengah (50 - 300 km):** Getaran dirasakan luas, namun dampak kerusakan fisik di permukaan relatif sedang.\n3. 🟢 **Gempa Dalam (> 300 km):** Sebagian besar energi seismik teredam oleh mantel bumi sehingga jarang menimbulkan kerusakan di permukaan.\n\n💡 **Kesimpulan:** Magnitudo mengukur energi di pusat gempa, sedangkan kedalaman dan jarak episentrum menentukan keparahan dampak di pemukiman.`
-  },
-  {
-    keywords: ['tsunami', 'ombak', 'pantai', 'surut', '20-20-20'],
-    answer: `🌊 **Prinsip Evakuasi Tsunami — Aturan Emas 20-20-20:**\n\nJika berada di pesisir pantai dan merasakan gempa bumi kuat:\n1. ⏱️ **20 Detik Guncangan:** Jika gempa berlangsung kuat selama 20 detik atau lebih hingga sulit berdiri.\n2. 🏃 **20 Menit Evakuasi:** Waktu emas evakuasi sekitar 20 menit sebelum gelombang pertama mencapai daratan.\n3. ⛰️ **20 Meter Ketinggian:** Segera lari menuju dataran dengan ketinggian minimal 20 meter dpl atau Tempat Evakuasi Sementara (TES).\n\n⚠️ **Penting:** Jika air laut surut tiba-tiba, jangan mendekat untuk melihat ikan terdampar. Segera evakuasi ke tempat tinggi tanpa menunggu sirine!`
-  },
-  {
-    keywords: ['banjir', 'flood', 'listrik', 'ular', 'setrum', 'genangan'],
-    answer: `🔵 **Langkah Keselamatan Bahaya Banjir:**\n\n1. ⚡ **Bahaya Listrik:** Matikan sakelar MCB utama meteran listrik sebelum air masuk ke dalam rumah.\n2. 🌊 **Arus Air Mengalir:** Hindari menerobos genangan air mengalir setinggi 15 cm ke atas karena sanggup menjatuhkan orang dewasa.\n3. 🐍 **Ancaman Hewan Berbisa:** Waspadai ular atau serangga yang mencari tempat kering di tumpukan perabotan basah. Gunakan tongkat kayu saat memeriksa.\n4. 📞 **Panggilan Darurat:** Hubungi **112** atau BPBD setempat jika air terus meningkat melampaui ambang batas aman.`
-  },
-  {
-    keywords: ['longsor', 'tanah longsor', 'lereng', 'retakan', 'tebing', 'miring'],
-    answer: `🟠 **Panduan Evakuasi Tanah Longsor:**\n\n**Tanda-Tanda Awal:**\n1. Muncul retakan tanah melengkung pada lereng atau jalan.\n2. Pintu/jendela rumah mendadak seret atau sulit dibuka karena fondasi bergeser.\n3. Air sumur mendadak keruh atau muncul mata air baru berlumpur.\n\n**Arah Evakuasi:**\n⚠️ **Lari Tegak Lurus (Menyamping) dari Jalur Luncuran!** Jangan berlari searah luncuran longsoran karena kecepatannya bisa mencapai lebih dari 50 km/jam.`
-  },
-  {
-    keywords: ['cuaca', 'angin', 'puting beliung', 'petir', 'pohon', 'badai', 'topan'],
-    answer: `⚡ **Langkah Keselamatan Cuaca Ekstrem & Petir:**\n\n1. 🚫 **Jauhi Pohon & Tiang:** Dilarang keras berteduh di bawah pohon tunggal atau tiang besi di tempat terbuka saat hujan deras.\n2. 🌪️ **Angin Puting Beliung:** Jika di luar ruangan, segera tiarap di cekungan tanah atau parit kering sambil melindungi kepala.\n3. 🔌 **Cabut Stopkontak:** Lepaskan kabel alat elektronik dan antena untuk menghindari bahaya lonjakan arus akibat petir.`
-  },
-  {
-    keywords: ['gunung', 'erupsi', 'vulkanik', 'lahar', 'abu vulkanik', 'kawah', 'merapi', 'magma', 'wedhus gembel'],
-    answer: `🌋 **Panduan Mitigasi Erupsi Gunung Api (SOP PVMBG & BNPB):**\n\n1. 😷 **Lindungi Saluran Napas:** Wajib kenakan masker khusus partikel debu (N95/KN95) atau kain basah untuk menyaring abu silika vulkanik yang berbahaya bagi paru-paru.\n2. 🥽 **Lindungi Mata & Kulit:** Kenakan kacamata pelindung (*goggles*) dan pakaian tertutup lengan panjang. Hindari menggunakan lensa kontak.\n3. 🚫 **Patuhi Radius Bahaya (KRB):** Dilarang beraktivitas di dalam radius Kawasan Rawan Bencana yang ditetapkan pos pemantauan PVMBG.\n4. 🌊 **Waspada Lahar Dingin:** Jauhi bantaran sungai yang berhulu di lereng gunung api saat terjadi hujan lebat di kawasan puncak.`
-  },
-  {
-    keywords: ['karhutla', 'kebakaran hutan', 'kebakaran lahan', 'titik panas', 'hotspot', 'kabut asap', 'asap', 'ispa', 'manggala agni', 'sipongi', 'n95', 'gambut'],
-    answer: `🔥 **Panduan Mitigasi Kebakaran Hutan & Lahan (Karhutla) & Kabut Asap:**\n\n📡 **Titik Panas Satelit vs Kebakaran:**\nData titik panas (*thermal hotspot*) dari satelit NASA FIRMS (VIIRS) mendeteksi anomali suhu permukaan bumi. Titik panas mengindikasikan potensi karhutla, namun perlu verifikasi lapangan oleh posko Manggala Agni / BPBD.\n\n😷 **Perlindungan Terhadap Kabut Asap (Bahaya PM2.5 & ISPA):**\n1. **Gunakan Masker N95 / KN95:** Masker kain atau bedah biasa tidak cukup rapat menyaring partikel mikro PM2.5 yang memicu ISPA.\n2. **Tutup Ventilasi Ruangan:** Tutup rapat jendela dan pintu, sumbat celah dengan handuk/kain basah untuk memerangkap asap.\n3. **Kurangi Aktivitas Luar Ruang:** Terutama bagi balita, ibu hamil, lansia, dan penderita asma/jantung.\n4. **Banyak Minum Air Putih:** Membantu mengencerkan lendir dan membersihkan partikel debu halus di saluran tenggorokan.\n\n🚨 **Nomor Darurat & Laporan Karhutla:**\n- 🚨 **112** — Layanan Darurat Terpadu Bebas Pulsa\n- 🚒 **113** — Pemadam Kebakaran\n- 🌲 **Manggala Agni KLHK / SiPongi:** Posko Pengendalian Kebakaran Hutan & Lahan`
-  },
-  {
-    keywords: ['tas siaga', 'tas darurat', 'emergency kit', 'perlengkapan', 'tsb', '72 jam'],
-    answer: `🎒 **Isi Wajib Tas Siaga Bencana (TSB) untuk 72 Jam Pertama:**\n\n1. 💧 **Air & Makanan:** Minimal 3 liter air/orang dan makanan siap santap berkalori tinggi (biskuit, makanan kaleng).\n2. 📄 **Dokumen Penting:** Salinan identitas, KK, dan ijazah dalam kantong plastik ziplock kedap air.\n3. 🩺 **Kotak P3K & Obat Khusus:** Obat pribadi untuk 7 hari (asma, hipertensi, diabetes) dan perban antiseptik.\n4. 🔦 **Peralatan Darurat:** Senter LED, baterai cadangan, peluit darurat, radio portabel, dan powerbank.\n\n💡 Gantung TSB di dekat pintu keluar agar mudah dibawa saat evakuasi mendesak.`
-  },
-  {
-    keywords: ['nomor darurat', 'telepon darurat', 'kontak', 'hubungi', 'call center', '112', '115', '118', 'basarnas'],
-    answer: `📞 **Daftar Nomor Panggilan Darurat Nasional Resmi Indonesia:**\n\n1. 🚨 **112** — Layanan Panggilan Darurat Tunggal Bebas Pulsa (Dapat dihubungi tanpa pulsa/SIM)\n2. 🌊 **115** — BASARNAS (Pencarian & Pertolongan Korban Bencana)\n3. 🏥 **118 / 119** — Ambulans & Layanan Kesehatan\n4. 🔥 **113** — Pemadam Kebakaran (Damkar)\n5. 👮 **110** — Kepolisian RI\n6. 🌋 **0800-1000-3000** — Posko BNPB Pusat\n7. 🌤️ **196** — Call Center BMKG`
-  },
-  {
-    keywords: ['sumber data', 'bmkg', 'bnpb', 'inarisk', 'akurasi', 'aplikasi', 'geoalert'],
-    answer: `📡 **Sumber Informasi & Standar Panduan GeoAlert:**\n\nGeoAlert mengintegrasikan panduan mitigasi resmi pemerintah:\n\n1. 🔴 **Data Gempa BMKG:** Menampilkan data gempa bumi resmi dari BMKG TEWS (*Tsunami Early Warning System*) yang diperbarui berkala pada peta dan tabel.\n2. 🗺️ **Indeks Risiko InaRISK BNPB:** Rujukan tingkat kerentanan bencana wilayah Indonesia.\n3. 🤖 **GeoAlert AI Advisory:** Panduan kesiapsiagaan terstruktur berdasarkan SOP mitigasi resmi BMKG dan BNPB.`
-  }
+// Kumpulan 12 saran pertanyaan kebencanaan (Campuran semua jenis bencana)
+const ALL_SUGGESTIONS = [
+  { text: "Apa yang harus dilakukan saat gempa kuat terjadi di gedung tinggi?", category: "Gempa Bumi" },
+  { text: "Kapan harus evakuasi setelah gempa di pantai? (Aturan 20-20-20)", category: "Tsunami" },
+  { text: "Bagaimana cara melindungi diri dan keluarga dari kabut asap karhutla?", category: "Karhutla" },
+  { text: "Langkah mematikan listrik dan evakuasi saat air banjir mulai masuk rumah", category: "Banjir" },
+  { text: "Tanda-tanda lereng rawan longsor dan arah evakuasi yang benar", category: "Longsor" },
+  { text: "Jenis masker apa yang wajib digunakan saat hujan abu vulkanik?", category: "Gunung Api" },
+  { text: "Apa saja barang wajib dalam Tas Siaga Bencana (TSB) 72 jam?", category: "Kesiapsiagaan" },
+  { text: "Nomor darurat bebas pulsa apa yang bisa dihubungi saat bencana?", category: "Nomor Darurat" },
+  { text: "Perbedaan titik panas satelit NASA FIRMS dengan kebakaran aktif", category: "Karhutla" },
+  { text: "Apakah gempa bumi bisa diprediksi tanggal dan jam terjadinya?", category: "Edukasi Sains" },
+  { text: "Pertolongan pertama pada korban yang terkena serpihan kaca saat gempa", category: "P3K" },
+  { text: "Bagaimana cara membaca status risiko pada peta GeoAlert?", category: "Panduan Aplikasi" }
 ];
 
-// Daftar kata kunci darurat & panik
+// Deteksi kata kunci darurat untuk memunculkan Emergency Card
 const EMERGENCY_KEYWORDS = [
-  'tolong', 'terjebak', 'darurat', 'gempa sekarang', 'tsunami datang',
-  'air naik', 'banjir parah', 'tertimbun', 'evakuasi darurat', 'bantuan segera',
-  'panik', 'posko darurat', 'korban'
+  'sedang gempa', 'gempa kuat', 'terjebak', 'banjir masuk', 'kebakaran',
+  'tolong', 'tertimbun', 'air naik', 'panik', 'sesak nafas asap', 'darurat'
 ];
 
-// Daftar kata kunci sapaan
-const GREETING_KEYWORDS = [
-  'halo', 'hai', 'helo', 'pagi', 'siang', 'sore', 'malam', 'siapa kamu',
-  'siapa anda', 'tentang ai', 'siapa ini', 'apa kabar'
-];
-
-/**
- * Logika respons AI dengan penanganan riwayat percakapan dan situasi darurat
- * @param {string} message - Pesan saat ini dari user
- * @param {Array} history - Riwayat pesan sebelumnya [{ role: 'user'|'ai', text: string }]
- */
-function getAIResponse(message, history = []) {
-  const lower = message.toLowerCase().trim();
-  const hasHistory = Array.isArray(history) && history.length > 0;
-  const hasIntroduced = hasHistory && history.some(m => m.role === 'ai');
-
-  // 1. PRIORITAS TERTINGGI: SITUASI DARURAT ATAU PANIK
-  const isEmergency = EMERGENCY_KEYWORDS.some(kw => lower.includes(kw));
-  if (isEmergency) {
-    return `🚨 **SEGERA HUBUNGI NOMOR DARURAT 112 (BEBAS PULSA) ATAU BASARNAS 115!**\n\nJika Anda sedang dalam ancaman bahaya langsung, lakukan langkah keselamatan cepat berikut:\n\n1. 🛡️ **Lindungi Diri:** Merunduk di bawah meja kokoh (*Drop, Cover, Hold On*) jika terjadi gempa. Jika di pesisir, segera lari ke tempat tinggi (>20 meter).\n2. ⚡ **Amankan Jalur:** Matikan MCB listrik utama dan jauhi dinding kaca serta barang yang mudah roboh.\n3. 📞 **Panggilan Darurat Langsung:**\n   - **112** — Layanan Darurat Bebas Pulsa (Semua operator)\n   - **115** — BASARNAS (Pencarian & Pertolongan)\n   - **118 / 119** — Ambulans & Pertolongan Medis\n   - **113** — Pemadam Kebakaran\n4. 📢 **Beri Sinyal Suara:** Jika terjebak, tiup peluit atau ketuk benda padat untuk memandu tim evakuasi tanpa membuang energi berteriak.`;
-  }
-
-  // 2. DETEKSI SAPAAN (Anti-Pengulangan)
-  const isGreeting = GREETING_KEYWORDS.some(kw => lower.includes(kw));
-  if (isGreeting) {
-    if (hasIntroduced) {
-      // Sapaan lanjutan dibalas singkat dan ramah
-      return `Halo kembali! Ada informasi keselamatan, panduan gempa/tsunami, atau nomor darurat yang perlu kami bantu?`;
-    }
-
-    // Perkenalan pertama (ringkas, tanpa klaim data real-time)
-    return `Salam! Saya **GeoAlert AI**, asisten kesiapsiagaan dan panduan mitigasi bencana alam Indonesia berbasis SOP resmi BMKG & BNPB.\n\nSaya siap membantu Anda dengan:\n1. 🚨 **Prosedur Keselamatan:** Panduan evakuasi gempa, tsunami, banjir, longsor, cuaca ekstrem, & erupsi gunung api.\n2. 🎒 **Kesiapsiagaan:** Penyusunan Tas Siaga Bencana (TSB) 72 jam & rencana evakuasi keluarga.\n3. 📞 **Nomor Darurat Resmi:** Informasi nomor telepon 112, 115 (BASARNAS), 118, dan 113.\n\n*Ada situasi atau pertanyaan mitigasi yang ingin Anda konsultasikan?*`;
-  }
-
-  // 3. MATCH KNOWLEDGE BASE MITIGASI
-  const match = AI_RESPONSES.find(r => r.keywords.some(kw => lower.includes(kw)));
-  if (match) return match.answer;
-
-  // 4. CONTEXTUAL REASONING ENGINE (FALLBACK)
-  const isQuestion = lower.includes('apakah') || lower.includes('kenapa') || lower.includes('mengapa') || lower.includes('bagaimana') || lower.includes('berapa') || lower.includes('dimana');
-  const isSafetyRelated = lower.includes('aman') || lower.includes('bahaya') || lower.includes('selamat') || lower.includes('evakuasi') || lower.includes('korban');
-
-  if (isSafetyRelated || isQuestion) {
-    return `🧠 **Panduan Keselamatan GeoAlert AI:**\n\nMengenai pertanyaan Anda: *"_${message}_"*\n\n1. 🛡️ **Prioritas Keselamatan Jiwa:** Keselamatan diri dan keluarga adalah hal utama. Jangan menunda evakuasi demi menyelamatkan barang berharga.\n2. 📋 **Cek Informasi Resmi:** Pantau data peringatan resmi BMKG pada peta dan tabel GeoAlert.\n3. 📞 **Hubungi Bantuan Segera:** Jika terjadi bahaya mendesak, segera hubungi **112** (Darurat Bebas Pulsa) atau **115** (BASARNAS).\n\n*Ketik topik spesifik seperti "gempa", "tsunami", "banjir", "gunung api", atau "tas siaga" untuk panduan langkah demi langkah.*`;
-  }
-
-  return `Terima kasih atas pertanyaan Anda. **GeoAlert AI** siap membantu dengan panduan mitigasi bencana terstruktur:\n\n1. 🎒 **Tas Siaga Bencana (TSB):** Perlengkapan wajib 72 jam pertama\n2. 🔴 **Gempa Bumi:** Prosedur perlindungan di gedung, rumah, dan mobil\n3. 🌊 **Tsunami:** Aturan evakuasi 20-20-20 & tanda air laut surut\n4. 🔵 **Banjir, Longsor & Gunung Api:** Penanganan arus listrik, arah lari tebing, & masker abu\n5. 📞 **Nomor Darurat:** Kontak cepat 112, 115 (BASARNAS), 118, dan 113\n\n*Silakan ketik pertanyaan spesifik Anda seputar mitigasi bencana di atas.*`;
+function isEmergencyQuery(text) {
+  const lower = (text || '').toLowerCase();
+  return EMERGENCY_KEYWORDS.some(kw => lower.includes(kw));
 }
 
-// Interactive Prompt Suggestion Sets for "Refresh Prompts"
-const PROMPT_SETS = [
-  [
-    { text: "Cara melindungi diri dari kabut asap karhutla", category: "Karhutla" },
-    { text: "Apa saja barang wajib dalam Tas Siaga Bencana (TSB)?", category: "Kesiapsiagaan" },
-    { text: "Prosedur keselamatan saat terjadi gempa bumi di gedung tinggi", category: "Gempa Bumi" },
-    { text: "Cara mengetahui potensi tsunami setelah guncangan kuat di pantai", category: "Tsunami" }
-  ],
-  [
-    { text: "Langkah evakuasi mandiri saat timbul tanda-tanda banjir", category: "Banjir" },
-    { text: "Tanda-tanda awal tanah longsor di kawasan perbukitan", category: "Longsor" },
-    { text: "Apa yang harus dilakukan saat terjadi angin puting beliung?", category: "Cuaca Ekstrem" },
-    { text: "Perlindungan diri dan masker apa yang wajib saat erupsi gunung api?", category: "Gunung Api" }
-  ],
-  [
-    { text: "Berapa liter air minum yang harus disiapkan per orang saat bencana?", category: "Perlengkapan" },
-    { text: "Apakah aman menggunakan lift saat evakuasi gedung pasca gempa?", category: "Prosedur Evakuasi" },
-    { text: "Tindakan pertama jika melihat air laut mendadak surut drastis", category: "Tsunami" },
-    { text: "Nomor darurat ambulans dan pemadam kebakaran nasional", category: "Nomor Darurat" }
-  ]
-];
+// Generator 4 saran acak
+function getRandomSuggestions(count = 4) {
+  const shuffled = [...ALL_SUGGESTIONS].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
 
 export default function AIChat({ isFloating = false, initialMessage = '' }) {
-  const [messages, setMessages] = useState([]);
+  // Session storage untuk persistensi percakapan
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('geoalert_chat_history');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const [input, setInput] = useState(initialMessage);
-  const [isTyping, setIsTyping] = useState(false);
-  const [promptSetIndex, setPromptSetIndex] = useState(0);
-  const [selectedModel, setSelectedModel] = useState("GeoAlert AI 2.0");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [activeSuggestions, setActiveSuggestions] = useState(() => getRandomSuggestions(4));
+  const [selectedModel, setSelectedModel] = useState("Mode Cepat (Flash)");
   const [showModelDropdown, setShowModelDropdown] = useState(false);
-  
+  const [copiedIndex, setCopiedIndex] = useState(null);
+  const [reactions, setReactions] = useState({});
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [lastUserMessage, setLastUserMessage] = useState('');
+
+  // Auto-scroll control
+  const [userScrolledUp, setUserScrolledUp] = useState(false);
+  const scrollAreaRef = useRef(null);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
-  const containerRef = useRef(null);
-  const [inView, setInView] = useState(false);
+  const abortControllerRef = useRef(null);
 
+  // Simpan riwayat percakapan ke sessionStorage
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setInView(entry.isIntersecting);
-      },
-      { threshold: 0.15 }
-    );
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+    try {
+      sessionStorage.setItem('geoalert_chat_history', JSON.stringify(messages));
+    } catch (e) {
+      console.warn('[GeoAlert AI] Gagal menyimpan history ke sessionStorage:', e);
     }
-    return () => observer.disconnect();
-  }, []);
+  }, [messages]);
 
-  // Time-of-day greeting
+  // Deteksi scroll manual pengguna (hentikan auto-scroll jika user scroll ke atas)
+  const handleScroll = () => {
+    if (!scrollAreaRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollAreaRef.current;
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+    setUserScrolledUp(!isAtBottom);
+  };
+
+  // Scroll otomatis jika tidak sedang scroll ke atas
+  useEffect(() => {
+    if (!userScrolledUp && bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isStreaming, userScrolledUp]);
+
+  // Sapaan ramah sesuai jam WIB
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour >= 4 && hour < 11) return "Selamat pagi";
@@ -203,31 +125,168 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
     return "Selamat malam";
   };
 
+  // Kirim initialMessage jika disediakan via props
   useEffect(() => {
-    if (initialMessage) {
+    if (initialMessage && messages.length === 0) {
       setInput(initialMessage);
       handleSend(initialMessage);
     }
   }, [initialMessage]);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
-
+  /**
+   * Eksekusi pengiriman pesan ke LLM backend via Server-Sent Events
+   */
   const handleSend = async (textToSend) => {
     const query = (textToSend || input).trim();
-    if (!query) return;
+    if (!query || isStreaming) return;
 
-    const currentHistory = [...messages];
+    setErrorMessage(null);
+    setLastUserMessage(query);
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', text: query }]);
-    setIsTyping(true);
+    setUserScrolledUp(false); // Reset auto-scroll saat mengirim pesan baru
 
-    await new Promise(r => setTimeout(r, 600 + Math.random() * 400));
-    setIsTyping(false);
-    setMessages(prev => [...prev, { role: 'ai', text: getAIResponse(query, currentHistory) }]);
+    const userMsg = { role: 'user', content: query, timestamp: Date.now() };
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
+
+    // Siapkan placeholder pesan asisten dengan indikator streaming
+    const assistantIndex = newMessages.length;
+    const assistantMsg = {
+      role: 'assistant',
+      content: '',
+      isStreaming: true,
+      isEmergency: isEmergencyQuery(query),
+      timestamp: Date.now()
+    };
+    setMessages([...newMessages, assistantMsg]);
+    setIsStreaming(true);
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/event-stream',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify({
+          messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+          session_id: 'sess_' + (sessionStorage.getItem('geoalert_session_id') || Math.random().toString(36).substring(7)),
+          lokasi_kota: 'Indonesia'
+        }),
+        signal: controller.signal
+      });
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error('Terlalu banyak permintaan. Silakan tunggu 1 menit sebelum mengirim pesan lagi.');
+        }
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson.error || `Server merespons error (HTTP ${response.status})`);
+      }
+
+      // Baca stream SSE
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
+      let accumulatedContent = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(trimmed.slice(6));
+              if (data.token) {
+                accumulatedContent += data.token;
+                setMessages(prev => {
+                  const updated = [...prev];
+                  if (updated[assistantIndex]) {
+                    updated[assistantIndex] = {
+                      ...updated[assistantIndex],
+                      content: accumulatedContent,
+                      isStreaming: true
+                    };
+                  }
+                  return updated;
+                });
+              }
+            } catch (e) {
+              // Line json parse exception ignored
+            }
+          } else if (trimmed === 'event: done') {
+            // Selesai streaming
+          }
+        }
+      }
+
+      // Selesai streaming penuh
+      setMessages(prev => {
+        const updated = [...prev];
+        if (updated[assistantIndex]) {
+          updated[assistantIndex] = {
+            ...updated[assistantIndex],
+            isStreaming: false
+          };
+        }
+        return updated;
+      });
+
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        // User menekan tombol "Hentikan"
+        setMessages(prev => {
+          const updated = [...prev];
+          if (updated[assistantIndex]) {
+            updated[assistantIndex] = {
+              ...updated[assistantIndex],
+              content: updated[assistantIndex].content + '\n\n*(Pesan dihentikan oleh pengguna)*',
+              isStreaming: false
+            };
+          }
+          return updated;
+        });
+      } else {
+        // Tampilkan pesan error ramah
+        console.error('[GeoAlert AI] Stream error:', err);
+        setErrorMessage(err.message || 'Gagal terhubung ke layanan GeoAlert AI.');
+        setMessages(prev => {
+          const updated = [...prev];
+          if (updated[assistantIndex]) {
+            updated[assistantIndex] = {
+              ...updated[assistantIndex],
+              content: `⚠️ **Maaf, terjadi kendala koneksi.**\n\n${err.message || 'Asisten tidak dapat merespons saat ini.'}\n\nUntuk bantuan darurat segera hubungi **112** atau BPBD setempat.`,
+              isStreaming: false,
+              isError: true
+            };
+          }
+          return updated;
+        });
+      }
+    } finally {
+      setIsStreaming(false);
+      abortControllerRef.current = null;
+    }
   };
 
+  // Hentikan streaming yang sedang berjalan
+  const handleStopStream = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+  };
+
+  // Keyboard navigation: Enter kirim, Shift+Enter baris baru
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -235,21 +294,41 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
     }
   };
 
+  // Muat ulang 4 saran pertanyaan acak
   const handleRefreshPrompts = () => {
-    setPromptSetIndex((prev) => (prev + 1) % PROMPT_SETS.length);
+    setActiveSuggestions(getRandomSuggestions(4));
   };
 
+  // Percakapan Baru (Reset)
   const handleResetChat = () => {
+    if (isStreaming) handleStopStream();
     setMessages([]);
     setInput('');
-    setIsTyping(false);
+    setErrorMessage(null);
+    try {
+      sessionStorage.removeItem('geoalert_chat_history');
+    } catch {}
   };
 
-  const activePrompts = PROMPT_SETS[promptSetIndex];
+  // Salin jawaban AI ke clipboard
+  const handleCopy = (text, idx) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedIndex(idx);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    });
+  };
+
+  // Reaksi jempol suka / tidak
+  const handleReaction = (idx, type) => {
+    setReactions(prev => ({
+      ...prev,
+      [idx]: prev[idx] === type ? null : type
+    }));
+  };
 
   return (
     <div
-      ref={containerRef}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -265,20 +344,19 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
         boxShadow: '0 20px 50px rgba(14, 42, 92, 0.25)'
       }}
     >
-
-      {/* Top Header Bar */}
+      {/* ================= HEADER BAR ================= */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '16px 24px',
+        padding: '14px 20px',
         borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        background: 'rgba(14, 42, 92, 0.3)',
+        background: 'rgba(14, 42, 92, 0.4)',
         backdropFilter: 'blur(12px)',
         zIndex: 10
       }}>
-        {/* App Logo / Badge Top-Left */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        {/* Logo & Header Badge */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
           <div style={{
             width: '32px', height: '32px', borderRadius: '10px',
             background: 'linear-gradient(135deg, #00D2FF 0%, #4A90D9 100%)',
@@ -290,9 +368,18 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
           <span style={{ fontWeight: '700', fontSize: '1rem', letterSpacing: '-0.01em', color: '#FFFFFF' }}>
             GeoAlert AI
           </span>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '5px',
+            padding: '3px 10px', borderRadius: '20px',
+            background: 'rgba(0, 210, 255, 0.12)', border: '1px solid rgba(0, 210, 255, 0.3)',
+            fontSize: '0.72rem', color: '#00D2FF', fontWeight: '600'
+          }}>
+            <ShieldCheck size={13} color="#00D2FF" />
+            Berbasis panduan BMKG &amp; BNPB
+          </span>
         </div>
 
-        {/* Header Action: Reset Chat when active */}
+        {/* Action: Percakapan Baru */}
         {messages.length > 0 && (
           <button
             onClick={handleResetChat}
@@ -305,16 +392,28 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
             }}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.18)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+            title="Mulai percakapan baru"
           >
             <RotateCcw size={14} /> Percakapan Baru
           </button>
         )}
       </div>
 
-      {/* Main Content Area */}
-      <div className="ai-chat-scroll-area dark-scroll" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', position: 'relative', zIndex: 1 }}>
-
-        {/* INITIAL DASHBOARD MODE (ThinkAI Style) */}
+      {/* ================= MAIN SCROLL AREA ================= */}
+      <div
+        ref={scrollAreaRef}
+        onScroll={handleScroll}
+        className="ai-chat-scroll-area dark-scroll"
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflowY: 'auto',
+          position: 'relative',
+          zIndex: 1
+        }}
+      >
+        {/* MODE 1: WELCOME DASHBOARD (Saat belum ada pesan) */}
         {messages.length === 0 ? (
           <div style={{
             flex: 1, display: 'flex', flexDirection: 'column',
@@ -322,16 +421,14 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
             padding: '1.5rem 1rem 1rem', textAlign: 'center',
             width: '100%', boxSizing: 'border-box'
           }}>
-            {/* Center 3D Glowing Orb */}
-            <div className={`ai-orb-wrapper ${inView ? 'animate-orb-enter' : ''}`} style={{ position: 'relative', marginBottom: '1rem' }}>
-              {/* Outer Pulse Ring */}
+            {/* Glowing Orb */}
+            <div style={{ position: 'relative', marginBottom: '1rem' }}>
               <div style={{
                 position: 'absolute', inset: '-10px', borderRadius: '50%',
                 border: '1px solid rgba(0, 210, 255, 0.3)',
                 animation: 'orb-pulse-ring 3s infinite ease-in-out',
                 pointerEvents: 'none'
               }} />
-              {/* 3D Glowing Sphere */}
               <div style={{
                 width: '64px', height: '64px', borderRadius: '50%',
                 background: 'radial-gradient(circle at 35% 35%, #FFFFFF 0%, #00D2FF 40%, #4A90D9 70%, #0E2A5C 100%)',
@@ -342,40 +439,40 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
               </div>
             </div>
 
-            {/* Hero Greeting Typography */}
-            <h2 className={`ai-greeting-title ${inView ? 'animate-greeting-enter' : ''}`} style={{
+            {/* Greeting Headline */}
+            <h2 style={{
               fontSize: 'clamp(1.4rem, 2.5vw, 2.1rem)', fontWeight: '700',
               lineHeight: '1.25', color: '#FFFFFF', marginBottom: '0.35rem',
               letterSpacing: '-0.02em', textShadow: '0 4px 20px rgba(0,0,0,0.3)'
             }}>
               {getGreeting()}, Pengunjung
             </h2>
-            <p className={`ai-greeting-sub ${inView ? 'animate-sub-enter' : ''}`} style={{
-              fontSize: 'clamp(0.95rem, 1.8vw, 1.2rem)', fontWeight: '500',
+            <p style={{
+              fontSize: 'clamp(0.95rem, 1.8vw, 1.15rem)', fontWeight: '500',
               color: 'rgba(255, 255, 255, 0.9)', marginBottom: '0.35rem'
             }}>
               Ada yang bisa GeoAlert AI bantu hari ini?
             </p>
-            <p className={`ai-greeting-sub ${inView ? 'animate-sub-enter' : ''}`} style={{
+            <p style={{
               fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.6)',
               maxWidth: '520px', marginBottom: '1.25rem', lineHeight: '1.5'
             }}>
-              Pilih salah satu saran pertanyaan di bawah atau ketik pertanyaan Anda sendiri seputar mitigasi bencana.
+              Pilih salah satu saran di bawah atau ketik langsung pertanyaan Anda seputar gempa, karhutla, banjir, atau panduan mitigasi lainnya.
             </p>
 
-            {/* Prompt Suggestion Cards Container */}
+            {/* Suggestion Cards Grid */}
             <div className="thinkai-prompts-container">
-              {activePrompts.map((p, idx) => (
+              {activeSuggestions.map((p, idx) => (
                 <button
                   key={idx}
-                  className={`thinkai-prompt-card ${inView ? 'animate-card-stagger' : ''}`}
-                  style={{ animationDelay: `${idx * 100 + 200}ms` }}
+                  className="thinkai-prompt-card"
                   onClick={() => handleSend(p.text)}
+                  style={{ textAlign: 'left', cursor: 'pointer' }}
                 >
                   <span style={{ fontSize: '0.85rem', fontWeight: '500', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {p.text}
                   </span>
-                  <span style={{ fontSize: '0.7rem', color: 'rgba(74, 144, 217, 0.9)', fontWeight: '600', marginTop: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'rgba(74, 144, 217, 0.95)', fontWeight: '600', marginTop: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     {p.category} →
                   </span>
                 </button>
@@ -388,18 +485,18 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '6px',
                 background: 'transparent', border: 'none',
-                color: 'rgba(255, 255, 255, 0.55)', fontSize: '0.8rem',
-                cursor: 'pointer', transition: 'color 0.2s', padding: '4px 8px'
+                color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.8rem',
+                cursor: 'pointer', transition: 'color 0.2s', padding: '6px 12px', marginTop: '8px'
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.9)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#FFFFFF'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'; }}
             >
-              <RefreshCw size={13} /> Muat ulang saran
+              <RefreshCw size={13} /> Muat ulang saran pertanyaan
             </button>
           </div>
         ) : (
-          /* ACTIVE CHAT TRAJECTORY MODE */
-          <div style={{ flex: 1, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          /* MODE 2: ACTIVE CONVERSATION TRAJECTORY */
+          <div style={{ flex: 1, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {messages.map((msg, i) => (
               <div
                 key={i}
@@ -410,7 +507,8 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                   alignItems: 'flex-start'
                 }}
               >
-                {msg.role === 'ai' && (
+                {/* AI Avatar */}
+                {msg.role === 'assistant' && (
                   <div style={{
                     width: '36px', height: '36px', borderRadius: '50%',
                     background: 'linear-gradient(135deg, #00D2FF 0%, #4A90D9 100%)',
@@ -420,74 +518,158 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                     <Bot size={20} color="#FFFFFF" />
                   </div>
                 )}
-                <div style={{
-                  maxWidth: '82%',
-                  padding: '14px 18px',
-                  borderRadius: '20px',
-                  background: msg.role === 'user'
-                    ? 'linear-gradient(135deg, #0E2A5C 0%, #1e5bb8 100%)'
-                    : 'rgba(14, 42, 92, 0.45)',
-                  backdropFilter: 'blur(16px)',
-                  border: msg.role === 'user' ? '1px solid rgba(74, 144, 217, 0.4)' : '1px solid rgba(255, 255, 255, 0.12)',
-                  color: '#FFFFFF',
-                  fontSize: '0.92rem',
-                  lineHeight: '1.65',
-                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)'
-                }}>
-                  {msg.role === 'ai' ? (
-                    <div
-                      className="ai-chat-bubble-markdown"
-                      dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.text) }}
-                    />
-                  ) : (
-                    <div style={{ whiteSpace: 'pre-wrap' }}>
-                      {msg.text}
+
+                {/* Message Bubble Container */}
+                <div style={{ maxWidth: '82%', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  
+                  {/* Emergency Alert Card (jika kondisi darurat terdeteksi) */}
+                  {msg.role === 'assistant' && msg.isEmergency && (
+                    <div style={{
+                      background: 'rgba(220, 38, 38, 0.18)',
+                      border: '1px solid rgba(239, 68, 68, 0.5)',
+                      borderRadius: '14px',
+                      padding: '10px 14px',
+                      marginBottom: '4px',
+                      animation: 'fadeIn 0.3s ease-out'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#FCA5A5', fontWeight: '700', fontSize: '0.82rem', marginBottom: '6px' }}>
+                        <AlertTriangle size={15} color="#EF4444" /> SITUASI DARURAT — SEGERA HUBUNGI:
+                      </div>
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        <a href="tel:112" style={{ background: '#EF4444', color: '#fff', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, textDecoration: 'none' }}>🚨 112 (Nasional)</a>
+                        <a href="tel:115" style={{ background: '#0284C7', color: '#fff', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, textDecoration: 'none' }}>🌊 115 (Basarnas)</a>
+                        <a href="tel:117" style={{ background: '#D97706', color: '#fff', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, textDecoration: 'none' }}>🌋 117 (BNPB)</a>
+                        <a href="tel:113" style={{ background: '#DC2626', color: '#fff', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, textDecoration: 'none' }}>🚒 113 (Damkar)</a>
+                      </div>
                     </div>
                   )}
+
+                  {/* Bubble Body */}
+                  <div
+                    role={msg.role === 'assistant' ? 'status' : undefined}
+                    aria-live={msg.role === 'assistant' ? 'polite' : undefined}
+                    style={{
+                      padding: '14px 18px',
+                      borderRadius: '20px',
+                      background: msg.role === 'user'
+                        ? 'linear-gradient(135deg, #0E2A5C 0%, #1e5bb8 100%)'
+                        : 'rgba(14, 42, 92, 0.45)',
+                      backdropFilter: 'blur(16px)',
+                      border: msg.role === 'user' ? '1px solid rgba(74, 144, 217, 0.4)' : '1px solid rgba(255, 255, 255, 0.12)',
+                      color: '#FFFFFF',
+                      fontSize: '0.92rem',
+                      lineHeight: '1.65',
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)'
+                    }}
+                  >
+                    {msg.role === 'assistant' ? (
+                      msg.content ? (
+                        <div
+                          className="ai-chat-bubble-markdown"
+                          dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
+                        />
+                      ) : (
+                        /* Typing indicator saat menunggu token pertama */
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', padding: '4px 0' }}>
+                          {[0, 1, 2].map(dot => (
+                            <div key={dot} style={{
+                              width: '7px', height: '7px', borderRadius: '50%',
+                              background: '#00D2FF',
+                              animation: `typing-dot 1.2s ease-in-out ${dot * 0.2}s infinite`
+                            }} />
+                          ))}
+                        </div>
+                      )
+                    ) : (
+                      <div style={{ whiteSpace: 'pre-wrap' }}>
+                        {msg.content}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action Toolbar on Assistant Response (Copy & Feedback) */}
+                  {msg.role === 'assistant' && msg.content && !msg.isStreaming && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '4px', marginTop: '2px' }}>
+                      <button
+                        onClick={() => handleCopy(msg.content, i)}
+                        style={{
+                          background: 'transparent', border: 'none', cursor: 'pointer',
+                          color: copiedIndex === i ? '#4ADE80' : 'rgba(255, 255, 255, 0.5)',
+                          display: 'inline-flex', alignItems: 'center', gap: '4px',
+                          fontSize: '0.72rem', padding: '2px 6px', borderRadius: '4px'
+                        }}
+                        title="Salin jawaban"
+                      >
+                        {copiedIndex === i ? <Check size={13} /> : <Copy size={13} />}
+                        <span>{copiedIndex === i ? 'Tersalin' : 'Salin'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleReaction(i, 'like')}
+                        style={{
+                          background: 'transparent', border: 'none', cursor: 'pointer',
+                          color: reactions[i] === 'like' ? '#00D2FF' : 'rgba(255, 255, 255, 0.4)',
+                          padding: '2px 4px'
+                        }}
+                        title="Membantu"
+                      >
+                        <ThumbsUp size={13} />
+                      </button>
+
+                      <button
+                        onClick={() => handleReaction(i, 'dislike')}
+                        style={{
+                          background: 'transparent', border: 'none', cursor: 'pointer',
+                          color: reactions[i] === 'dislike' ? '#F87171' : 'rgba(255, 255, 255, 0.4)',
+                          padding: '2px 4px'
+                        }}
+                        title="Kurang membantu"
+                      >
+                        <ThumbsDown size={13} />
+                      </button>
+
+                      {msg.isError && lastUserMessage && (
+                        <button
+                          onClick={() => handleSend(lastUserMessage)}
+                          style={{
+                            background: 'rgba(239, 68, 68, 0.2)', border: '1px solid rgba(239, 68, 68, 0.4)',
+                            color: '#FCA5A5', padding: '2px 8px', borderRadius: '6px',
+                            fontSize: '0.72rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px'
+                          }}
+                        >
+                          <RefreshCw size={11} /> Coba lagi
+                        </button>
+                      )}
+                    </div>
+                  )}
+
                 </div>
               </div>
             ))}
 
-            {isTyping && (
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <div style={{
-                  width: '36px', height: '36px', borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #00D2FF 0%, #4A90D9 100%)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-                }}>
-                  <Bot size={20} color="#FFFFFF" />
-                </div>
-                <div style={{
-                  padding: '12px 18px', borderRadius: '20px',
-                  background: 'rgba(14, 42, 92, 0.45)', border: '1px solid rgba(255, 255, 255, 0.12)',
-                  display: 'flex', gap: '6px', alignItems: 'center'
-                }}>
-                  {[0, 1, 2].map(i => (
-                    <div key={i} style={{
-                      width: '8px', height: '8px', borderRadius: '50%',
-                      background: '#4A90D9',
-                      animation: `typing-dot 1.2s ease-in-out ${i * 0.2}s infinite`
-                    }} />
-                  ))}
-                </div>
-              </div>
-            )}
             <div ref={bottomRef} />
           </div>
         )}
       </div>
 
-      {/* THINKAI BOTTOM CHAT BOX CONTAINER */}
-      <div className={`thinkai-bottom-container ${inView ? 'animate-input-enter' : ''}`}>
+      {/* ================= INPUT FOOTER BAR ================= */}
+      <div className="thinkai-bottom-container">
         <div className="thinkai-input-box">
-          {/* Main Input Textarea/Field */}
+          {/* Main Input Textarea */}
           <textarea
             ref={inputRef}
             rows={messages.length === 0 ? 2 : 1}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={messages.length === 0 ? "Bagaimana GeoAlert AI dapat membantu Anda hari ini?" : "Ketik pertanyaan Anda..."}
+            disabled={isStreaming}
+            placeholder={
+              isStreaming
+                ? "GeoAlert AI sedang merespons..."
+                : messages.length === 0
+                ? "Tanyakan seputar gempa, karhutla, banjir, atau panduan evakuasi..."
+                : "Ketik pertanyaan Anda..."
+            }
             style={{
               width: '100%', background: 'transparent', border: 'none', outline: 'none',
               color: '#FFFFFF', fontSize: '0.95rem', resize: 'none', fontFamily: 'inherit',
@@ -495,10 +677,10 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
             }}
           />
 
-          {/* Bottom Action Bar inside Input Container */}
+          {/* Action Row */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px' }}>
             
-            {/* Left: Model Selector Badge Pill */}
+            {/* Model Indicator Pill */}
             <div style={{ position: 'relative' }}>
               <button
                 onClick={() => setShowModelDropdown(!showModelDropdown)}
@@ -507,95 +689,116 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                   padding: '5px 12px', borderRadius: '20px',
                   background: 'rgba(255, 255, 255, 0.08)',
                   border: '1px solid rgba(255, 255, 255, 0.15)',
-                  color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.78rem',
+                  color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.76rem',
                   fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s'
                 }}
               >
-                <ShieldCheck size={14} color="#00D2FF" />
+                <ShieldCheck size={13} color="#00D2FF" />
                 {selectedModel} <ChevronDown size={12} />
               </button>
 
-              {/* Model Dropdown Popup */}
               {showModelDropdown && (
                 <div style={{
                   position: 'absolute', bottom: 'calc(100% + 8px)', left: 0,
                   background: '#0E2A5C', border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: '16px', padding: '6px', width: '220px',
+                  borderRadius: '14px', padding: '6px', width: '210px',
                   boxShadow: '0 10px 30px rgba(0,0,0,0.5)', zIndex: 50
                 }}>
                   {[
-                    "GeoAlert AI 2.0 — BMKG SOP",
-                    "GeoAlert Fast — Respon Instan",
-                    "GeoAlert Pro — Mitigasi Lengkap"
+                    { label: "Mode Cepat (Flash)", desc: "Respon instan standar" },
+                    { label: "Mode Teliti (Pro)", desc: "Analisis mitigasi mendalam" }
                   ].map(m => (
                     <button
-                      key={m}
-                      onClick={() => { setSelectedModel(m.split(' — ')[0]); setShowModelDropdown(false); }}
+                      key={m.label}
+                      onClick={() => { setSelectedModel(m.label); setShowModelDropdown(false); }}
                       style={{
-                        width: '100%', textAlign: 'left', padding: '8px 12px',
-                        borderRadius: '10px', background: 'transparent', border: 'none',
-                        color: '#FFFFFF', fontSize: '0.78rem', cursor: 'pointer',
+                        width: '100%', textAlign: 'left', padding: '8px 10px',
+                        borderRadius: '8px', background: 'transparent', border: 'none',
+                        color: '#FFFFFF', fontSize: '0.76rem', cursor: 'pointer',
                         transition: 'background 0.2s'
                       }}
                       onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                     >
-                      {m}
+                      <div style={{ fontWeight: 600 }}>{m.label}</div>
+                      <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.6)' }}>{m.desc}</div>
                     </button>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Right: Attachment Icons & Send Button */}
+            {/* Right: Attachment (disabled with tooltip), Stop & Send Buttons */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button
                 className="thinkai-icon-btn"
-                title="Lampirkan Dokumen"
-                onClick={() => alert("Fitur unggah dokumen panduan evakuasi segera hadir!")}
+                title="Fitur lampirkan dokumen (Segera hadir)"
+                style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                disabled
               >
                 <Paperclip size={16} />
               </button>
+
               <button
                 className="thinkai-icon-btn"
-                title="Kamera / Foto"
-                onClick={() => alert("Fitur analisis foto kerusakan bencana segera hadir!")}
+                title="Fitur analisis foto bencana (Segera hadir)"
+                style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                disabled
               >
                 <Camera size={16} />
               </button>
-              <button
-                onClick={() => handleSend()}
-                disabled={!input.trim()}
-                aria-label="Kirim Pesan"
-                style={{
-                  width: '36px', height: '36px', borderRadius: '50%', border: 'none',
-                  background: input.trim()
-                    ? 'linear-gradient(135deg, #00D2FF 0%, #4A90D9 100%)'
-                    : 'rgba(255, 255, 255, 0.1)',
-                  color: input.trim() ? '#FFFFFF' : 'rgba(255, 255, 255, 0.3)',
-                  cursor: input.trim() ? 'pointer' : 'default',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.2s', boxShadow: input.trim() ? '0 0 15px rgba(0, 210, 255, 0.4)' : 'none'
-                }}
-              >
-                <Send size={16} />
-              </button>
+
+              {/* Tombol Hentikan (saat streaming) ATAU Tombol Kirim */}
+              {isStreaming ? (
+                <button
+                  onClick={handleStopStream}
+                  aria-label="Hentikan Jawaban"
+                  style={{
+                    width: '36px', height: '36px', borderRadius: '50%', border: 'none',
+                    background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+                    color: '#FFFFFF', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 0 15px rgba(239, 68, 68, 0.4)'
+                  }}
+                  title="Hentikan respon"
+                >
+                  <Square size={14} fill="#FFFFFF" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleSend()}
+                  disabled={!input.trim()}
+                  aria-label="Kirim Pesan"
+                  style={{
+                    width: '36px', height: '36px', borderRadius: '50%', border: 'none',
+                    background: input.trim()
+                      ? 'linear-gradient(135deg, #00D2FF 0%, #4A90D9 100%)'
+                      : 'rgba(255, 255, 255, 0.1)',
+                    color: input.trim() ? '#FFFFFF' : 'rgba(255, 255, 255, 0.3)',
+                    cursor: input.trim() ? 'pointer' : 'default',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.2s',
+                    boxShadow: input.trim() ? '0 0 15px rgba(0, 210, 255, 0.4)' : 'none'
+                  }}
+                >
+                  <Send size={16} />
+                </button>
+              )}
             </div>
 
           </div>
         </div>
 
-        {/* ThinkAI Footer Notes */}
+        {/* Footer Disclaimer & Hint */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           marginTop: '8px', padding: '0 4px',
           fontSize: '0.72rem', color: 'rgba(255, 255, 255, 0.45)'
         }}>
           <span>GeoAlert AI dapat membuat kekeliruan. Selalu verifikasi informasi dengan BMKG &amp; BNPB.</span>
-          <span style={{ display: 'none', md: 'inline' }}>Tekan Shift + Enter untuk baris baru</span>
+          <span style={{ display: 'none', md: 'inline' }}>Shift + Enter untuk baris baru</span>
         </div>
       </div>
-
     </div>
   );
 }

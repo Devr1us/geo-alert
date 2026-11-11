@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use App\Http\Controllers\SubscriberController;
 use App\Http\Controllers\KarhutlaController;
+use App\Http\Controllers\ChatController;
 
 // Serve React SPA for all non-API routes
 Route::get('/', function () {
@@ -151,6 +152,12 @@ Route::middleware(['throttle:60,1'])->get('/api/bmkg/cuaca-ekstrem', function ()
 // Rate-limited: 60 requests/minute per IP
 // =============================================
 Route::middleware(['throttle:60,1'])->get('/api/karhutla', [KarhutlaController::class, 'index']);
+
+// =============================================
+// GEOALERT AI ASSISTANT — REAL LLM STREAMING API
+// Rate-limited: 15 requests/minute per IP
+// =============================================
+Route::middleware(['throttle:15,1'])->post('/api/chat', [ChatController::class, 'chat']);
 
 // =============================================
 // NEWSLETTER SUBSCRIBE
