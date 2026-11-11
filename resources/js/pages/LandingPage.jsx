@@ -4,11 +4,10 @@ import {
   Map, Bell, Bot, Shield, ChevronRight, Activity, ArrowRight,
   Wind, Droplets, Mountain, ChevronDown, ChevronUp, MapPin, BellOff, RefreshCw,
   Zap, Quote, Compass, MessageSquare, Clock, AlertTriangle, AlertOctagon, ShieldAlert,
-  Waves, Flame, Briefcase, Navigation
+  Waves, Flame, Navigation
 } from 'lucide-react';
 import '../../css/LandingPage.css';
 import MitigationModal from '../components/MitigationModal';
-import EmergencyBagModal from '../components/EmergencyBagModal';
 import CitySelectModal from '../components/CitySelectModal';
 import RevealSection from '../components/RevealSection';
 import { BMKG_TERKINI_URL, BMKG_DIRASAKAN_URL } from '../config/bmkgApi';
@@ -276,7 +275,6 @@ export default function LandingPage() {
 
   // Modals state
   const [showCityModal, setShowCityModal] = useState(false);
-  const [showTsbModal, setShowTsbModal] = useState(false);
 
   // Notification state
   const [notifPref, setNotifPref] = useState(() => localStorage.getItem(NOTIF_KEY));
@@ -1068,59 +1066,6 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-
-          {/* Tas Siaga Bencana (TSB) Banner */}
-          <div
-            className="tsb-promo-banner"
-            style={{
-              marginTop: '3.5rem',
-              padding: '2.5rem',
-              borderRadius: 'var(--radius-lg)',
-              background: 'linear-gradient(135deg, #0E2A5C 0%, #173B7A 100%)',
-              color: '#FFFFFF',
-              boxShadow: '0 12px 30px rgba(14, 42, 92, 0.15)',
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '2rem',
-              flexWrap: 'wrap',
-            }}
-          >
-            <div style={{ maxWidth: '680px' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.15)', padding: '4px 12px', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: '700', letterSpacing: '0.05em', marginBottom: '12px' }}>
-                <Briefcase size={14} /> STANDAR KESIAPSIAGAAN MANDIRI
-              </div>
-              <h3 style={{ color: '#FFFFFF', fontSize: '1.75rem', marginBottom: '8px', fontWeight: '800' }}>
-                Checklist Tas Siaga Bencana (TSB) 72 Jam
-              </h3>
-              <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '0.98rem', lineHeight: '1.6', margin: 0 }}>
-                Pastikan perbekalan mandiri keluarga Anda untuk 3 hari pertama pasca-bencana telah lengkap dan tersimpan dalam tas kedap air dekat pintu keluar. Dilengkapi fitur cetak bersih ukuran A4 siap tempel di dinding.
-              </p>
-            </div>
-            <div>
-              <button
-                type="button"
-                onClick={() => setShowTsbModal(true)}
-                className="btn btn-primary"
-                style={{
-                  background: '#F7F2EA',
-                  color: '#0E2A5C',
-                  border: 'none',
-                  padding: '1rem 1.75rem',
-                  fontSize: '1rem',
-                  fontWeight: '700',
-                  boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                }}
-              >
-                <Briefcase size={18} /> Buka &amp; Cetak Checklist TSB
-              </button>
-            </div>
-          </div>
         </div>
       </RevealSection>
 
@@ -1176,13 +1121,6 @@ export default function LandingPage() {
           isOpen={showCityModal}
           onClose={() => setShowCityModal(false)}
           onSelectCity={handleSelectManualCity}
-        />
-      )}
-
-      {/* Emergency Bag (TSB) Checklist Modal */}
-      {showTsbModal && (
-        <EmergencyBagModal
-          onClose={() => setShowTsbModal(false)}
         />
       )}
     </div>
