@@ -6,6 +6,7 @@ import { ASSET_BASE } from '../config/baseUrl';
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [isHoveredOrFocused, setIsHoveredOrFocused] = useState(false);
   const scrollStopTimerRef = useRef(null);
   const tickingRef = useRef(false);
@@ -19,6 +20,7 @@ export default function Navbar() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      setIsScrolled(currentScrollY > 50);
 
       // 1. Jika di posisi paling atas (scrollY <= 10), navbar selalu tampil
       if (currentScrollY <= 10) {
@@ -49,6 +51,8 @@ export default function Navbar() {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    // Check initial scroll
+    handleScroll();
     return () => {
       window.removeEventListener('scroll', handleScroll);
       if (scrollStopTimerRef.current) {
@@ -103,8 +107,9 @@ export default function Navbar() {
     }
   };
 
+  const isDarkHero = false;
   const isHidden = !isVisible && !isOpen && !isHoveredOrFocused;
-  const navClass = `navbar ${isHidden ? 'navbar-hidden' : ''}`;
+  const navClass = `navbar ${isScrolled ? 'navbar-scrolled' : ''} ${isHidden ? 'navbar-hidden' : ''}`;
 
   return (
     <nav
@@ -139,14 +144,14 @@ export default function Navbar() {
 
           {/* Center Brand Logo (Desktop - Only Logo Icon, NO text) */}
           <Link to="/" className="nav-brand-center" aria-label="GeoAlert Beranda">
-            <svg viewBox="0 0 100 100" className="nav-logo-center-svg" fill="none" stroke="#0E2A5C" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="50" cy="50" r="40"/>
-              <circle cx="50" cy="50" r="24"/>
-              <line x1="50" y1="6" x2="50" y2="94"/>
-              <line x1="6" y1="50" x2="94" y2="50"/>
-              <line x1="50" y1="50" x2="75" y2="25"/>
-              <path d="M50 30 C43 30 38 35 38 42 C38 52 50 64 50 64 C50 64 62 52 62 42 C62 35 57 30 50 30 Z" fill="#0E2A5C" stroke="none"/>
-              <circle cx="50" cy="41" r="4" fill="#F7F2EA"/>
+            <svg viewBox="0 0 100 100" className="nav-logo-center-svg" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="50" cy="50" r="40" />
+              <circle cx="50" cy="50" r="24" />
+              <line x1="50" y1="6" x2="50" y2="94" />
+              <line x1="6" y1="50" x2="94" y2="50" />
+              <line x1="50" y1="50" x2="75" y2="25" />
+              <path d="M50 30 C43 30 38 35 38 42 C38 52 50 64 50 64 C50 64 62 52 62 42 C62 35 57 30 50 30 Z" fill="currentColor" stroke="none" />
+              <circle cx="50" cy="41" r="4" fill={isDarkHero ? 'rgba(255, 255, 255, 0.4)' : 'var(--bg-cream)'} />
             </svg>
           </Link>
 

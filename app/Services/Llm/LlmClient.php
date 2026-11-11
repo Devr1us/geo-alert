@@ -28,7 +28,7 @@ class LlmClient
     public function __construct()
     {
         $this->provider = strtolower(env('LLM_PROVIDER', 'gemini'));
-        $this->model = env('LLM_MODEL', 'gemini-3.8-flash');
+        $this->model = env('LLM_MODEL', 'gemini-3.5-flash');
         $this->baseUrl = env('LLM_BASE_URL');
 
         $k1 = env('GEMINI_API_KEY');
@@ -136,17 +136,18 @@ class LlmClient
             return false;
         }
 
-        // 2. Daftar model pool (model utama + model cadangan)
+        // 2. Daftar model pool (model utama + model cadangan teruji)
         $primaryModel = $options['model'] ?? $this->model;
         if (!str_contains($primaryModel, 'gemini')) {
-            $primaryModel = 'gemini-3.8-flash';
+            $primaryModel = 'gemini-3.5-flash';
         }
 
         $modelPool = array_unique([
             $primaryModel,
-            'gemini-3.8-flash',
             'gemini-3.5-flash',
-            'gemini-flash-latest'
+            'gemini-3.6-flash',
+            'gemini-3.5-flash-lite',
+            'gemini-flash-latest',
         ]);
 
         // 3. Payload standar Gemini — systemInstruction terpisah, max_tokens >= 1024, TANPA thinking_budget
@@ -171,11 +172,10 @@ class LlmClient
 
         $jsonPayload = json_encode($payload);
 
-        // 4. Iterasi Model Pool & Key Pool dengan Retry Exponential Backoff
+        // 4. Iterasi Model Pool & Key Pool dengan Failover Cepat
         foreach ($modelPool as $currentModel) {
             foreach ($this->geminiKeys as $keyIdx => $apiKey) {
-                $maxRetries = 3;
-                $backoffs = [1, 2, 4]; // Detik exponential backoff untuk 429 / 503
+                $maxRetries = 2; // Cukup 2 percobaan agar tidak memicu timeout client
 
                 for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
                     $url = "https://generativelanguage.googleapis.com/v1beta/models/" . urlencode($currentModel) . ":streamGenerateContent?alt=sse&key=" . urlencode($apiKey);
@@ -280,11 +280,29 @@ class LlmClient
                         break; // Keluar dari retry loop, coba model berikutnya
                     }
 
-                    // 3) 429 (Rate Limit) atau 503 (Overloaded): Lakukan exponential backoff
-                    if (($httpCode === 429 || $httpCode === 503) && $attempt < $maxRetries) {
-                        $waitSec = $backoffs[$attempt - 1] ?? 1;
-                        Log::info("[LlmClient] Mengalami {$httpCode} pada model {$currentModel}. Retry ke-{$attempt}/{$maxRetries} setelah {$waitSec}s...");
-                        sleep($waitSec);
+                    // 3) 429: Deteksi apakah quota habis (RESOURCE_EXHAUSTED / quota exceeded)
+                    if ($httpCode === 429) {
+                        $isQuotaExhausted = str_contains(strtolower($geminiErrMsg), 'quota')
+                            || str_contains(strtolower($geminiErrMsg), 'limit')
+                            || $geminiErrStatus === 'RESOURCE_EXHAUSTED';
+
+                        if ($isQuotaExhausted) {
+                            Log::warning("[LlmClient] Kuota harian habis pada model {$currentModel} (Key #{$keyIdx}). Segera beralih ke key/model berikutnya tanpa jeda...");
+                            break; // Jangan sleep! Langsung coba key berikutnya atau model berikutnya
+                        }
+
+                        if ($attempt < $maxRetries) {
+                            Log::info("[LlmClient] Rate limit sesaat pada model {$currentModel}. Retry ke-{$attempt}/{$maxRetries} setelah 1s...");
+                            sleep(1);
+                            continue;
+                        }
+                        break;
+                    }
+
+                    // 4) 503 (Overloaded): Coba sekali dengan jeda 1s
+                    if ($httpCode === 503 && $attempt < $maxRetries) {
+                        Log::info("[LlmClient] Server overloaded 503 pada model {$currentModel}. Retry ke-{$attempt}/{$maxRetries} setelah 1s...");
+                        sleep(1);
                         continue;
                     }
 
@@ -363,8 +381,8 @@ class LlmClient
         curl_setopt_array($ch, [
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $jsonPayload,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 20,
+            CURLOPT_CONNECTTIMEOUT => 5,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_HTTPHEADER => $headers,
             CURLOPT_RETURNTRANSFER => false,

@@ -179,10 +179,10 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    // Timeout otomatis 30 detik untuk permintaan
+    // Timeout otomatis 50 detik untuk permintaan
     const timeoutId = setTimeout(() => {
-      controller.abort(new Error('Batas waktu 30 detik terlampaui.'));
-    }, 30000);
+      controller.abort(new Error('Batas waktu koneksi terlampaui.'));
+    }, 50000);
 
     try {
       const response = await fetch('/api/chat', {
@@ -196,7 +196,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
           messages: cleanHistory,
           session_id: 'sess_' + (sessionStorage.getItem('geoalert_session_id') || Math.random().toString(36).substring(7)),
           lokasi_kota: 'Indonesia',
-          model: selectedModel.includes('Pro') ? 'gemini-3.8-flash' : 'gemini-3.8-flash'
+          model: selectedModel.includes('Pro') ? 'gemini-3.5-flash' : 'gemini-3.5-flash'
         }),
         signal: controller.signal
       });
@@ -264,7 +264,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
       });
 
     } catch (err) {
-      if (err.name === 'AbortError' && !err.message.includes('30 detik')) {
+      if (err.name === 'AbortError' && !err.message.includes('Batas waktu')) {
         // User menekan tombol "Hentikan"
         setMessages(prev => {
           const updated = [...prev];

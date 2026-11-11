@@ -81,7 +81,7 @@ class ChatController extends Controller
         $fullSystemPrompt = $baseSystemPrompt . "\n\n" . $dataTerkini;
 
         // 4. Return SSE Streaming Response
-        $requestedModel = $request->input('model', 'gemini-3.8-flash');
+        $requestedModel = $request->input('model', 'gemini-3.5-flash');
         return response()->stream(function () use ($messages, $fullSystemPrompt, $startTime, $userText, $sessionId, $requestedModel) {
             // Nonaktifkan output buffering
             if (function_exists('apache_setenv')) {

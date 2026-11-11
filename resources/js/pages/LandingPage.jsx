@@ -4,12 +4,13 @@ import {
   Map, Bell, Bot, Shield, ChevronRight, Activity, ArrowRight,
   Droplets, Mountain, ChevronDown, ChevronUp, MapPin, BellOff, RefreshCw,
   Zap, Quote, Compass, MessageSquare, Clock, AlertTriangle, AlertOctagon, ShieldAlert,
-  Waves, Flame, Navigation
+  Waves, Flame, Navigation, BookOpen
 } from 'lucide-react';
 import '../../css/LandingPage.css';
 import MitigationModal from '../components/MitigationModal';
 import CitySelectModal from '../components/CitySelectModal';
 import RevealSection from '../components/RevealSection';
+import HeroEarthquakeRadarCard from '../components/HeroEarthquakeRadarCard';
 import { BMKG_TERKINI_URL, BMKG_DIRASAKAN_URL } from '../config/bmkgApi';
 import { ASSET_BASE } from '../config/baseUrl';
 import { formatLocation } from '../utils/locationFormatter';
@@ -90,12 +91,12 @@ const FAQ_DATA = [
 
 // Education content — Bencana Utama Indonesia (BMKG, BNPB, PVMBG, NASA FIRMS)
 const EDUCATION_DATA = [
-  { icon: <Activity size={32} color="var(--color-alert)" />, bg: 'rgba(192, 73, 43, 0.1)', accentColor: 'var(--color-alert)', title: 'Gempa Bumi', desc: 'Getaran tektonik tiba-tiba akibat pelepasan energi lempeng bumi. Indonesia berada di Cincin Api Pasifik dengan ribuan sesar aktif yang memerlukan kewaspadaan tinggi.' },
-  { icon: <Waves size={32} color="#0284C7" />, bg: 'rgba(2, 132, 199, 0.1)', accentColor: '#0284C7', title: 'Tsunami', desc: 'Gelombang laut raksasa yang dipicu oleh gempa bumi dangkal di dasar laut, longsor bawah laut, atau letusan gunung api. Terapkan evakuasi emas 20-20-20 di pesisir.' },
-  { icon: <Flame size={32} color="#EA580C" />, bg: 'rgba(234, 88, 12, 0.12)', accentColor: '#EA580C', title: 'Karhutla (Kebakaran Hutan & Lahan)', desc: 'Penyebab utama adalah pembakaran lahan ilegal dan kemarau di lahan gambut. Berdampak kabut asap beracun, lonjakan ISPA, dan gangguan transportasi darat/udara. Wajib pakai masker N95 dan laporkan titik api ke satgas BPBD/Manggala Agni.' },
-  { icon: <Droplets size={32} color="var(--color-standby)" />, bg: 'rgba(74, 144, 217, 0.1)', accentColor: 'var(--color-standby)', title: 'Banjir & Banjir Bandang', desc: 'Luapan air berlebih akibat curah hujan ekstrem atau kegagalan tanggul. Aliran air deras membawa material lumpur dan puing yang membahayakan nyawa dan kelistrikan.' },
-  { icon: <Mountain size={32} color="var(--color-status-warning)" />, bg: 'rgba(245, 124, 0, 0.1)', accentColor: 'var(--color-status-warning)', title: 'Tanah Longsor', desc: 'Pergerakan massa batuan atau tanah menuruni lereng saat kondisi tanah jenuh air. Selalu evakuasi secara tegak lurus (menyamping) dari jalur luncuran tebing.' },
-  { icon: <Flame size={32} color="#DC2626" />, bg: 'rgba(220, 38, 38, 0.1)', accentColor: '#DC2626', title: 'Erupsi Gunung Api', desc: 'Keluarnya magma, awan panas (wedhus gembel), lontaran batu pijar, dan abu silika dari kawah aktif. Kenakan masker debu/N95 dan patuhi radius Kawasan Rawan Bencana (KRB).' },
+  { icon: <Activity size={32} color="var(--navy)" />, bg: 'rgba(18, 40, 92, 0.08)', accentColor: 'var(--navy)', title: 'Gempa Bumi', desc: 'Getaran tektonik tiba-tiba akibat pelepasan energi lempeng bumi. Indonesia berada di Cincin Api Pasifik dengan ribuan sesar aktif yang memerlukan kewaspadaan tinggi.' },
+  { icon: <Waves size={32} color="var(--navy)" />, bg: 'rgba(18, 40, 92, 0.08)', accentColor: 'var(--navy)', title: 'Tsunami', desc: 'Gelombang laut raksasa yang dipicu oleh gempa bumi dangkal di dasar laut, longsor bawah laut, atau letusan gunung api. Terapkan evakuasi emas 20-20-20 di pesisir.' },
+  { icon: <Flame size={32} color="var(--navy)" />, bg: 'rgba(18, 40, 92, 0.08)', accentColor: 'var(--navy)', title: 'Karhutla (Kebakaran Hutan & Lahan)', desc: 'Penyebab utama adalah pembakaran lahan ilegal dan kemarau di lahan gambut. Berdampak kabut asap beracun, lonjakan ISPA, dan gangguan transportasi darat/udara. Wajib pakai masker N95 dan laporkan titik api ke satgas BPBD/Manggala Agni.' },
+  { icon: <Droplets size={32} color="var(--navy)" />, bg: 'rgba(18, 40, 92, 0.08)', accentColor: 'var(--navy)', title: 'Banjir & Banjir Bandang', desc: 'Luapan air berlebih akibat curah hujan ekstrem atau kegagalan tanggul. Aliran air deras membawa material lumpur dan puing yang membahayakan nyawa dan kelistrikan.' },
+  { icon: <Mountain size={32} color="var(--navy)" />, bg: 'rgba(18, 40, 92, 0.08)', accentColor: 'var(--navy)', title: 'Tanah Longsor', desc: 'Pergerakan massa batuan atau tanah menuruni lereng saat kondisi tanah jenuh air. Selalu evakuasi secara tegak lurus (menyamping) dari jalur luncuran tebing.' },
+  { icon: <Mountain size={32} color="var(--navy)" />, bg: 'rgba(18, 40, 92, 0.08)', accentColor: 'var(--navy)', title: 'Erupsi Gunung Api', desc: 'Keluarnya magma, awan panas (wedhus gembel), lontaran batu pijar, dan abu silika dari kawah aktif. Kenakan masker debu/N95 dan patuhi radius Kawasan Rawan Bencana (KRB).' },
 ];
 
 // ============================================================
@@ -217,7 +218,7 @@ async function fetchDisasterEvents() {
         const coords = (g.Coordinates || '').split(',');
         const lat = parseFloat(coords[0]);
         const lng = parseFloat(coords[1]);
-        
+
         const riskInfo = evaluateRisk({
           magnitude: g.Magnitude,
           depth: g.Kedalaman,
@@ -266,22 +267,22 @@ async function fetchDisasterEvents() {
         const karhutlaEvents = khJson.events
           .filter(ev => ev.risk === 'warning' || ev.risk === 'danger')
           .map((ev) => ({
-          id: ev.id,
-          type: 'Karhutla',
-          location: ev.location || `${ev.wilayah?.kabupaten}, ${ev.wilayah?.provinsi}`,
-          rawLocation: ev.location,
-          province: ev.wilayah?.provinsi || '',
-          lat: ev.lat,
-          lng: ev.lon,
-          time: ev.waktu || '—',
-          risk: ev.risk,
-          riskLabel: ev.status,
-          riskBadgeClass: ev.risk === 'danger' ? 'badge-danger' : ev.risk === 'warning' ? 'badge-warning' : 'badge-standby',
-          scale: `${ev.jumlah_titik} titik (${ev.frp_total} MW)`,
-          jumlah_titik: ev.jumlah_titik,
-          frp_total: ev.frp_total,
-          radius_km: ev.radius_km || 5,
-        }));
+            id: ev.id,
+            type: 'Karhutla',
+            location: ev.location || `${ev.wilayah?.kabupaten}, ${ev.wilayah?.provinsi}`,
+            rawLocation: ev.location,
+            province: ev.wilayah?.provinsi || '',
+            lat: ev.lat,
+            lng: ev.lon,
+            time: ev.waktu || '—',
+            risk: ev.risk,
+            riskLabel: ev.status,
+            riskBadgeClass: ev.risk === 'danger' ? 'badge-danger' : ev.risk === 'warning' ? 'badge-warning' : 'badge-standby',
+            scale: `${ev.jumlah_titik} titik (${ev.frp_total} MW)`,
+            jumlah_titik: ev.jumlah_titik,
+            frp_total: ev.frp_total,
+            radius_km: ev.radius_km || 5,
+          }));
 
         allEvents.push(...karhutlaEvents);
       }
@@ -368,9 +369,9 @@ export default function LandingPage() {
   const [liveAlerts, setLiveAlerts] = useState(0);
   const [liveProvinces, setLiveProvinces] = useState(0);
 
-  const alertsCount  = useCountUp(liveAlerts, 1500);
+  const alertsCount = useCountUp(liveAlerts, 1500);
   const provincesCount = useCountUp(liveProvinces, 1500);
-  const speedCount   = useCountUp(3, 1500);
+  const speedCount = useCountUp(3, 1500);
 
   const [openFaq, setOpenFaq] = useState(null);
   const [modal, setModal] = useState(null);
@@ -450,7 +451,7 @@ export default function LandingPage() {
               areaReason: res.reason,
               updatedAt: nowStr
             }));
-          } catch {}
+          } catch { }
 
           if (navigateOnSuccess) {
             navigate('/peta', { state: { userCoords: coords, locationName: name } });
@@ -495,7 +496,7 @@ export default function LandingPage() {
         areaReason: res.reason,
         updatedAt: nowStr
       }));
-    } catch {}
+    } catch { }
   };
 
   // Tombol aksi Hero & CTA
@@ -556,17 +557,17 @@ export default function LandingPage() {
 
   // ---- Helpers untuk status wilayah ----
   const areaStatusConfig = {
-    safe:    { label: 'Aman',    color: 'var(--color-status-safe)',    glow: 'var(--color-status-safe)' },
+    safe: { label: 'Aman', color: 'var(--color-status-safe)', glow: 'var(--color-status-safe)' },
     warning: { label: 'Waspada', color: 'var(--color-status-warning)', glow: 'var(--color-status-warning)' },
-    danger:  { label: 'Bahaya',  color: 'var(--color-alert)',          glow: 'var(--color-alert)' },
+    danger: { label: 'Bahaya', color: 'var(--color-alert)', glow: 'var(--color-alert)' },
   };
   const currentStatus = areaStatusConfig[areaStatus] || areaStatusConfig.safe;
 
   return (
     <div>
-      {/* =================== HERO =================== */}
+      {/* =================== HERO SECTION (LIGHT & TRANQUIL BROMO LANDSCAPE) =================== */}
       <section className="hero-section">
-        {/* Layer 1: Landscape Gunung Api Indonesia (WebP, eager, fetchpriority="high", srcset) */}
+        {/* Layer 1: Landscape Gunung Api Indonesia (WebP, eager, 80% saturation diredam, opasitas 0.38) */}
         <div className="hero-bg-image-layer" aria-hidden="true">
           <img
             src="/images/hero-bg.webp"
@@ -579,13 +580,13 @@ export default function LandingPage() {
           />
         </div>
 
-        {/* Layer 2: Veil Oval Radial Gradient (Krem #F7F3EC) di belakang teks tengah (kontras >= 4.5:1) */}
+        {/* Layer 2: Veil Oval Radial Gradient (Krem #F7F3EC) tepat di belakang teks tengah (kontras >= 4.5:1) */}
         <div className="hero-veil-oval" aria-hidden="true" />
 
-        {/* Layer 3: Vertical Cream Gradient Overlay (80% area judul/teks, memudar ke 15% di dasar) */}
+        {/* Layer 3: Vertical Cream Gradient Overlay (80% area judul/paragraf, memudar ke 15% di dasar) */}
         <div className="hero-gradient-overlay" aria-hidden="true" />
 
-        {/* Layer 4: Aksen Kepulan Abu / Kontur Kabut Halus (SVG) */}
+        {/* Layer 4: Aksen Garis Topografi / Kontur Halus (SVG) */}
         <div className="hero-top-contours" aria-hidden="true">
           <svg className="hero-top-contours-svg" viewBox="0 0 1440 280" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M-60,35 C240,5 540,65 840,25 C1140,-15 1360,55 1500,15" stroke="rgba(14, 42, 92, 0.08)" strokeWidth="1.2" />
@@ -596,192 +597,122 @@ export default function LandingPage() {
           </svg>
         </div>
 
-        {/* Layer 5: Gradient Mask fading bottom edge into next section (#FFFFFF) */}
+        {/* Layer 5: Gradient Mask fading bottom edge into next section */}
         <div className="hero-bottom-fade-mask" aria-hidden="true" />
 
-        <div className="container" style={{ position: 'relative', zIndex: 2 }}>
-          <h1 className="hero-title hero-title-animated" style={{ fontSize: '4rem', fontWeight: '900' }}>
+        {/* Hero Content */}
+        <div className="container" style={{ position: 'relative', zIndex: 10 }}>
+          {/* Judul Besar Serif Tebal */}
+          <h1 className="hero-title hero-title-animated">
             GeoAlert
           </h1>
-          <p className="hero-subtitle hero-subtitle-animated" style={{ fontSize: '1.5rem', fontWeight: '500', color: 'var(--color-primary)' }}>
+
+          {/* Subtitle / Tagline */}
+          <p className="hero-subtitle hero-subtitle-animated">
             Deteksi Dini, Lindungi Diri
           </p>
-          <p className="hero-desc-animated" style={{ maxWidth: '700px', margin: '0 auto 2.5rem', color: 'var(--color-text-muted)', fontSize: '1.125rem', lineHeight: '1.7' }}>
-            Pantau informasi bencana alam di seluruh Indonesia secara real-time.
-            Dapatkan panduan mitigasi instan dan peringatan dini langsung dari sumber resmi.
+
+          {/* Deskripsi */}
+          <p className="hero-desc-animated">
+            Pantau informasi bencana alam di seluruh Indonesia secara real-time. Dapatkan panduan mitigasi instan dan peringatan dini langsung dari sumber resmi.
           </p>
 
+          {/* Tombol Aksi Hero */}
           <div className="hero-actions hero-actions-animated">
             <button
               type="button"
               onClick={handleCekBencana}
-              className="btn btn-primary"
-              style={{ padding: '1rem 2rem', fontSize: '1.125rem', cursor: 'pointer', border: 'none' }}
+              className="btn btn-hero-primary"
             >
-              <Map size={24} /> Cek Bencana Terdekat
+              <BookOpen size={20} /> Cek Bencana Terdekat
             </button>
-            <a href="#tentang" className="btn btn-secondary" style={{ padding: '1rem 2rem', fontSize: '1.125rem', background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(10px)' }}>
+            <a href="#tentang" className="btn btn-hero-secondary">
               Pelajari Lebih Lanjut
             </a>
           </div>
-
-          {/* ---- Live Status Card (Refined to match exact screenshot mockup) ---- */}
-          <div className="live-status-pill-card hero-status-card-animated">
-            {/* Column 1: Lokasi Anda */}
-            <div className="status-pill-col">
-              <span className="status-pill-label">LOKASI ANDA</span>
-              {locationStatus === 'detecting' && (
-                <div className="status-pill-val loading-val" style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
-                  <RefreshCw size={14} className="animate-spin" /> Mendeteksi…
-                </div>
-              )}
-              {locationStatus === 'ready' && (
-                <div className="status-pill-val location-val" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <MapPin size={15} color="#0E2A5C" />
-                  <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={locationName}>
-                    {locationName || 'Lokasi Terdeteksi'}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setShowCityModal(true)}
-                    title="Ubah kota atau lokasi"
-                    style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: '0.75rem', textDecoration: 'underline', padding: '0 2px' }}
-                  >
-                    Ubah
-                  </button>
-                </div>
-              )}
-              {(locationStatus === 'prompt' || locationStatus === 'denied') && (
-                <div className="status-pill-val-action">
-                  <button
-                    type="button"
-                    className="btn-status-pill-activate"
-                    onClick={() => requestLocation(false)}
-                    title="Aktifkan deteksi lokasi otomatis via peramban"
-                  >
-                    <Navigation size={13} /> Aktifkan Lokasi
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-status-pill-manual"
-                    onClick={() => setShowCityModal(true)}
-                    title="Pilih kota secara manual tanpa GPS"
-                  >
-                    Pilih Kota
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="status-pill-divider" />
-
-            {/* Column 2: Status Wilayah */}
-            <div className="status-pill-col">
-              <span className="status-pill-label">STATUS WILAYAH</span>
-              {locationStatus === 'ready' ? (
-                <div
-                  className="status-pill-val area-val"
-                  style={{ color: currentStatus.color, cursor: areaReason ? 'help' : 'default' }}
-                  title={areaReason || `Status wilayah: ${currentStatus.label}`}
-                >
-                  <span
-                    className="status-dot-glow"
-                    style={{
-                      backgroundColor: currentStatus.color,
-                      boxShadow: `0 0 10px ${currentStatus.glow}`,
-                    }}
-                  />
-                  <span>{currentStatus.label}</span>
-                </div>
-              ) : (
-                <div className="status-pill-val text-muted" style={{ fontSize: '0.95rem', color: '#64748B' }}>
-                  <span
-                    className="status-dot-glow"
-                    style={{
-                      backgroundColor: '#94A3B8',
-                      boxShadow: 'none',
-                    }}
-                  />
-                  <span>Belum tersedia</span>
-                </div>
-              )}
-            </div>
-
-            <div className="status-pill-divider" />
-
-            {/* Column 3: Pembaruan */}
-            <div className="status-pill-col">
-              <span className="status-pill-label">PEMBARUAN</span>
-              <div className="status-pill-val time-val">
-                <Clock size={13} color="#0E2A5C" />
-                <span>{locationStatus === 'ready' ? (lastUpdatedTime || 'Baru saja') : '-'}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Transparent Location Privacy Note */}
-          {locationStatus !== 'ready' && (
-            <p className="hero-location-privacy-note" style={{ fontSize: '0.8rem', color: '#64748B', marginTop: '0.85rem', textAlign: 'center' }}>
-              🔒 Untuk mendeteksi bencana terdekat dari posisi Anda. Koordinat diproses langsung di peramban Anda dan tidak disimpan di server.
-            </p>
-          )}
         </div>
       </section>
 
-      {/* =================== STATS + TRUST BAR (gabungan) =================== */}
+      {/* =================== FLOATING OVERLAP RADAR CARD =================== */}
+      {/* Kartu Gempa Terbaru (Radar + Status) Menjorok Konsisten -48px Menimpa Krem */}
+      <div className="hero-card-overlap-wrapper">
+        <div className="container">
+          <HeroEarthquakeRadarCard
+            events={events}
+            eventsLoading={eventsLoading}
+            userCoords={userCoords}
+            locationName={locationName}
+            locationStatus={locationStatus}
+            areaStatus={areaStatus}
+            onSelectLocation={() => setShowCityModal(true)}
+          />
+        </div>
+      </div>
+
+      {/* =================== STATS + TRUST BAR (GABUNGAN) =================== */}
       <section className="stats-section">
         <div className="container">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          {/* Stats Cards (4 Kolom Sama Tinggi & Struktur Identik) */}
+          <div className="stats-grid">
             {[
               {
                 value: eventsLoading ? '…' : alertsCount,
                 label: 'Peringatan Aktif',
-                note: eventsLoading ? null : '(BMKG & NASA FIRMS)',
+                note: 'BMKG & NASA FIRMS',
               },
               {
                 value: eventsLoading ? '…' : provincesCount,
                 label: 'Provinsi Terpantau',
-                note: eventsLoading ? null : '(seluruh Indonesia)',
+                note: 'Seluruh Indonesia',
               },
-              { value: `< ${speedCount}s`, label: 'Kecepatan Notifikasi' },
-              { value: '24/7', label: 'Pemantauan Aktif' },
+              {
+                value: `< ${speedCount}s`,
+                label: 'Kecepatan Notifikasi',
+                note: 'Respons peringatan',
+              },
+              {
+                value: '24/7',
+                label: 'Pemantauan Aktif',
+                note: 'Tanpa jeda waktu',
+              },
             ].map((s, i) => (
-              <RevealSection key={i} style={{ padding: '2rem', borderRadius: 'var(--radius-lg)', transitionDelay: `${i * 400}ms` }} className="stat-item">
-                <div className="stat-number">{s.value}</div>
-                <div style={{ fontWeight: '600', color: 'var(--color-primary)', letterSpacing: '0.03em' }}>{s.label}</div>
-                {s.note && (
-                  <div style={{ fontSize: '0.725rem', color: '#64748b', marginTop: '4px' }}>{s.note}</div>
-                )}
+              <RevealSection
+                key={i}
+                className="stat-item"
+                style={{ transitionDelay: `${i * 120}ms` }}
+              >
+                <div className="stat-number tabular-nums">{s.value}</div>
+                <div className="stat-label">{s.label}</div>
+                <div className="stat-note">{s.note}</div>
               </RevealSection>
             ))}
           </div>
 
-          {/* Trust Bar — di dalam navy */}
+          {/* Section Terhubung Dengan Sumber Data Resmi (Badge Seragam & Rapi) */}
           <div className="trust-bar-inline">
             <span className="trust-bar-label">
               Terhubung dengan sumber data resmi
             </span>
-            <div className="trust-logos-inline">
-              <a href="https://www.bmkg.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
-                <span className="trust-badge-inline trust-bmkg-inline">BMKG</span>
-                <span>Badan Meteorologi, Klimatologi, &amp; Geofisika</span>
+            <div className="trust-logos-grid">
+              <a href="https://www.bmkg.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="Badan Meteorologi, Klimatologi, & Geofisika">
+                <span className="trust-badge-unified">BMKG</span>
+                <span className="trust-name-unified">Badan Meteorologi, Klimatologi, &amp; Geofisika</span>
               </a>
-              <a href="https://www.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
-                <span className="trust-badge-inline trust-bnpb-inline">BNPB</span>
-                <span>Badan Penanggulangan Bencana</span>
+              <a href="https://www.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="Badan Nasional Penanggulangan Bencana">
+                <span className="trust-badge-unified">BNPB</span>
+                <span className="trust-name-unified">Badan Penanggulangan Bencana</span>
               </a>
-              <a href="https://inarisk.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
-                <span className="trust-badge-inline trust-inarisk-inline">InaRISK</span>
-                <span>Portal Risiko Bencana</span>
+              <a href="https://inarisk.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="Portal Risiko Bencana BNPB">
+                <span className="trust-badge-unified">InaRISK</span>
+                <span className="trust-name-unified">Portal Risiko Bencana</span>
               </a>
-              <a href="https://firms.modaps.eosdis.nasa.gov" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
-                <span className="trust-badge-inline" style={{ background: '#EA580C', color: '#fff', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>NASA FIRMS</span>
-                <span>Data Titik Panas Satelit Global</span>
+              <a href="https://firms.modaps.eosdis.nasa.gov" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="NASA Fire Information for Resource Management System">
+                <span className="trust-badge-unified">FIRMS</span>
+                <span className="trust-name-unified">NASA FIRMS Satelit Global</span>
               </a>
-              <a href="https://sipongi.menlhk.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-inline">
-                <span className="trust-badge-inline" style={{ background: '#059669', color: '#fff', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>SiPongi KLHK</span>
-                <span>Sistem Monitoring Karhutla KLHK</span>
+              <a href="https://sipongi.menlhk.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="Sistem Monitoring Kebakaran Hutan & Lahan KLHK">
+                <span className="trust-badge-unified">SiPongi</span>
+                <span className="trust-name-unified">Sistem Monitoring Karhutla KLHK</span>
               </a>
             </div>
           </div>
@@ -955,22 +886,22 @@ export default function LandingPage() {
       >
         <div className="container relative z-10">
           <h2 className="how-to-use-heading">Cara Menggunakan GeoAlert</h2>
-          
+
           <div className="how-to-use-centered-container">
             <div className="how-to-use-timeline">
               <div className="timeline-connector-vertical" />
               {[
-                { 
-                  n: '1', 
-                  title: 'Pilih Lokasi Anda', 
-                  desc: 'Izinkan akses lokasi atau cari kota Anda secara manual di peta interaktif.', 
-                  action: null 
+                {
+                  n: '1',
+                  title: 'Pilih Lokasi Anda',
+                  desc: 'Izinkan akses lokasi atau cari kota Anda secara manual di peta interaktif.',
+                  action: null
                 },
-                { 
-                  n: '2', 
-                  title: 'Lihat Status Bencana', 
-                  desc: 'Periksa indikator warna untuk mengetahui tingkat risiko di sekitar Anda.', 
-                  action: null 
+                {
+                  n: '2',
+                  title: 'Lihat Status Bencana',
+                  desc: 'Periksa indikator warna untuk mengetahui tingkat risiko di sekitar Anda.',
+                  action: null
                 },
                 {
                   n: '3',
@@ -1000,11 +931,11 @@ export default function LandingPage() {
                     </button>
                   ),
                 },
-                { 
-                  n: '4', 
-                  title: 'Tanya Asisten AI', 
-                  desc: 'Gunakan asisten panduan SOP BMKG untuk informasi evakuasi dan mitigasi.', 
-                  action: null 
+                {
+                  n: '4',
+                  title: 'Tanya Asisten AI',
+                  desc: 'Gunakan asisten panduan SOP BMKG untuk informasi evakuasi dan mitigasi.',
+                  action: null
                 },
               ].map((s, i) => (
                 <RevealStep key={i}>
@@ -1022,7 +953,7 @@ export default function LandingPage() {
       </RevealSection>
 
       {/* =================== RECENT DISASTERS =================== */}
-      <RevealSection className="section bg-white">
+      <RevealSection className="section">
         <div className="container">
           <div className="flex justify-between items-center" style={{ marginBottom: '3rem' }}>
             <h2 style={{ fontSize: '2.5rem' }}>Kejadian Terkini</h2>
@@ -1104,8 +1035,8 @@ export default function LandingPage() {
                             {isKarhutla
                               ? `${ev.jumlah_titik} titik (${ev.frp_total} MW)`
                               : ev.type === 'Gempa Bumi' && ev.magnitude
-                              ? `M ${ev.magnitude}`
-                              : (ev.scale || ev.magnitude || '—')}
+                                ? `M ${ev.magnitude}`
+                                : (ev.scale || ev.magnitude || '—')}
                           </td>
                           <td>{riskBadge}</td>
                         </tr>
@@ -1153,7 +1084,7 @@ export default function LandingPage() {
       </RevealSection>
 
       {/* =================== MITIGATION =================== */}
-      <RevealSection id="mitigasi" className="section bg-white">
+      <RevealSection id="mitigasi" className="section">
         <div className="container">
           <h2 className="section-title">Panduan Mitigasi Instan</h2>
           <p className="section-subtitle">
@@ -1165,37 +1096,37 @@ export default function LandingPage() {
             {[
               {
                 key: 'karhutla',
-                icon: <Flame size={44} color="#EA580C" />,
+                icon: <Flame size={44} color="var(--navy)" />,
                 title: 'Karhutla & Kabut Asap',
                 desc: 'Gunakan masker N95 dan tutup ventilasi ruangan saat kabut asap pekat. Kurangi aktivitas luar, siapkan obat pernapasan, ikuti instruksi evakuasi BPBD, dan laporkan titik api ke 112 / Manggala Agni.',
               },
               {
                 key: 'gempa',
-                icon: <Activity size={44} color="var(--color-alert)" />,
+                icon: <Activity size={44} color="var(--navy)" />,
                 title: 'Gempa Bumi',
                 desc: 'Terapkan DUCK, COVER, HOLD ON. Jauhi jendela kaca, perabot tinggi, dan jangan gunakan lift. Evakuasi setelah getaran reda.',
               },
               {
                 key: 'tsunami',
-                icon: <Waves size={44} color="#0284C7" />,
+                icon: <Waves size={44} color="var(--navy)" />,
                 title: 'Tsunami',
                 desc: 'Gunakan aturan emas 20-20-20. Jika gempa terasa 20 detik, Anda punya 20 menit untuk lari ke tempat setinggi minimal 20 meter dpl.',
               },
               {
                 key: 'banjir',
-                icon: <Droplets size={44} color="var(--color-standby)" />,
+                icon: <Droplets size={44} color="var(--navy)" />,
                 title: 'Banjir & Bandang',
                 desc: 'Matikan sakelar MCB listrik utama segera. Amankan dokumen ke wadah kedap air di lantai atas, dan jangan terobos arus deras.',
               },
               {
                 key: 'longsor',
-                icon: <Mountain size={44} color="var(--color-status-warning)" />,
+                icon: <Mountain size={44} color="var(--navy)" />,
                 title: 'Tanah Longsor',
                 desc: 'Kenali retakan tanah & dinding seret. Saat terjadi suara gemuruh tebing, evakuasi lari TEGAK LURUS (menyamping) dari luncuran.',
               },
               {
                 key: 'gunungapi',
-                icon: <Flame size={44} color="#DC2626" />,
+                icon: <Mountain size={44} color="var(--navy)" />,
                 title: 'Erupsi Gunung Api',
                 desc: 'Gunakan masker N95 dan kacamata pelindung dari abu silika. Patuhi radius zona steril KRB yang ditetapkan pos pemantauan PVMBG.',
               },
@@ -1219,7 +1150,7 @@ export default function LandingPage() {
       </RevealSection>
 
       {/* =================== FAQ =================== */}
-      <RevealSection className="section bg-white">
+      <RevealSection className="section">
         <div className="container" style={{ maxWidth: '800px' }}>
           <h2 className="section-title">Pertanyaan Umum</h2>
           {FAQ_DATA.map((item, i) => (
@@ -1244,8 +1175,8 @@ export default function LandingPage() {
       </RevealSection>
 
       {/* =================== FINAL CTA =================== */}
-      <RevealSection className="section section-lg text-center">
-        <div className="container">
+      <RevealSection className="section section-lg text-center cta-navy-section">
+        <div className="container" style={{ position: 'relative', zIndex: 2 }}>
           <h2 className="section-title" style={{ marginBottom: '1.5rem', fontSize: 'clamp(2.2rem, 4vw, 3rem)' }}>Jangan Tunggu Sampai Terlambat</h2>
           <p className="section-subtitle">
             Pantau kondisi lingkungan Anda dan jadilah selangkah lebih maju dalam menghadapi potensi bencana. Keselamatan Anda adalah prioritas utama.
@@ -1253,8 +1184,8 @@ export default function LandingPage() {
           <button
             type="button"
             onClick={handleCekBencana}
-            className="btn btn-primary"
-            style={{ padding: '1.25rem 3rem', fontSize: '1.25rem', borderRadius: 'var(--radius-full)', cursor: 'pointer', border: 'none' }}
+            className="btn btn-cta-contrast"
+            style={{ padding: '1.25rem 3rem', fontSize: '1.25rem', borderRadius: 'var(--radius-full)', cursor: 'pointer' }}
           >
             Pantau Wilayah Saya Sekarang
           </button>
