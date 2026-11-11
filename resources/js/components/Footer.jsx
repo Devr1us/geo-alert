@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MessageSquare, Globe, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import { ASSET_BASE } from '../config/baseUrl';
+import RevealSection from './RevealSection';
 
 export default function Footer() {
   const [email, setEmail] = useState('');
@@ -47,7 +48,7 @@ export default function Footer() {
       <div className="container">
         <div className="footer-custom-grid">
           {/* Column 1: Brand Info & Social Icons */}
-          <div className="footer-brand-col">
+          <RevealSection className="footer-brand-col" animation="fade-up" delay={0}>
             <Link to="/" className="footer-logo-wrap">
               <img src={`${ASSET_BASE}logo-geoalert.svg`} alt="GeoAlert" className="footer-logo-img" />
               <span className="footer-brand-title">GeoAlert</span>
@@ -99,10 +100,10 @@ export default function Footer() {
                 <Globe size={18} />
               </a>
             </div>
-          </div>
+          </RevealSection>
 
           {/* Column 2: Eksplorasi Links */}
-          <div className="footer-links-col">
+          <RevealSection className="footer-links-col" animation="fade-up" delay={80}>
             <h4 className="footer-col-title">Eksplorasi</h4>
             <ul className="footer-links-list">
               <li><Link to="/" className="footer-link-item">Beranda</Link></li>
@@ -111,23 +112,23 @@ export default function Footer() {
               <li><a href="#cara-penggunaan" className="footer-link-item">Cara Penggunaan</a></li>
               <li><a href="#faq" className="footer-link-item">Pertanyaan Umum (FAQ)</a></li>
             </ul>
-          </div>
+          </RevealSection>
 
           {/* Column 3: Informasi Bencana & Mitigasi */}
-          <div className="footer-links-col">
+          <RevealSection className="footer-links-col" animation="fade-up" delay={160}>
             <h4 className="footer-col-title">Mitigasi Bencana</h4>
             <ul className="footer-links-list">
               <li><Link to="/peta" className="footer-link-item">Gempa Bumi</Link></li>
               <li><Link to="/peta" className="footer-link-item">Karhutla (Titik Panas)</Link></li>
               <li><Link to="/peta" className="footer-link-item">Banjir Bandang</Link></li>
               <li><Link to="/peta" className="footer-link-item">Tanah Longsor</Link></li>
-              <li><Link to="/peta" className="footer-link-item">Cuaca Ekstrem</Link></li>
+              <li><Link to="/peta" className="footer-link-item">Erupsi Gunung Api</Link></li>
               <li><a href="https://inarisk.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="footer-link-item">Portal InaRISK BNPB</a></li>
             </ul>
-          </div>
+          </RevealSection>
 
           {/* Column 4: Newsletter Berlangganan */}
-          <div className="footer-newsletter-col">
+          <RevealSection className="footer-newsletter-col" animation="fade-up" delay={240}>
             <h4 className="footer-col-title">Peringatan Dini Email</h4>
             <p className="footer-newsletter-sub">
               Daftarkan email Anda untuk menerima informasi lansiran siaga gempa &amp; buletin cuaca mingguan.
@@ -168,16 +169,28 @@ export default function Footer() {
                 )}
               </form>
             )}
-          </div>
+          </RevealSection>
         </div>
 
         {/* Footer Bottom Bar */}
-        <div className="footer-custom-bottom">
+        <RevealSection className="footer-custom-bottom" animation="fade-in" delay={100}>
           <p className="footer-developer-tag">
             Developed by <span className="dev-team-name">GeoAlert Tech Team</span>
           </p>
           <p className="footer-copyright-text">
             &copy; {new Date().getFullYear()} GeoAlert Indonesia. HAK CIPTA DILINDUNGI.
+          </p>
+          <p className="footer-photo-credit" style={{ fontSize: '0.72rem', color: 'rgba(255, 255, 255, 0.5)', margin: '4px 0' }}>
+            Foto Hero: Erupsi Bromo &amp; Semeru oleh{' '}
+            <a
+              href="https://commons.wikimedia.org/wiki/File:Bromo_and_Semeru_volcanoes,_Java,_Indonesia,_20220820_0754_9542.jpg"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'rgba(255, 255, 255, 0.75)', textDecoration: 'underline' }}
+            >
+              Jakub Hałun
+            </a>{' '}
+            (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>CC BY-SA 4.0</a>)
           </p>
 
           <div className="footer-legal-links">
@@ -189,7 +202,7 @@ export default function Footer() {
               Syarat &amp; Ketentuan
             </Link>
           </div>
-        </div>
+        </RevealSection>
       </div>
     </footer>
   );

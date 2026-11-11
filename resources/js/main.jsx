@@ -6,6 +6,14 @@ import '../css/index.css';
 import '../css/components.css';
 import { ROUTER_BASENAME } from './config/baseUrl';
 
+// Progressive enhancement flag: sembunyikan elemen animasi HANYA jika JavaScript siap
+if (typeof document !== 'undefined') {
+  document.documentElement.classList.add('js-ready');
+  if (!document.documentElement.hasAttribute('data-scroll-dir')) {
+    document.documentElement.setAttribute('data-scroll-dir', 'down');
+  }
+}
+
 // Nonaktifkan scroll restoration otomatis browser SEBELUM React mount,
 // supaya Firefox/Chrome tidak sempat me-restore posisi scroll dari sesi
 // sebelumnya bahkan selama jeda singkat sebelum hydration selesai.

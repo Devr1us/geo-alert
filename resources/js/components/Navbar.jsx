@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, MapPin, Sparkles } from 'lucide-react';
 import { ASSET_BASE } from '../config/baseUrl';
@@ -6,6 +6,9 @@ import { ASSET_BASE } from '../config/baseUrl';
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [isHoveredOrFocused, setIsHoveredOrFocused] = useState(false);
+  const scrollStopTimerRef = useRef(null);
+  const tickingRef = useRef(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -14,28 +17,44 @@ export default function Navbar() {
   };
 
   useEffect(() => {
-    let lastScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY || document.documentElement.scrollTop || 0;
 
-    const handleScroll = (e) => {
-      let currentScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-
-      if (e && e.target && e.target !== document && e.target !== window && typeof e.target.scrollTop === 'number') {
-        currentScrollY = e.target.scrollTop;
+      // 1. Jika di posisi paling atas (scrollY <= 10), navbar selalu tampil
+      if (currentScrollY <= 10) {
+        if (scrollStopTimerRef.current) {
+          clearTimeout(scrollStopTimerRef.current);
+          scrollStopTimerRef.current = null;
+        }
+        setIsVisible(true);
+        return;
       }
 
-      if (currentScrollY <= 20) {
-        setIsVisible(true);
-      } else if (currentScrollY > lastScrollY + 5) {
-        setIsVisible(false);
-      } else if (currentScrollY < lastScrollY - 5) {
-        setIsVisible(true);
+      // 2. Jika pengguna mulai scroll (arah apa pun), navbar langsung disembunyikan
+      if (!tickingRef.current) {
+        window.requestAnimationFrame(() => {
+          setIsVisible(false);
+          tickingRef.current = false;
+        });
+        tickingRef.current = true;
       }
 
-      lastScrollY = currentScrollY;
+      // 3. Debounce: tampilkan navbar kembali HANYA setelah scroll berhenti (200ms tanpa event scroll)
+      if (scrollStopTimerRef.current) {
+        clearTimeout(scrollStopTimerRef.current);
+      }
+      scrollStopTimerRef.current = setTimeout(() => {
+        setIsVisible(true);
+      }, 200);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
-    return () => window.removeEventListener('scroll', handleScroll, { capture: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollStopTimerRef.current) {
+        clearTimeout(scrollStopTimerRef.current);
+      }
+    };
   }, []);
 
   const forceScrollTop = () => {
@@ -54,8 +73,17 @@ export default function Navbar() {
   const goToMap = (e) => {
     e.preventDefault();
     setIsOpen(false);
-    navigate('/peta', { replace: location.pathname === '/peta' });
-    forceScrollTop();
+    if (location.pathname === '/peta') {
+      if (location.hash) {
+        navigate('/peta', { replace: true });
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    } else {
+      navigate('/peta');
+      forceScrollTop();
+    }
   };
 
   const scrollToSection = (id) => (e) => {
@@ -75,10 +103,21 @@ export default function Navbar() {
     }
   };
 
-  const navClass = `navbar ${!isVisible && !isOpen ? 'navbar-hidden' : ''}`;
+  const isHidden = !isVisible && !isOpen && !isHoveredOrFocused;
+  const navClass = `navbar ${isHidden ? 'navbar-hidden' : ''}`;
 
   return (
-    <nav className={navClass}>
+    <nav
+      className={navClass}
+      onMouseEnter={() => setIsHoveredOrFocused(true)}
+      onMouseLeave={() => setIsHoveredOrFocused(false)}
+      onFocus={() => setIsHoveredOrFocused(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          setIsHoveredOrFocused(false);
+        }
+      }}
+    >
       <div className="container nav-pill-container">
         {/* Mobile Spacer (for 3-way balance: Spacer | Logo Center | Toggle Right) */}
         <div className="nav-mobile-spacer" aria-hidden="true" />

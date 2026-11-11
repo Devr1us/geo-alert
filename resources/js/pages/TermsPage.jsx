@@ -1,41 +1,46 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, ArrowLeft } from 'lucide-react';
+import RevealSection from '../components/RevealSection';
 
 export default function TermsPage() {
   return (
     <div style={{ minHeight: '80vh', background: 'var(--color-bg)', padding: 'calc(var(--navbar-height) + 2rem) 0 4rem' }}>
       <div className="container" style={{ maxWidth: '800px' }}>
         {/* Back nav */}
-        <Link
-          to="/"
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: '8px',
-            color: 'var(--color-primary)', textDecoration: 'none',
-            fontWeight: '600', marginBottom: '2rem', fontSize: '0.9rem',
-          }}
-        >
-          <ArrowLeft size={16} /> Kembali ke Beranda
-        </Link>
+        <RevealSection animation="fade-in">
+          <Link
+            to="/"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '8px',
+              color: 'var(--color-primary)', textDecoration: 'none',
+              fontWeight: '600', marginBottom: '2rem', fontSize: '0.9rem',
+            }}
+          >
+            <ArrowLeft size={16} /> Kembali ke Beranda
+          </Link>
+        </RevealSection>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
-          <div style={{
-            background: 'rgba(14,42,92,0.1)', padding: '1rem',
-            borderRadius: 'var(--radius-lg)', flexShrink: 0,
-          }}>
-            <FileText size={36} color="var(--color-primary)" />
+        <RevealSection animation="fade-up" delay={60}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
+            <div style={{
+              background: 'rgba(14,42,92,0.1)', padding: '1rem',
+              borderRadius: 'var(--radius-lg)', flexShrink: 0,
+            }}>
+              <FileText size={36} color="var(--color-primary)" />
+            </div>
+            <div>
+              <h1 style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>Syarat &amp; Ketentuan</h1>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+                Terakhir diperbarui: 8 Agustus 2026
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>Syarat &amp; Ketentuan</h1>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
-              Terakhir diperbarui: 8 Agustus 2026
-            </p>
-          </div>
-        </div>
+        </RevealSection>
 
         {/* Content */}
-        <div className="card" style={{ padding: '2.5rem', lineHeight: '1.8', color: 'var(--color-text-main)' }}>
+        <RevealSection className="card" animation="fade-up" delay={100} style={{ padding: '2.5rem', lineHeight: '1.8', color: 'var(--color-text-main)' }}>
           <section style={{ marginBottom: '2.5rem' }}>
             <h2 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: 'var(--color-primary)' }}>1. Penerimaan Syarat</h2>
             <p>
@@ -137,13 +142,15 @@ export default function TermsPage() {
               melalui pengadilan yang berwenang di Jakarta, Indonesia.
             </p>
           </section>
-        </div>
+        </RevealSection>
 
-        <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-          <Link to="/kebijakan-privasi" style={{ color: 'var(--color-primary)', fontWeight: '600' }}>
-            Baca juga: Kebijakan Privasi →
-          </Link>
-        </div>
+        <RevealSection animation="fade-up" delay={120}>
+          <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+            <Link to="/kebijakan-privasi" style={{ color: 'var(--color-primary)', fontWeight: '600' }}>
+              Baca juga: Kebijakan Privasi →
+            </Link>
+          </div>
+        </RevealSection>
       </div>
     </div>
   );

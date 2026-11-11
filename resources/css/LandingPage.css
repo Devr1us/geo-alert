@@ -1,30 +1,132 @@
 /* LandingPage.css */
 
+/* ============================================================
+   HERO SECTION — LATAR BENCANA ALAM INDONESIA (ERUPSI BROMO & SEMERU)
+   Foto: Erupsi Gunung Bromo & Semeru, Jawa Timur, Indonesia
+   Fotografer: Jakub Hałun
+   URL: https://commons.wikimedia.org/wiki/File:Bromo_and_Semeru_volcanoes,_Java,_Indonesia,_20220820_0754_9542.jpg
+   Lisensi: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+   ============================================================ */
+
 .hero-section {
   padding: calc(var(--navbar-height) + 2.5rem) 0 var(--spacing-12);
-  background: linear-gradient(rgba(247, 242, 234, 0.1), rgba(247, 242, 234, 0.2)), url("/images/Background utama.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-color: #E4E3E2; /* Warna latar cadangan selagi gambar dimuat */
   text-align: center;
   position: relative;
   overflow: hidden;
 }
 
-.hero-section::before {
-  content: '';
+/* Layer 1: Landscape Gunung Api Indonesia (WebP, eager, 80% saturation diredam, opasitas 0.6) */
+.hero-bg-image-layer {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-image: radial-gradient(rgba(14, 42, 92, 0.12) 1.2px, transparent 1.2px);
-  background-size: 24px 24px;
-  opacity: 0.55;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #E4E3E2;
+  overflow: hidden;
   z-index: 0;
   pointer-events: none;
 }
 
-.hero-section > * {
-  position: relative;
+.hero-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center bottom;
+  filter: saturate(0.55);
+  opacity: 0.6;
+  display: block;
+  transform: translateZ(0);
+}
+
+/* Layer 2: Veil Oval Radial Gradient (Krem #F7F3EC) tepat di belakang teks tengah */
+.hero-veil-oval {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(1000px, 94vw);
+  height: 480px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(247, 243, 236, 0.94) 0%,
+    rgba(247, 243, 236, 0.82) 45%,
+    rgba(247, 243, 236, 0) 75%
+  );
+  filter: blur(20px);
+  pointer-events: none;
   z-index: 1;
+}
+
+/* Layer 3: Vertical Cream Gradient Overlay (80% area judul/paragraf, memudar ke 15% di dasar) */
+.hero-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(247, 243, 236, 0.85) 0%,
+    rgba(247, 243, 236, 0.80) 45%,
+    rgba(247, 243, 236, 0.45) 75%,
+    rgba(247, 243, 236, 0.15) 100%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Layer 4: Aksen Kepulan Abu / Kontur Kabut Halus (SVG) */
+.hero-top-contours {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48%;
+  max-height: 320px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hero-top-contours-svg {
+  width: 100%;
+  height: 100%;
+  min-width: 1200px;
+  animation: heroTopContoursDrift 50s ease-in-out infinite alternate;
+}
+
+@keyframes heroTopContoursDrift {
+  0% {
+    transform: translateY(0);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+
+/* Layer 5: Gradient Mask fading bottom edge into next section (#FFFFFF) */
+.hero-bottom-fade-mask {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 140px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.35) 35%,
+    rgba(255, 255, 255, 0.78) 70%,
+    #FFFFFF 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hero-section > .container {
+  position: relative;
+  z-index: 2;
 }
 
 /* ── Hero Title ─────────────────────────────────────────────────── */
@@ -127,6 +229,10 @@
   }
   .hero-section {
     animation: none !important;
+  }
+  .hero-top-contours-svg {
+    animation: none !important;
+    transform: none !important;
   }
 }
 
@@ -271,6 +377,16 @@
 }
 
 @media (max-width: 640px) {
+  .hero-bottom-fade-mask {
+    height: 90px;
+  }
+
+  .hero-veil-oval {
+    width: 100%;
+    height: 440px;
+    top: 38%;
+  }
+
   .live-status-pill-card {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

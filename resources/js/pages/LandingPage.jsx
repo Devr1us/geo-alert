@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Map, Bell, Bot, Shield, ChevronRight, Activity, ArrowRight,
-  Wind, Droplets, Mountain, ChevronDown, ChevronUp, MapPin, BellOff, RefreshCw,
+  Droplets, Mountain, ChevronDown, ChevronUp, MapPin, BellOff, RefreshCw,
   Zap, Quote, Compass, MessageSquare, Clock, AlertTriangle, AlertOctagon, ShieldAlert,
   Waves, Flame, Navigation
 } from 'lucide-react';
@@ -95,7 +95,6 @@ const EDUCATION_DATA = [
   { icon: <Flame size={32} color="#EA580C" />, bg: 'rgba(234, 88, 12, 0.12)', accentColor: '#EA580C', title: 'Karhutla (Kebakaran Hutan & Lahan)', desc: 'Penyebab utama adalah pembakaran lahan ilegal dan kemarau di lahan gambut. Berdampak kabut asap beracun, lonjakan ISPA, dan gangguan transportasi darat/udara. Wajib pakai masker N95 dan laporkan titik api ke satgas BPBD/Manggala Agni.' },
   { icon: <Droplets size={32} color="var(--color-standby)" />, bg: 'rgba(74, 144, 217, 0.1)', accentColor: 'var(--color-standby)', title: 'Banjir & Banjir Bandang', desc: 'Luapan air berlebih akibat curah hujan ekstrem atau kegagalan tanggul. Aliran air deras membawa material lumpur dan puing yang membahayakan nyawa dan kelistrikan.' },
   { icon: <Mountain size={32} color="var(--color-status-warning)" />, bg: 'rgba(245, 124, 0, 0.1)', accentColor: 'var(--color-status-warning)', title: 'Tanah Longsor', desc: 'Pergerakan massa batuan atau tanah menuruni lereng saat kondisi tanah jenuh air. Selalu evakuasi secara tegak lurus (menyamping) dari jalur luncuran tebing.' },
-  { icon: <Wind size={32} color="#D97706" />, bg: 'rgba(217, 119, 6, 0.1)', accentColor: '#D97706', title: 'Cuaca Ekstrem & Puting Beliung', desc: 'Fenomena hidrometeorologi berbahaya seperti angin puting beliung, petir hebat, dan hujan es. Berlindung di bangunan kokoh dan jauhi pohon tunggal serta tiang tinggi.' },
   { icon: <Flame size={32} color="#DC2626" />, bg: 'rgba(220, 38, 38, 0.1)', accentColor: '#DC2626', title: 'Erupsi Gunung Api', desc: 'Keluarnya magma, awan panas (wedhus gembel), lontaran batu pijar, dan abu silika dari kawah aktif. Kenakan masker debu/N95 dan patuhi radius Kawasan Rawan Bencana (KRB).' },
 ];
 
@@ -566,11 +565,41 @@ export default function LandingPage() {
   return (
     <div>
       {/* =================== HERO =================== */}
-      <section
-        className="hero-section"
-        style={{ backgroundImage: `linear-gradient(rgba(247, 242, 234, 0.1), rgba(247, 242, 234, 0.2)), url("${ASSET_BASE}images/Background utama.png")` }}
-      >
-        <div className="container">
+      <section className="hero-section">
+        {/* Layer 1: Landscape Gunung Api Indonesia (WebP, eager, fetchpriority="high", srcset) */}
+        <div className="hero-bg-image-layer" aria-hidden="true">
+          <img
+            src="/images/hero-bg.webp"
+            srcSet="/images/hero-bg-mobile.webp 1200w, /images/hero-bg.webp 2000w"
+            sizes="100vw"
+            alt=""
+            loading="eager"
+            fetchPriority="high"
+            className="hero-bg-img"
+          />
+        </div>
+
+        {/* Layer 2: Veil Oval Radial Gradient (Krem #F7F3EC) di belakang teks tengah (kontras >= 4.5:1) */}
+        <div className="hero-veil-oval" aria-hidden="true" />
+
+        {/* Layer 3: Vertical Cream Gradient Overlay (80% area judul/teks, memudar ke 15% di dasar) */}
+        <div className="hero-gradient-overlay" aria-hidden="true" />
+
+        {/* Layer 4: Aksen Kepulan Abu / Kontur Kabut Halus (SVG) */}
+        <div className="hero-top-contours" aria-hidden="true">
+          <svg className="hero-top-contours-svg" viewBox="0 0 1440 280" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M-60,35 C240,5 540,65 840,25 C1140,-15 1360,55 1500,15" stroke="rgba(14, 42, 92, 0.08)" strokeWidth="1.2" />
+            <path d="M-60,85 C220,55 520,115 820,75 C1120,35 1340,105 1500,65" stroke="rgba(14, 42, 92, 0.08)" strokeWidth="1.2" />
+            <path d="M-60,135 C200,105 500,165 800,125 C1100,85 1320,155 1500,115" stroke="rgba(14, 42, 92, 0.08)" strokeWidth="1.2" />
+            <path d="M-60,185 C180,155 480,215 780,175 C1080,135 1300,205 1500,165" stroke="rgba(14, 42, 92, 0.08)" strokeWidth="1.2" />
+            <path d="M-60,235 C160,205 460,265 760,225 C1060,185 1280,255 1500,215" stroke="rgba(14, 42, 92, 0.08)" strokeWidth="1.2" />
+          </svg>
+        </div>
+
+        {/* Layer 5: Gradient Mask fading bottom edge into next section (#FFFFFF) */}
+        <div className="hero-bottom-fade-mask" aria-hidden="true" />
+
+        <div className="container" style={{ position: 'relative', zIndex: 2 }}>
           <h1 className="hero-title hero-title-animated" style={{ fontSize: '4rem', fontWeight: '900' }}>
             GeoAlert
           </h1>
@@ -1163,12 +1192,6 @@ export default function LandingPage() {
                 icon: <Mountain size={44} color="var(--color-status-warning)" />,
                 title: 'Tanah Longsor',
                 desc: 'Kenali retakan tanah & dinding seret. Saat terjadi suara gemuruh tebing, evakuasi lari TEGAK LURUS (menyamping) dari luncuran.',
-              },
-              {
-                key: 'cuaca',
-                icon: <Wind size={44} color="#D97706" />,
-                title: 'Cuaca Ekstrem',
-                desc: 'Berlindung di bangunan kokoh tertutup. Jauhi pohon besar, tiang listrik, dan cabut kabel alat elektronik dari stopkontak.',
               },
               {
                 key: 'gunungapi',

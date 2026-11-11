@@ -7,7 +7,6 @@ import 'leaflet/dist/leaflet.css';
 import '../../css/MapPage.css';
 import '../../css/LandingPage.css';
 import AIChat from '../components/AIChat';
-import RevealSection from '../components/RevealSection';
 import MitigationModal from '../components/MitigationModal';
 import { BMKG_TERKINI_URL, BMKG_DIRASAKAN_URL } from '../config/bmkgApi';
 import { formatLocation } from '../utils/locationFormatter';
@@ -361,6 +360,19 @@ export default function MapPage() {
     }
   }, [location.state]);
 
+  // Pastikan posisi scroll selalu di atas (Peta Bencana) saat membuka /peta,
+  // kecuali jika URL secara eksplisit meminta hash #tanya-ai
+  useEffect(() => {
+    if (location.hash === '#tanya-ai') {
+      const el = document.getElementById('tanya-ai');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+  }, [location.pathname, location.hash]);
+
   // Geocoding search state
   const [geocodeLoading, setGeocodeLoading] = useState(false);
   const [geocodeResult, setGeocodeResult] = useState(null);
@@ -712,9 +724,7 @@ export default function MapPage() {
                       className={`chip-pill ${activeFilter === chip ? 'active' : ''}`}
                       onClick={() => setActiveFilter(chip)}
                       aria-pressed={activeFilter === chip}
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                     >
-                      {chip === 'Karhutla' && <Flame size={13} color="#EA580C" />}
                       <span>{chip}</span>
                     </button>
                   ))}
@@ -1009,7 +1019,10 @@ export default function MapPage() {
               <div className="segmented-control">
                 <button
                   className={`segmented-tab ${sidebarTab === 'map' ? 'active' : ''}`}
-                  onClick={() => setSidebarTab('map')}
+                  onClick={() => {
+                    setSidebarTab('map');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
                 >
                   <MapIcon size={15} /> Peta &amp; Legenda
                 </button>
@@ -1123,13 +1136,13 @@ export default function MapPage() {
       </div>
 
       {/* SECTION: TANYA ASISTEN AI */}
-      <RevealSection id="tanya-ai" animation="glow-in" className="tanya-ai-section">
+      <section id="tanya-ai" className="tanya-ai-section">
         <div style={{ width: '100%', maxWidth: '1440px', margin: '0 auto', padding: '0 var(--spacing-4)', boxSizing: 'border-box' }}>
           <div className="ai-chat-full-card">
             <AIChat isFloating={false} />
           </div>
         </div>
-      </RevealSection>
+      </section>
 
       {/* Modal Mitigasi Terintegrasi */}
       {mitigationModal && (

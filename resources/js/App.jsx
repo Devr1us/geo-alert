@@ -10,6 +10,31 @@ import Footer from './components/Footer';
 function ScrollController() {
   const { pathname, hash } = useLocation();
 
+  // Global scroll direction tracker: set data-scroll-dir="down" | "up" on documentElement
+  useEffect(() => {
+    let lastScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+          if (currentScrollY > lastScrollY + 2) {
+            document.documentElement.setAttribute('data-scroll-dir', 'down');
+          } else if (currentScrollY < lastScrollY - 2) {
+            document.documentElement.setAttribute('data-scroll-dir', 'up');
+          }
+          lastScrollY = currentScrollY;
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   useEffect(() => {
     if (hash) {
       const scrollToHash = () => {

@@ -91,6 +91,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
   const abortControllerRef = useRef(null);
+  const isInitialMount = useRef(true);
 
   // Simpan riwayat percakapan ke sessionStorage
   useEffect(() => {
@@ -109,10 +110,18 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
     setUserScrolledUp(!isAtBottom);
   };
 
-  // Scroll otomatis jika tidak sedang scroll ke atas
+  // Scroll otomatis hanya kontainer chat internal saat ada pesan baru atau streaming aktif,
+  // TIDAK menggulir window/halaman utama agar user tetap melihat peta bencana
   useEffect(() => {
-    if (!userScrolledUp && bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    if (!userScrolledUp && scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTo({
+        top: scrollAreaRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
     }
   }, [messages, isStreaming, userScrolledUp]);
 
