@@ -728,7 +728,7 @@ export default function MapPage() {
                 className="map-firms-permanent-banner"
                 style={{
                   position: 'absolute',
-                  top: '72px',
+                  top: '95px',
                   left: '16px',
                   right: '16px',
                   maxWidth: '620px',
@@ -791,7 +791,7 @@ export default function MapPage() {
 
             {/* Floating Notice Toast */}
             {!noticeDismissed && (hasSampleItems || error) && (
-              <div className="map-notice-toast" style={{ top: !satelliteNoticeDismissed ? '120px' : '72px' }}>
+              <div className="map-notice-toast" style={{ top: !satelliteNoticeDismissed ? '146px' : '95px' }}>
                 <Info size={16} color="var(--color-standby)" style={{ flexShrink: 0 }} />
                 <div style={{ flex: 1 }}>
                   {error ? (

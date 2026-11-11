@@ -260,7 +260,7 @@
 
 /* Leaflet control repositioning so it doesn't overlap floating toolbar */
 .leaflet-top.leaflet-left {
-  top: 90px !important;
+  top: 152px !important;
   left: 16px !important;
 }
 
