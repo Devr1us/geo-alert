@@ -290,15 +290,6 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
           <span style={{ fontWeight: '700', fontSize: '1rem', letterSpacing: '-0.01em', color: '#FFFFFF' }}>
             GeoAlert AI
           </span>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: '5px',
-            padding: '2px 10px', borderRadius: '20px',
-            background: 'rgba(46, 125, 50, 0.2)', border: '1px solid rgba(46, 125, 50, 0.4)',
-            fontSize: '0.72rem', color: '#4CAF50', fontWeight: '600'
-          }}>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4CAF50', boxShadow: '0 0 8px #4CAF50' }} />
-            BMKG Verified
-          </span>
         </div>
 
         {/* Header Action: Reset Chat when active */}
