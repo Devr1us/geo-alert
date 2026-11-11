@@ -1074,9 +1074,9 @@ export default function LandingPage() {
                           <td className="mono" style={{ fontSize: '0.875rem', fontWeight: '600', color: isKarhutla ? '#EA580C' : 'var(--color-primary)' }}>
                             {isKarhutla
                               ? `${ev.jumlah_titik} titik (${ev.frp_total} MW)`
-                              : ev.magnitude
+                              : ev.type === 'Gempa Bumi' && ev.magnitude
                               ? `M ${ev.magnitude}`
-                              : (ev.scale || '—')}
+                              : (ev.scale || ev.magnitude || '—')}
                           </td>
                           <td>{riskBadge}</td>
                         </tr>

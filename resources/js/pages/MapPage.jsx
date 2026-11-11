@@ -155,7 +155,7 @@ const INDONESIA_CENTER = [-2.5, 117.5];
 // Sample data — SIMULASI BENCANA MULTI-BAHAYA
 // Catatan: Data banjir, longsor, dan erupsi gunung api belum
 // tersedia melalui API publik tanpa autentikasi, ditampilkan
-// sebagai contoh data edukatif terstruktur.
+// sebagai contoh data edukatif terstruktur dengan metrik relevan.
 // =============================================================
 const SAMPLE_DISASTERS = [
   {
@@ -165,8 +165,8 @@ const SAMPLE_DISASTERS = [
     lat: -6.2, lng: 106.9,
     time: '(contoh data)',
     risk: 'standby',
-    magnitude: 'Ketinggian 50 cm',
-    depth: '-',
+    magnitude: '50 cm',
+    depth: 'TMA Siaga 3',
     step: 'Matikan arus listrik. Evakuasi ke lantai atas. Hubungi BPBD.',
     isSample: true,
   },
@@ -177,8 +177,8 @@ const SAMPLE_DISASTERS = [
     lat: -6.6, lng: 106.8,
     time: '(contoh data)',
     risk: 'warning',
-    magnitude: 'Volume sedang',
-    depth: '-',
+    magnitude: 'Volume Sedang',
+    depth: 'Tanah Labil',
     step: 'Jauhi area lereng. Evakuasi lari tegak lurus dari luncuran. Pantau perkembangan.',
     isSample: true,
   },
@@ -189,7 +189,7 @@ const SAMPLE_DISASTERS = [
     lat: -7.7011, lng: 108.4947,
     time: '(contoh simulasi)',
     risk: 'danger',
-    magnitude: 'Potensi Gelombang 3m',
+    magnitude: 'Tinggi ~3 m',
     depth: 'Laut Dangkal',
     step: 'Aturan 20-20-20: Gempa terasa 20 detik, lari dalam 20 menit ke ketinggian >20m dpl.',
     isSample: true,
@@ -202,11 +202,69 @@ const SAMPLE_DISASTERS = [
     time: '(contoh status PVMBG)',
     risk: 'warning',
     magnitude: 'Level III (Siaga)',
-    depth: 'Kawah Aktif',
+    depth: 'Radius Bahaya 5 km',
     step: 'Jauhi radius bahaya 5 km dari kawah puncak. Kenakan masker N95 antisipasi abu silika.',
     isSample: true,
   },
 ];
+
+// Helper untuk menyesuaikan label dan nilai metrik sesuai jenis bencana
+const getDisasterMetrics = (item) => {
+  const type = (item.type || '').toLowerCase();
+
+  if (type.includes('banjir')) {
+    return {
+      label1: 'Ketinggian Air',
+      value1: item.magnitude || '50 cm',
+      label2: 'Kondisi Genangan',
+      value2: item.depth && item.depth !== '-' ? item.depth : 'TMA Siaga 3',
+    };
+  }
+
+  if (type.includes('longsor')) {
+    return {
+      label1: 'Skala Longsor',
+      value1: item.magnitude || 'Volume Sedang',
+      label2: 'Kondisi Lereng',
+      value2: item.depth && item.depth !== '-' ? item.depth : 'Tanah Labil',
+    };
+  }
+
+  if (type.includes('gunung') || type.includes('erupsi')) {
+    return {
+      label1: 'Tingkat Aktivitas',
+      value1: item.magnitude || 'Level III (Siaga)',
+      label2: 'Zona Bahaya',
+      value2: item.depth && item.depth !== '-' ? item.depth : 'Radius Bahaya 5 km',
+    };
+  }
+
+  if (type.includes('tsunami')) {
+    return {
+      label1: 'Tinggi Gelombang',
+      value1: item.magnitude || 'Tinggi ~3 m',
+      label2: 'Pusat Gempa',
+      value2: item.depth && item.depth !== '-' ? item.depth : 'Laut Dangkal',
+    };
+  }
+
+  if (type.includes('cuaca')) {
+    return {
+      label1: 'Kecepatan Angin',
+      value1: item.magnitude || '> 50 km/jam',
+      label2: 'Fenomena',
+      value2: item.depth && item.depth !== '-' ? item.depth : 'Hujan & Angin Kencang',
+    };
+  }
+
+  // Standar BMKG untuk Gempa Bumi
+  return {
+    label1: 'Magnitudo',
+    value1: item.magnitude || '-',
+    label2: 'Kedalaman',
+    value2: item.depth || '-',
+  };
+};
 
 function SetBounds() {
   const map = useMap();
@@ -811,16 +869,25 @@ export default function MapPage() {
                                     <Info size={11} /> contoh tampilan data
                                   </div>
                                 )}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
-                                  <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
-                                    <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>Magnitudo</div>
-                                    <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.1rem', color: '#0E2A5C' }}>{item.magnitude}</div>
-                                  </div>
-                                  <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
-                                    <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>Kedalaman</div>
-                                    <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.1rem', color: '#0E2A5C' }}>{item.depth}</div>
-                                  </div>
-                                </div>
+                                {(() => {
+                                  const metrics = getDisasterMetrics(item);
+                                  return (
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
+                                      <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
+                                        <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>{metrics.label1}</div>
+                                        <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.05rem', color: '#0E2A5C' }}>
+                                          {metrics.value1}
+                                        </div>
+                                      </div>
+                                      <div style={{ background: '#f7f2ea', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
+                                        <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>{metrics.label2}</div>
+                                        <div style={{ fontFamily: 'Fira Code, monospace', fontWeight: '700', fontSize: '1.05rem', color: '#0E2A5C' }}>
+                                          {metrics.value2}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })()}
                                 <div style={{ fontSize: '0.85rem', padding: '10px', background: 'rgba(192,73,43,0.08)', borderRadius: '8px', borderLeft: '3px solid #C0492B', lineHeight: '1.5' }}>
                                   <strong>⚠️ Rekomendasi:</strong><br />{item.step}
                                 </div>
@@ -949,9 +1016,13 @@ export default function MapPage() {
                           <span className="mono" style={{ color: '#EA580C', fontWeight: '700', background: 'rgba(234,88,12,0.1)', padding: '2px 6px', borderRadius: '4px' }}>
                             {item.jumlah_titik} Titik ({item.frp_total} MW)
                           </span>
-                        ) : item.magnitude && item.magnitude !== '-' && !item.isSample ? (
+                        ) : item.type === 'Gempa Bumi' && item.magnitude && item.magnitude !== '-' ? (
                           <span className="mono" style={{ color: 'var(--color-primary)', fontWeight: '700', background: 'rgba(14,42,92,0.05)', padding: '2px 6px', borderRadius: '4px' }}>
                             M {item.magnitude}
+                          </span>
+                        ) : item.magnitude && item.magnitude !== '-' ? (
+                          <span className="mono" style={{ color: 'var(--color-primary)', fontWeight: '700', background: 'rgba(14,42,92,0.05)', padding: '2px 6px', borderRadius: '4px' }}>
+                            {item.magnitude}
                           </span>
                         ) : null}
                       </div>
