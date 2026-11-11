@@ -1733,7 +1733,7 @@
 
 .how-to-use-white-section {
   position: relative;
-  background: url("/images/bg-cara-penggunaan.jpg") center/cover no-repeat;
+  background: #ffffff;
   color: #1e293b;
   padding: 5.5rem 0 6rem;
   border-top: 1px solid rgba(14, 42, 92, 0.08);

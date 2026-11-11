@@ -821,7 +821,6 @@ export default function LandingPage() {
       <RevealSection
         id="cara-penggunaan"
         className="how-to-use-white-section"
-        style={{ backgroundImage: `url("${ASSET_BASE}images/bg-cara-penggunaan.jpg")`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
       >
         <div className="container relative z-10">
           <h2 className="how-to-use-heading">Cara Menggunakan GeoAlert</h2>
