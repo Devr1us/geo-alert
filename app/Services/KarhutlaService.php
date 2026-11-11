@@ -337,6 +337,12 @@ class KarhutlaService
                 $riskLevel = 'standby';
             }
 
+            // Saring: Hanya masukkan titik panas yang berisiko nyata karhutla (Waspada dan Bahaya Tinggi)
+            // Titik panas biasa/tunggal berstatus Siaga diabaikan karena merupakan anomali termal minor/noise
+            if ($riskLevel === 'standby') {
+                continue;
+            }
+
             // Cari nama wilayah (provinsi & kabupaten/kota)
             $wilayah = $this->determineRegion($centerLat, $centerLon);
 

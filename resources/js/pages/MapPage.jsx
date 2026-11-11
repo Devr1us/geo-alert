@@ -514,6 +514,12 @@ export default function MapPage() {
   };
 
   const filteredData = data.filter(item => {
+    // Saring Karhutla: hanya tampilkan yang berisiko nyata (Waspada & Bahaya Tinggi)
+    // Titik panas biasa/tunggal (Siaga / standby) disaring keluar agar peta bersih
+    if (item.type === 'Karhutla' && item.risk === 'standby') {
+      return false;
+    }
+
     let matchesFilter = false;
     if (activeFilter === 'Semua') {
       matchesFilter = true;

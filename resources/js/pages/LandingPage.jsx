@@ -263,7 +263,10 @@ async function fetchDisasterEvents() {
     try {
       const khJson = await resKarhutla.value.json();
       if (Array.isArray(khJson.events)) {
-        const karhutlaEvents = khJson.events.map((ev) => ({
+        // Hanya ambil kejadian Karhutla berstatus Waspada & Bahaya Tinggi
+        const karhutlaEvents = khJson.events
+          .filter(ev => ev.risk === 'warning' || ev.risk === 'danger')
+          .map((ev) => ({
           id: ev.id,
           type: 'Karhutla',
           location: ev.location || `${ev.wilayah?.kabupaten}, ${ev.wilayah?.provinsi}`,
