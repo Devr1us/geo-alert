@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Search, AlertTriangle, AlertOctagon, ShieldAlert, RefreshCw, Activity, Droplets, Wind, Mountain, Waves, Flame, Bot, Map as MapIcon, Info, X } from 'lucide-react';
+import { Search, AlertTriangle, AlertOctagon, ShieldAlert, RefreshCw, Activity, Droplets, Wind, Mountain, Waves, Flame, Bot, Map as MapIcon, Info, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -357,6 +357,21 @@ export default function MapPage() {
   const [geocodeResult, setGeocodeResult] = useState(null);
   const searchDebounceRef = useRef(null);
 
+  // Horizontal scroll for filter chips
+  const chipsScrollRef = useRef(null);
+  const scrollChips = (offset) => {
+    if (chipsScrollRef.current) {
+      chipsScrollRef.current.scrollBy({ left: offset, behavior: 'smooth' });
+    }
+  };
+  const handleChipsWheel = (e) => {
+    if (chipsScrollRef.current) {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        chipsScrollRef.current.scrollLeft += e.deltaY;
+      }
+    }
+  };
+
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -631,9 +646,9 @@ export default function MapPage() {
             {/* Floating Toolbar Overlay */}
             <div className="map-toolbar-floating">
               {/* Search bar dengan geocoding */}
-              <div style={{ position: 'relative', flexGrow: 1, maxWidth: '400px' }}>
+              <div style={{ position: 'relative', flexShrink: 0, width: '240px', maxWidth: '280px' }}>
                 <div className="search-bar-pill">
-                  <Search size={18} color="var(--color-primary)" />
+                  <Search size={17} color="var(--color-primary)" />
                   <input
                     type="text"
                     placeholder="Cari lokasi atau wilayah..."
@@ -666,20 +681,44 @@ export default function MapPage() {
                 )}
               </div>
 
-              {/* Filter chips pills */}
-              <div className="filter-chips-pill">
-                {['Semua', 'Gempa', 'Tsunami', 'Karhutla', 'Banjir', 'Longsor', 'Gunung Api'].map(chip => (
-                  <button
-                    key={chip}
-                    className={`chip-pill ${activeFilter === chip ? 'active' : ''}`}
-                    onClick={() => setActiveFilter(chip)}
-                    aria-pressed={activeFilter === chip}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                  >
-                    {chip === 'Karhutla' && <Flame size={13} color="#EA580C" />}
-                    <span>{chip}</span>
-                  </button>
-                ))}
+              {/* Filter chips pills with scroll navigation & mouse wheel */}
+              <div className="filter-chips-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0, flex: 1 }}>
+                <button
+                  type="button"
+                  className="chips-nav-arrow"
+                  onClick={() => scrollChips(-140)}
+                  title="Geser kategori ke kiri"
+                  aria-label="Geser ke kiri"
+                >
+                  <ChevronLeft size={15} />
+                </button>
+                <div
+                  className="filter-chips-pill"
+                  ref={chipsScrollRef}
+                  onWheel={handleChipsWheel}
+                >
+                  {['Semua', 'Gempa', 'Tsunami', 'Karhutla', 'Banjir', 'Longsor', 'Gunung Api'].map(chip => (
+                    <button
+                      key={chip}
+                      className={`chip-pill ${activeFilter === chip ? 'active' : ''}`}
+                      onClick={() => setActiveFilter(chip)}
+                      aria-pressed={activeFilter === chip}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      {chip === 'Karhutla' && <Flame size={13} color="#EA580C" />}
+                      <span>{chip}</span>
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="chips-nav-arrow"
+                  onClick={() => scrollChips(140)}
+                  title="Geser kategori ke kanan"
+                  aria-label="Geser ke kanan"
+                >
+                  <ChevronRight size={15} />
+                </button>
               </div>
             </div>
 
