@@ -3,6 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "serve": "C:\\laragon\\bin\\php\\php-8.3.30-Win32-vs16-x64\\php.exe artisan serve",
         "build": "vite build",
         "build:ghpages": "vite build --config vite.config.ghpages.js --mode ghpages && node -e \"require('fs').copyFileSync('dist/index.html','dist/404.html')\"",
         "dev": "vite"

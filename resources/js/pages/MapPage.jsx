@@ -248,6 +248,15 @@ const getDisasterMetrics = (item) => {
     };
   }
 
+  if (type.includes('karhutla')) {
+    return {
+      label1: 'Jumlah Titik',
+      value1: item.jumlah_titik ? `${item.jumlah_titik} Titik` : (item.magnitude || 'Titik Panas'),
+      label2: 'Radiasi Termal',
+      value2: item.frp_total ? `${item.frp_total} MW` : (item.depth || 'FRP Aktif'),
+    };
+  }
+
   if (type.includes('cuaca')) {
     return {
       label1: 'Kecepatan Angin',
@@ -588,9 +597,9 @@ export default function MapPage() {
   };
 
   const filteredData = data.filter(item => {
-    // Saring Karhutla: hanya tampilkan yang berisiko nyata (Waspada & Bahaya Tinggi)
-    // Titik panas biasa/tunggal (Siaga / standby) disaring keluar agar peta bersih
-    if (item.type === 'Karhutla' && item.risk === 'standby') {
+    // Saring Karhutla: hanya tampilkan yang berisiko nyata (Waspada & Bahaya Tinggi) pada filter Semua
+    // Jika user memilih kategori 'Karhutla' secara eksplisit, tampilkan seluruh kluster
+    if (item.type === 'Karhutla' && item.risk === 'standby' && activeFilter !== 'Karhutla') {
       return false;
     }
 

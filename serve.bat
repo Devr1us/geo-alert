@@ -1,0 +1,3 @@
+@echo off
+echo Memulai Laravel server GeoAlert dengan PHP 8.3...
+"C:\laragon\bin\php\php-8.3.30-Win32-vs16-x64\php.exe" "%~dp0artisan" serve %*
