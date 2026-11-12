@@ -515,14 +515,18 @@ export default function LandingPage() {
 
           {/* Top Row: 2 Big Cards */}
           <div className="grid md:grid-cols-2 gap-8 items-stretch" style={{ marginBottom: '2.25rem' }}>
-            {/* Left Card: Indonesian Archipelago */}
-            <RevealSection className="about-map-card" once={false}>
-              <div className="map-card-graphic-wrapper">
-                <img
-                  src={`${ASSET_BASE}images/INDONESIAN.png`}
-                  alt="Indonesia Archipelago Map"
-                  className="map-silhouette-img"
-                />
+            {/* Left Card: Tipografi Kutipan Siaga */}
+            <RevealSection className="about-quote-card" once={false}>
+              <span className="about-quote-mark" aria-hidden="true">“</span>
+              <div className="about-quote-content">
+                <blockquote className="about-quote-text">
+                  <span className="quote-text-primary">Siaga hari ini,</span>
+                  <span className="quote-text-accent">selamat esok hari.</span>
+                </blockquote>
+                <div className="about-quote-footer">
+                  <div className="about-quote-divider" aria-hidden="true" />
+                  <span className="about-quote-tag">DETEKSI DINI, LINDUNGI DIRI</span>
+                </div>
               </div>
             </RevealSection>
 

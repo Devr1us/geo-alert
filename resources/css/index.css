@@ -1,9 +1,13 @@
 :root {
+  /* Background Variables */
+  --bg-cream: #FAF7F0;
+  --bg-cream-soft: #FCFAF5;
+
   /* Colors */
   --color-primary: #0E2A5C;
   --color-primary-hover: #0a1f44;
   --color-alert: #C0492B;
-  --color-bg: #F7F2EA;
+  --color-bg: var(--bg-cream);
   --color-standby: #4A90D9;
   --color-white: #FFFFFF;
   --color-text-main: #1A1A1A;
@@ -65,10 +69,16 @@ body {
   min-height: 100%;
   overflow-x: hidden;
   font-family: var(--font-body);
-  background-color: var(--color-bg);
+  background-color: var(--bg-cream);
   color: var(--color-text-main);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+
+.app-container,
+.main-content {
+  background-color: var(--bg-cream);
+  min-height: 100vh;
 }
 
 img, picture, video, canvas, svg {

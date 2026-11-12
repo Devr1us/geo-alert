@@ -5,7 +5,7 @@ import RevealSection from '../components/RevealSection';
 
 export default function PrivacyPage() {
   return (
-    <div style={{ minHeight: '80vh', background: 'var(--color-bg)', padding: 'calc(var(--navbar-height) + 2rem) 0 4rem' }}>
+    <div style={{ minHeight: '80vh', background: 'var(--bg-cream)', padding: 'calc(var(--navbar-height) + 2rem) 0 4rem' }}>
       <div className="container" style={{ maxWidth: '800px' }}>
         {/* Back nav */}
         <RevealSection animation="fade-in">

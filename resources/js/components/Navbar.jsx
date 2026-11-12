@@ -92,6 +92,16 @@ export default function Navbar() {
     setTimeout(go, 300);
   };
 
+  const goToHome = (e) => {
+    e.preventDefault();
+    setIsOpen(false);
+    navigate('/', { replace: true });
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+    forceScrollTop();
+  };
+
   const goToMap = (e) => {
     e.preventDefault();
     setIsOpen(false);
@@ -136,7 +146,7 @@ export default function Navbar() {
         <div className="nav-mobile-spacer" aria-hidden="true" />
 
         {/* Mobile Header Brand (Centered on mobile view) */}
-        <Link to="/" className="nav-brand-mobile" aria-label="GeoAlert" onClick={() => setIsOpen(false)}>
+        <Link to="/" className="nav-brand-mobile" aria-label="GeoAlert" onClick={goToHome}>
           <img src={`${ASSET_BASE}logo-geoalert.svg`} alt="GeoAlert" className="nav-logo" />
           <span className="nav-brand-text">GeoAlert</span>
         </Link>
@@ -145,13 +155,13 @@ export default function Navbar() {
         <div className={`nav-links-wrapper ${isOpen ? 'active' : ''}`}>
           {/* Left Group Links */}
           <div className="nav-group nav-group-left">
-            <Link to="/" className="nav-link" onClick={() => setIsOpen(false)}>Beranda</Link>
+            <Link to="/" className="nav-link" onClick={goToHome}>Beranda</Link>
             <a href="/peta" className="nav-link" onClick={goToMap}>Peta Bencana</a>
             <a href="#mitigasi" className="nav-link" onClick={scrollToSection('mitigasi')}>Mitigasi</a>
           </div>
 
           {/* Center Brand Logo (Desktop - Only Logo Icon, NO text) */}
-          <Link to="/" className="nav-brand-center" aria-label="GeoAlert Beranda">
+          <Link to="/" className="nav-brand-center" aria-label="GeoAlert Beranda" onClick={goToHome}>
             <svg viewBox="0 0 100 100" className="nav-logo-center-svg" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="50" cy="50" r="40" />
               <circle cx="50" cy="50" r="24" />

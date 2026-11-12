@@ -42,6 +42,12 @@
 
         <!-- Unregister Service Worker & Bust Cache in Local Dev -->
         <script>
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
+            if (!window.location.hash) {
+                window.scrollTo(0, 0);
+            }
             if ('serviceWorker' in navigator && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
                 navigator.serviceWorker.getRegistrations().then(function(regs) {
                     for (var i = 0; i < regs.length; i++) {
