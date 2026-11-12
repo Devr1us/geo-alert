@@ -78,7 +78,7 @@ export default function Navbar() {
     e.preventDefault();
     setIsOpen(false);
     if (location.pathname === '/peta') {
-      if (location.hash) {
+      if (location.hash || location.search) {
         navigate('/peta', { replace: true });
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });

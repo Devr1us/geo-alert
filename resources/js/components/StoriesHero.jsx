@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, ArrowRight, X, MapPin, BookOpen, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, ArrowRight, X, MapPin, BookOpen, ExternalLink, Compass } from 'lucide-react';
 import {
   STORIES,
   REGION_SVG_PATHS,
@@ -10,15 +11,25 @@ import {
   VIDEO_SRC,
   STILL_SRC,
 } from '../data/storiesData';
+import { REGION_BOUNDS, getRegionBySlug } from '../data/regionBounds';
 import '../../css/StoriesHero.css';
 
 const RULER_TOP_POSITIONS = [10, 56, 108, 158, 206];
 
+console.info('[GeoAlert hero v2] loaded');
+
 export default function StoriesHero({ onCekBencana }) {
+  const navigate = useNavigate();
   const [activeZoneIndex, setActiveZoneIndex] = useState(0);
   const [isStoryOpen, setIsStoryOpen] = useState(false);
   const [storyIndex, setStoryIndex] = useState(0);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0, visible: false });
+
+  // Zoom to region & navigation states
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [zoomingRegion, setZoomingRegion] = useState(null);
+  const [isOverlayVisible, setIsOverlayVisible] = useState(false);
+  const [touchActiveStory, setTouchActiveStory] = useState(null);
 
   const heroRef = useRef(null);
   const mapViewportRef = useRef(null);
@@ -27,6 +38,8 @@ export default function StoriesHero({ onCekBencana }) {
   const storyCanvasRef = useRef(null);
   const animFrameIdRef = useRef(null);
   const stillImageRef = useRef(null);
+  const navigationTimerRef = useRef(null);
+  const overlayTimerRef = useRef(null);
 
   const activeStory = STORIES[activeZoneIndex] || STORIES[0];
   const modalStory = STORIES[storyIndex] || STORIES[0];
@@ -52,7 +65,29 @@ export default function StoriesHero({ onCekBencana }) {
     };
   }, []);
 
-  // 2. Fungsi menggambar cell video/gambar ke canvas
+  // 2. Reset zoom, overlay, & navigation lock saat mount dan bfcache (Back button)
+  useEffect(() => {
+    setIsNavigating(false);
+    setZoomingRegion(null);
+    setIsOverlayVisible(false);
+    setTouchActiveStory(null);
+
+    const handlePageShow = () => {
+      setIsNavigating(false);
+      setZoomingRegion(null);
+      setIsOverlayVisible(false);
+      setTouchActiveStory(null);
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+    return () => {
+      window.removeEventListener('pageshow', handlePageShow);
+      if (navigationTimerRef.current) clearTimeout(navigationTimerRef.current);
+      if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
+    };
+  }, []);
+
+  // 3. Fungsi menggambar cell video/gambar ke canvas
   const renderCellToCanvas = useCallback((canvas, cCol, cRow) => {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -89,7 +124,7 @@ export default function StoriesHero({ onCekBencana }) {
     }
   }, []);
 
-  // 3. Render loop canvas
+  // 4. Render loop canvas
   useEffect(() => {
     let active = true;
 
@@ -126,7 +161,51 @@ export default function StoriesHero({ onCekBencana }) {
     };
   }, [activeZoneIndex, isStoryOpen, storyIndex, renderCellToCanvas]);
 
-  // 4. Buka / Tutup Modal Kisah Lengkap
+  // 5. Eksekusi Zoom & Navigasi ke Halaman Peta Bencana
+  const triggerRegionZoom = useCallback((regionIdOrSlug) => {
+    if (isNavigating) return; // Kunci double click
+
+    const region = getRegionBySlug(regionIdOrSlug) || REGION_BOUNDS['sumatera'];
+    const slug = region.slug;
+
+    // Periksa preferensi reduced-motion
+    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      navigate(`/peta?wilayah=${slug}`);
+      return;
+    }
+
+    setIsNavigating(true);
+    setZoomingRegion(region);
+    setCursorPos((prev) => ({ ...prev, visible: false }));
+
+    // Overlay krem memudar masuk setelah 450ms
+    if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
+    overlayTimerRef.current = setTimeout(() => {
+      setIsOverlayVisible(true);
+    }, 450);
+
+    // Navigasi ke /peta?wilayah=<slug> setelah animasi selesai (750ms)
+    if (navigationTimerRef.current) clearTimeout(navigationTimerRef.current);
+    navigationTimerRef.current = setTimeout(() => {
+      navigate(`/peta?wilayah=${slug}`);
+    }, 750);
+  }, [isNavigating, navigate]);
+
+  // 6. Handler klik pada wilayah (desktop: langsung zoom & navigasi; mobile: buka kartu aksi ringkas)
+  const handleRegionClick = useCallback((regionId, index, evt) => {
+    setActiveZoneIndex(index);
+    const isTouchOnly = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    const isTouchType = evt && (evt.pointerType === 'touch' || evt.nativeEvent?.pointerType === 'touch');
+
+    if (isTouchOnly || isTouchType) {
+      setTouchActiveStory(STORIES[index]);
+    } else {
+      triggerRegionZoom(regionId);
+    }
+  }, [triggerRegionZoom]);
+
+  // 7. Buka / Tutup Modal Kisah Lengkap (Sekunder, tidak dipicu klik peta)
   const openStory = useCallback((index) => {
     const targetIdx = typeof index === 'number' ? index : activeZoneIndex;
     setStoryIndex(targetIdx);
@@ -139,7 +218,7 @@ export default function StoriesHero({ onCekBencana }) {
     setIsStoryOpen(false);
   }, []);
 
-  // 5. Navigasi Keyboard
+  // 8. Navigasi Keyboard
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (isStoryOpen) {
@@ -153,26 +232,33 @@ export default function StoriesHero({ onCekBencana }) {
         return;
       }
 
-      // Saat di peta beranda: panah atas/bawah memilih wilayah
-      if (e.key === 'ArrowDown') {
+      if (isNavigating) return;
+
+      // Saat di peta beranda: panah atas/bawah/kiri/kanan memilih wilayah
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
         setActiveZoneIndex((prev) => (prev + 1) % STORIES.length);
-      } else if (e.key === 'ArrowUp') {
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
         setActiveZoneIndex((prev) => (prev - 1 + STORIES.length) % STORIES.length);
-      } else if (e.key === 'Enter') {
-        // Enter membuka kisah wilayah yang sedang aktif jika target tidak sedang di tombol aksi
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        // Enter atau Spasi pada item zona memicu zoom ke peta bencana
         if (document.activeElement && document.activeElement.classList.contains('sh-zone-item')) {
-          openStory(activeZoneIndex);
+          e.preventDefault();
+          const targetZone = STORIES[activeZoneIndex];
+          if (targetZone) triggerRegionZoom(targetZone.id);
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isStoryOpen, activeZoneIndex, closeStory, openStory]);
+  }, [isStoryOpen, isNavigating, activeZoneIndex, closeStory, triggerRegionZoom]);
 
-  // 6. Custom cursor positioning (hanya pointer halus)
+  // 9. Custom cursor positioning (hanya pointer halus)
   const handlePointerMove = (e) => {
     if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return;
+    if (isNavigating || isStoryOpen) return;
     setCursorPos({
       x: e.clientX,
       y: e.clientY,
@@ -196,7 +282,7 @@ export default function StoriesHero({ onCekBencana }) {
   return (
     <section
       ref={heroRef}
-      className="stories-hero"
+      className={`stories-hero ${isNavigating ? 'is-navigating' : ''}`}
       aria-label="Kisah Tangguh Nusantara — Hero Section GeoAlert"
     >
       {/* Hidden Video element for animation texture */}
@@ -220,16 +306,22 @@ export default function StoriesHero({ onCekBencana }) {
         aria-hidden="true"
       />
 
-      {/* Custom Pointer Circle Cursor Disc */}
+      {/* Smooth transition cream overlay to /peta */}
       <div
-        className={`sh-custom-cursor ${cursorPos.visible && !isStoryOpen ? 'is-visible' : ''}`}
+        className={`sh-zoom-overlay ${isOverlayVisible ? 'is-active' : ''}`}
+        aria-hidden="true"
+      />
+
+      {/* Custom Pointer Circle Cursor Disc (Only fine pointer devices) */}
+      <div
+        className={`sh-custom-cursor ${cursorPos.visible && !isStoryOpen && !isNavigating ? 'is-visible' : ''}`}
         style={{
           left: `${cursorPos.x}px`,
           top: `${cursorPos.y}px`,
         }}
         aria-hidden="true"
       >
-        <span>+ BUKA</span>
+        <span>LIHAT PETA</span>
       </div>
 
       <div className="stories-hero-container">
@@ -250,7 +342,7 @@ export default function StoriesHero({ onCekBencana }) {
             {/* Paragraph (max ~60 karakter per baris) */}
             <p className="stories-hero-desc">
               Lima wilayah, lima kisah ketangguhan warga memitigasi bencana di tanah air.
-              Arahkan kursor ke zona untuk melihat dekat, lalu buka kisah lengkap di baliknya.
+              Arahkan kursor ke zona untuk melihat dekat, lalu klik wilayah untuk membuka peta bencana interaktif.
             </p>
 
             {/* Tombol Aksi */}
@@ -261,7 +353,7 @@ export default function StoriesHero({ onCekBencana }) {
                 className="sh-btn sh-btn-primary"
                 aria-label="Cek Bencana Terdekat pada Peta Interaktif"
               >
-                <BookOpen size={19} aria-hidden="true" />
+                <Compass size={19} aria-hidden="true" />
                 <span>Cek Bencana Terdekat</span>
               </button>
 
@@ -288,18 +380,18 @@ export default function StoriesHero({ onCekBencana }) {
               <div>0° 47' 00" S, 113° 55' 00" E</div>
             </div>
 
-            {/* SVG Map Container */}
+            {/* SVG Map Container (Separated cleanly from zone selector) */}
             <div ref={mapViewportRef} className="sh-map-viewport">
               <svg
                 className="sh-map-svg"
                 viewBox="0 0 1440 810"
                 role="img"
-                aria-label="Peta Vektor Interaktif Wilayah Indonesia"
+                aria-label="Peta Vektor Interaktif Wilayah Indonesia — Klik untuk Zoom ke Peta Bencana"
               >
-                <title>Peta Interaktif Kisah Tangguh Indonesia</title>
+                <title>Peta Interaktif Wilayah Bencana Indonesia</title>
                 <desc>
-                  Peta kepulauan Indonesia yang memuat lima zona kisah: Sumatera, Jawa,
-                  Kalimantan, Sulawesi, dan Papua & Maluku.
+                  Peta kepulauan Indonesia dengan lima zona wilayah: Sumatera, Jawa,
+                  Kalimantan, Sulawesi, dan Papua & Maluku. Klik salah satu wilayah untuk zoom langsung ke Peta Bencana.
                 </desc>
 
                 <defs>
@@ -317,112 +409,199 @@ export default function StoriesHero({ onCekBencana }) {
                   />
                 </defs>
 
-                {/* Layer 1: Photo Fill Canvases inside Region ClipPaths */}
-                <g id="sh-photo-fills">
-                  {STORIES.map((s) => {
-                    const isActive = s.id === activeStory.id;
-                    return (
-                      <foreignObject
-                        key={`fo-${s.id}`}
-                        x="0"
-                        y="0"
-                        width="1440"
-                        height="810"
-                        clipPath={`url(#sh-clip-${s.id})`}
-                        className={`sh-photo-fill ${isActive ? 'is-active' : ''}`}
-                      >
-                        <canvas
-                          ref={(el) => {
-                            if (el) canvasMapRefs.current[s.id] = el;
-                          }}
+                {/* Main Zoom Stage Group: zooms smoothly to clicked region in SVG coordinates */}
+                <g
+                  id="sh-zoom-stage"
+                  className={`sh-zoom-stage ${zoomingRegion ? 'is-zooming' : ''}`}
+                  style={
+                    zoomingRegion
+                      ? {
+                          transformOrigin: `${zoomingRegion.svgCenter.x}px ${zoomingRegion.svgCenter.y}px`,
+                          transform: `scale(${zoomingRegion.zoomScale || 2.2})`,
+                        }
+                      : {
+                          transformOrigin: '720px 405px',
+                          transform: 'scale(1)',
+                        }
+                  }
+                >
+                  {/* Layer 1: Photo Fill Canvases inside Region ClipPaths */}
+                  <g id="sh-photo-fills" pointerEvents="none">
+                    {STORIES.map((s) => {
+                      const isActive = s.id === activeStory.id;
+                      const isTarget = zoomingRegion
+                        ? zoomingRegion.slug === s.id || (s.id === 'papua' && zoomingRegion.slug === 'papua-maluku')
+                        : isActive;
+                      return (
+                        <foreignObject
+                          key={`fo-${s.id}`}
+                          x="0"
+                          y="0"
                           width="1440"
                           height="810"
-                          style={{ width: '100%', height: '100%', display: 'block' }}
+                          clipPath={`url(#sh-clip-${s.id})`}
+                          className={`sh-photo-fill ${isActive ? 'is-active' : ''} ${isTarget ? 'is-target' : ''}`}
+                          pointerEvents="none"
+                        >
+                          <canvas
+                            ref={(el) => {
+                              if (el) canvasMapRefs.current[s.id] = el;
+                            }}
+                            width="1440"
+                            height="810"
+                            style={{ width: '100%', height: '100%', display: 'block', pointerEvents: 'none' }}
+                          />
+                        </foreignObject>
+                      );
+                    })}
+                  </g>
+
+                  {/* Layer 2: Coastline Ink Paths */}
+                  <g id="sh-coastlines">
+                    {STORIES.map((s, idx) => {
+                      const isActive = s.id === activeStory.id;
+                      const isTarget = zoomingRegion
+                        ? zoomingRegion.slug === s.id || (s.id === 'papua' && zoomingRegion.slug === 'papua-maluku')
+                        : isActive;
+                      return (
+                        <path
+                          key={`coastline-${s.id}`}
+                          className={`sh-coastline-path sh-region-${s.id} ${isActive ? 'is-active' : ''} ${isTarget ? 'is-target' : ''}`}
+                          d={REGION_SVG_PATHS[s.id]}
+                          pathLength="1"
+                          role="button"
+                          tabIndex={0}
+                          aria-label={`Buka peta bencana wilayah ${s.name}`}
+                          onClick={(e) => handleRegionClick(s.id, idx, e)}
+                          onMouseEnter={() => setActiveZoneIndex(idx)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              triggerRegionZoom(s.id);
+                            }
+                          }}
                         />
-                      </foreignObject>
-                    );
-                  })}
-                </g>
+                      );
+                    })}
+                  </g>
 
-                {/* Layer 2: Coastline Ink Paths */}
-                <g id="sh-coastlines">
-                  {STORIES.map((s) => {
-                    const isActive = s.id === activeStory.id;
-                    return (
+                  {/* Layer 3: Invisible Hit Areas (min 44px equivalent) */}
+                  <g id="sh-hit-areas">
+                    {STORIES.map((s, idx) => (
                       <path
-                        key={`coastline-${s.id}`}
-                        className={`sh-coastline-path sh-region-${s.id} ${isActive ? 'is-active' : ''}`}
+                        key={`hit-${s.id}`}
+                        className="sh-hit-area"
                         d={REGION_SVG_PATHS[s.id]}
-                        pathLength="1"
-                        onClick={() => openStory(STORIES.findIndex((item) => item.id === s.id))}
-                        onMouseEnter={() => {
-                          const idx = STORIES.findIndex((item) => item.id === s.id);
-                          if (idx !== -1) setActiveZoneIndex(idx);
-                        }}
-                      />
-                    );
-                  })}
-                </g>
-
-                {/* Layer 3: Invisible Hit Areas for smooth hover across entire landmass */}
-                <g id="sh-hit-areas">
-                  {STORIES.map((s, idx) => (
-                    <path
-                      key={`hit-${s.id}`}
-                      className="sh-hit-area"
-                      d={REGION_SVG_PATHS[s.id]}
-                      onClick={() => openStory(idx)}
-                      onMouseEnter={() => setActiveZoneIndex(idx)}
-                    />
-                  ))}
-                </g>
-
-                {/* Layer 4: Orange Terracotta Pulse Dots */}
-                <g id="sh-dots">
-                  {STORIES.map((s, idx) => {
-                    const isActive = s.id === activeStory.id;
-                    return (
-                      <g
-                        key={`dot-${s.id}`}
-                        className={`sh-dot-group ${isActive ? 'is-active' : ''}`}
-                        transform={`translate(${s.dot.x}, ${s.dot.y})`}
-                        onClick={() => openStory(idx)}
+                        onClick={(e) => handleRegionClick(s.id, idx, e)}
                         onMouseEnter={() => setActiveZoneIndex(idx)}
                         role="button"
-                        tabIndex={0}
-                        aria-label={`Buka kisah wilayah ${s.name}`}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            openStory(idx);
-                          }
-                        }}
-                      >
-                        <circle cx="0" cy="0" r="14" className="sh-dot-pulse" />
-                        <circle cx="0" cy="0" r="5" className="sh-dot-core" />
-                      </g>
-                    );
-                  })}
-                </g>
+                        aria-label={`Buka peta bencana wilayah ${s.name}`}
+                        tabIndex={-1}
+                      />
+                    ))}
+                  </g>
 
-                {/* Layer 5: Active Ring with Rotating Badge Text */}
-                <g
-                  className="sh-active-ring-group is-visible"
-                  transform={`translate(${activeStory.dot.x}, ${activeStory.dot.y})`}
-                >
-                  <circle cx="0" cy="0" r="28" className="sh-ring-disc" />
-                  <line x1="-8" y1="0" x2="8" y2="0" className="sh-ring-plus" />
-                  <line x1="0" y1="-8" x2="0" y2="8" className="sh-ring-plus" />
-                  <text className="sh-ring-spin-text">
-                    <textPath href="#sh-ring-text-path">
-                      KISAH TANGGUH &bull; GEOALERT &bull;
-                    </textPath>
-                  </text>
+                  {/* Layer 4: Orange Terracotta Pulse Dots */}
+                  <g id="sh-dots">
+                    {STORIES.map((s, idx) => {
+                      const isActive = s.id === activeStory.id;
+                      const isTarget = zoomingRegion
+                        ? zoomingRegion.slug === s.id || (s.id === 'papua' && zoomingRegion.slug === 'papua-maluku')
+                        : isActive;
+                      return (
+                        <g
+                          key={`dot-${s.id}`}
+                          className={`sh-dot-group ${isActive ? 'is-active' : ''} ${isTarget ? 'is-target' : ''}`}
+                          transform={`translate(${s.dot.x}, ${s.dot.y})`}
+                          onClick={(e) => handleRegionClick(s.id, idx, e)}
+                          onMouseEnter={() => setActiveZoneIndex(idx)}
+                          role="button"
+                          tabIndex={0}
+                          aria-label={`Buka peta bencana wilayah ${s.name}`}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              triggerRegionZoom(s.id);
+                            }
+                          }}
+                        >
+                          {/* Minimum 48px hit target area */}
+                          <circle cx="0" cy="0" r="24" fill="transparent" pointerEvents="all" />
+                          <circle cx="0" cy="0" r="14" className="sh-dot-pulse" />
+                          <circle cx="0" cy="0" r="5" className="sh-dot-core" />
+                        </g>
+                      );
+                    })}
+                  </g>
+
+                  {/* Layer 5: Active Ring with Rotating Badge Text (Pointer Events None) */}
+                  <g
+                    className={`sh-active-ring-group ${zoomingRegion ? 'is-hidden' : 'is-visible'}`}
+                    transform={`translate(${activeStory.dot.x}, ${activeStory.dot.y})`}
+                    pointerEvents="none"
+                    aria-hidden="true"
+                  >
+                    <circle cx="0" cy="0" r="28" className="sh-ring-disc" />
+                    <line x1="-8" y1="0" x2="8" y2="0" className="sh-ring-plus" />
+                    <line x1="0" y1="-8" x2="0" y2="8" className="sh-ring-plus" />
+                    <text className="sh-ring-spin-text">
+                      <textPath href="#sh-ring-text-path">
+                        KISAH TANGGUH &bull; GEOALERT &bull;
+                      </textPath>
+                    </text>
+                  </g>
                 </g>
               </svg>
+
+              {/* Touch Device Action Card (Muncul saat wilayah disentuh pada layar sentuh) */}
+              {touchActiveStory && !isNavigating && (
+                <div className="sh-touch-action-card" role="dialog" aria-label={`Pilihan wilayah ${touchActiveStory.name}`}>
+                  <div className="sh-touch-card-top">
+                    <div>
+                      <span className="sh-touch-card-badge">{touchActiveStory.coords}</span>
+                      <h4 className="sh-touch-card-title">{touchActiveStory.name}</h4>
+                    </div>
+                    <button
+                      type="button"
+                      className="sh-touch-card-close"
+                      onClick={() => setTouchActiveStory(null)}
+                      aria-label="Tutup pilihan wilayah"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                  <p className="sh-touch-card-desc">{touchActiveStory.subtitle}: {touchActiveStory.desc}</p>
+                  <div className="sh-touch-card-btns">
+                    <button
+                      type="button"
+                      className="sh-touch-btn-primary"
+                      onClick={() => {
+                        const targetId = touchActiveStory.id;
+                        setTouchActiveStory(null);
+                        triggerRegionZoom(targetId);
+                      }}
+                    >
+                      <Compass size={14} />
+                      <span>Buka di Peta Bencana</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="sh-touch-btn-secondary"
+                      onClick={() => {
+                        const idx = STORIES.findIndex((s) => s.id === touchActiveStory.id);
+                        setTouchActiveStory(null);
+                        openStory(idx >= 0 ? idx : activeZoneIndex);
+                      }}
+                    >
+                      <BookOpen size={14} />
+                      <span>Baca Kisah</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Zone Selector (Right Edge on Desktop, Horizontal Chips on Mobile) */}
+            {/* Zone Selector (Right Edge on Desktop, Horizontal Chips on Mobile, separated from Map) */}
             <div className="sh-zone-selector" role="tablist" aria-label="Pilih Wilayah Indonesia">
               <div className="sh-zone-list-wrap">
                 <div className="sh-zone-title" id="sh-zone-label">PILIH WILAYAH</div>
@@ -435,9 +614,9 @@ export default function StoriesHero({ onCekBencana }) {
                         type="button"
                         role="tab"
                         aria-selected={isActive}
-                        aria-controls={`sh-tabpanel-${s.id}`}
+                        aria-label={`Buka peta bencana wilayah ${s.name}`}
                         className={`sh-zone-item ${isActive ? 'is-active' : ''}`}
-                        onClick={() => openStory(idx)}
+                        onClick={() => triggerRegionZoom(s.id)}
                         onMouseEnter={() => setActiveZoneIndex(idx)}
                         onFocus={() => setActiveZoneIndex(idx)}
                       >
@@ -445,6 +624,22 @@ export default function StoriesHero({ onCekBencana }) {
                       </button>
                     );
                   })}
+                </div>
+
+                {/* Secondary link to read story without opening modal from map click */}
+                <div className="sh-story-link-wrap">
+                  <button
+                    type="button"
+                    className="sh-read-story-trigger"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openStory(activeZoneIndex);
+                    }}
+                    aria-label={`Baca kisah ketangguhan wilayah ${activeStory.name}`}
+                  >
+                    <BookOpen size={13} aria-hidden="true" />
+                    <span>Baca kisah {activeStory.name} &rarr;</span>
+                  </button>
                 </div>
               </div>
 
@@ -471,6 +666,7 @@ export default function StoriesHero({ onCekBencana }) {
       {/* ==========================================================================
           MODAL KISAH LENGKAP (Full Story Dialog)
           Ported with high fidelity from public/stories.html #story-view
+          Diakses via tautan sekunder "Baca kisah" atau menu Kisah
           ========================================================================== */}
       <div
         className={`sh-story-overlay ${isStoryOpen ? 'is-open' : ''}`}
@@ -641,4 +837,3 @@ export default function StoriesHero({ onCekBencana }) {
     </section>
   );
 }
-

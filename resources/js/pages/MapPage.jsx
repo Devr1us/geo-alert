@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Search, AlertTriangle, AlertOctagon, ShieldAlert, RefreshCw, Activity, Droplets, Wind, Mountain, Waves, Flame, Bot, Map as MapIcon, Info, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Search, AlertTriangle, AlertOctagon, ShieldAlert, RefreshCw, Activity, Droplets, Wind, Mountain, Waves, Flame, Bot, Map as MapIcon, Info, X, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -11,6 +11,7 @@ import MitigationModal from '../components/MitigationModal';
 import { BMKG_TERKINI_URL, BMKG_DIRASAKAN_URL } from '../config/bmkgApi';
 import { formatLocation } from '../utils/locationFormatter';
 import { evaluateRisk, hasTsunamiThreat } from '../utils/riskEvaluator';
+import { REGION_BOUNDS, getRegionBySlug, isCoordinateInRegion } from '../data/regionBounds';
 
 // Fix for default leaflet icons in React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -145,8 +146,8 @@ const createTsunamiMarkerIcon = (level) => {
 
 // Indonesia bounds — limits panning and sets initial view
 const INDONESIA_BOUNDS = L.latLngBounds(
-  L.latLng(-11.0, 95.0),  // SW corner
-  L.latLng(6.0, 141.0)    // NE corner
+  L.latLng(-13.0, 93.0),  // SW corner (mencakup seluruh perairan barat & selatan)
+  L.latLng(8.5, 143.0)    // NE corner (mencakup seluruh Sabang s/d Merauke & pulau terluar)
 );
 const INDONESIA_CENTER = [-2.5, 117.5];
 
@@ -274,22 +275,45 @@ const getDisasterMetrics = (item) => {
   };
 };
 
-function SetBounds() {
+function MapViewController({ activeRegion, center, zoom }) {
   const map = useMap();
+  const prevRegionSlugRef = useRef(null);
+
   useEffect(() => {
     map.setMaxBounds(INDONESIA_BOUNDS);
     map.setMinZoom(4);
-    // Langsung set tampilan awal peta ke batas Indonesia
-    map.fitBounds(INDONESIA_BOUNDS, { padding: [10, 10] });
   }, [map]);
-  return null;
-}
 
-function ChangeView({ center, zoom }) {
-  const map = useMap();
   useEffect(() => {
-    map.setView(center, zoom);
-  }, [center, zoom, map]);
+    if (!map) return;
+    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (activeRegion && activeRegion.bounds) {
+      prevRegionSlugRef.current = activeRegion.slug;
+      const t = setTimeout(() => {
+        try {
+          map.invalidateSize();
+          if (prefersReducedMotion) {
+            map.fitBounds(activeRegion.bounds, { padding: [30, 30], maxZoom: 8 });
+          } else {
+            map.flyToBounds(activeRegion.bounds, { padding: [30, 30], duration: 1.2, maxZoom: 8 });
+          }
+        } catch (_) {}
+      }, 50);
+      return () => clearTimeout(t);
+    } else if (prevRegionSlugRef.current && !activeRegion) {
+      // User klik tombol "Lihat seluruh Indonesia"
+      prevRegionSlugRef.current = null;
+      if (prefersReducedMotion) {
+        map.fitBounds(INDONESIA_BOUNDS, { padding: [10, 10] });
+      } else {
+        map.flyToBounds(INDONESIA_BOUNDS, { padding: [10, 10], duration: 1.0 });
+      }
+    } else if (!activeRegion && center) {
+      map.setView(center, zoom || 5);
+    }
+  }, [activeRegion, center, zoom, map]);
+
   return null;
 }
 
@@ -332,6 +356,15 @@ async function geocodeLocation(query) {
 
 export default function MapPage() {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Parsing parameter URL (?wilayah=... atau ?provinsi=...)
+  const searchParams = new URLSearchParams(location.search);
+  const initialWilayahSlug = searchParams.get('wilayah') || searchParams.get('provinsi');
+  const initialRegion = getRegionBySlug(initialWilayahSlug);
+
+  const [activeRegion, setActiveRegion] = useState(initialRegion);
+  const [filterOnlyThisRegion, setFilterOnlyThisRegion] = useState(Boolean(initialRegion));
   const [activeFilter, setActiveFilter] = useState('Semua');
   const [search, setSearch] = useState('');
   const [data, setData] = useState([]);
@@ -339,8 +372,8 @@ export default function MapPage() {
   const [error, setError] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [isSampleData, setIsSampleData] = useState(false);
-  const [mapCenter, setMapCenter] = useState(INDONESIA_CENTER);
-  const [mapZoom, setMapZoom] = useState(5);
+  const [mapCenter, setMapCenter] = useState(initialRegion ? initialRegion.center : INDONESIA_CENTER);
+  const [mapZoom, setMapZoom] = useState(initialRegion ? 6 : 5);
   const [sidebarTab, setSidebarTab] = useState('map');
   const [noticeDismissed, setNoticeDismissed] = useState(false);
   const [satelliteNoticeDismissed, setSatelliteNoticeDismissed] = useState(false);
@@ -352,13 +385,35 @@ export default function MapPage() {
     notice: null,
   });
 
-  // Auto-pan map jika diarahkan dari tombol "Cek Bencana Terdekat" / CTA di LandingPage
+  // Sinkronisasi saat URL search params berubah (misalnya klik navbar "Peta Bencana" atau tombol Back)
   useEffect(() => {
-    if (location.state?.userCoords) {
+    const params = new URLSearchParams(location.search);
+    const slug = params.get('wilayah') || params.get('provinsi');
+    const reg = getRegionBySlug(slug);
+    setActiveRegion(reg);
+    if (reg) {
+      setFilterOnlyThisRegion(true);
+      setMapCenter(reg.center);
+      setMapZoom(6);
+    } else {
+      setFilterOnlyThisRegion(false);
+    }
+  }, [location.search]);
+
+  // Handler reset ke tampilan nasional penuh
+  const handleResetToNational = () => {
+    setActiveRegion(null);
+    setFilterOnlyThisRegion(false);
+    navigate('/peta', { replace: true });
+  };
+
+  // Auto-pan map jika diarahkan dari tombol "Cek Bencana Terdekat" / CTA di LandingPage (hanya jika tanpa ?wilayah=)
+  useEffect(() => {
+    if (location.state?.userCoords && !activeRegion) {
       setMapCenter(location.state.userCoords);
       setMapZoom(10);
     }
-  }, [location.state]);
+  }, [location.state, activeRegion]);
 
   // Pastikan posisi scroll selalu di atas (Peta Bencana) saat membuka /peta,
   // kecuali jika URL secara eksplisit meminta hash #tanya-ai
@@ -615,6 +670,13 @@ export default function MapPage() {
       return false;
     }
 
+    // Filter wilayah aktif jika toggle "Hanya wilayah ini" aktif
+    if (activeRegion && filterOnlyThisRegion) {
+      if (!isCoordinateInRegion(item.lat, item.lng, activeRegion)) {
+        return false;
+      }
+    }
+
     let matchesFilter = false;
     if (activeFilter === 'Semua') {
       matchesFilter = true;
@@ -741,13 +803,43 @@ export default function MapPage() {
               </div>
             </div>
 
+            {/* Floating Active Region Banner (Saat datang dari hero / parameter ?wilayah=) */}
+            {activeRegion && (
+              <div
+                className="map-active-region-banner"
+                role="status"
+                aria-live="polite"
+              >
+                <div className="region-banner-info">
+                  <span className="region-banner-pulse" aria-hidden="true" />
+                  <MapPin size={15} color="#0E2A5C" aria-hidden="true" />
+                  <span>
+                    Wilayah: <strong>{activeRegion.name}</strong>
+                  </span>
+                  <span className="region-incident-count-pill">
+                    {data.filter(item => isCoordinateInRegion(item.lat, item.lng, activeRegion)).length} Kejadian
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="region-banner-reset-btn"
+                  onClick={handleResetToNational}
+                  title="Kembalikan peta ke tampilan seluruh Indonesia"
+                  aria-label="Lihat seluruh Indonesia dan hapus filter wilayah"
+                >
+                  <span>Lihat seluruh Indonesia</span>
+                  <X size={13} aria-hidden="true" />
+                </button>
+              </div>
+            )}
+
             {/* Satellite Disclaimer Banner */}
             {!satelliteNoticeDismissed && (
               <div
                 className="map-firms-permanent-banner"
                 style={{
                   position: 'absolute',
-                  top: '95px',
+                  top: activeRegion ? '142px' : '95px',
                   left: '16px',
                   right: '16px',
                   maxWidth: '620px',
@@ -810,7 +902,14 @@ export default function MapPage() {
 
             {/* Floating Notice Toast */}
             {!noticeDismissed && (hasSampleItems || error) && (
-              <div className="map-notice-toast" style={{ top: !satelliteNoticeDismissed ? '146px' : '95px' }}>
+              <div
+                className="map-notice-toast"
+                style={{
+                  top: activeRegion
+                    ? (!satelliteNoticeDismissed ? '194px' : '142px')
+                    : (!satelliteNoticeDismissed ? '146px' : '95px'),
+                }}
+              >
                 <Info size={16} color="var(--color-standby)" style={{ flexShrink: 0 }} />
                 <div style={{ flex: 1 }}>
                   {error ? (
@@ -835,16 +934,15 @@ export default function MapPage() {
             {/* Leaflet Map Container */}
             <div className="map-container">
               <MapContainer
-                center={INDONESIA_CENTER}
-                zoom={5}
+                center={activeRegion ? activeRegion.center : INDONESIA_CENTER}
+                zoom={activeRegion ? 6 : 5}
                 style={{ height: '100%', width: '100%' }}
                 maxBounds={INDONESIA_BOUNDS}
-                maxBoundsViscosity={1.0}
+                maxBoundsViscosity={0.7}
                 minZoom={4}
               >
                 <MapFixResize />
-                <SetBounds />
-                <ChangeView center={mapCenter} zoom={mapZoom} />
+                <MapViewController activeRegion={activeRegion} center={mapCenter} zoom={mapZoom} />
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -1080,9 +1178,29 @@ export default function MapPage() {
                   fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-primary)',
                   background: 'rgba(14,42,92,0.06)', padding: '2px 8px', borderRadius: 'var(--radius-full)'
                 }}>
-                  {filteredData.length} Bencana
+                  {activeRegion && filterOnlyThisRegion
+                    ? `${filteredData.length} di ${activeRegion.name}`
+                    : `${filteredData.length} Bencana`}
                 </span>
               </div>
+
+              {/* Toggle "Hanya wilayah ini" saat datang dari hero */}
+              {activeRegion && (
+                <div className="sidebar-region-toggle-box">
+                  <label className="sidebar-region-toggle-label">
+                    <input
+                      type="checkbox"
+                      checked={filterOnlyThisRegion}
+                      onChange={(e) => setFilterOnlyThisRegion(e.target.checked)}
+                      className="sidebar-region-checkbox"
+                    />
+                    <span>Hanya wilayah {activeRegion.name}</span>
+                  </label>
+                  <span className="sidebar-region-count-note">
+                    {data.filter(item => isCoordinateInRegion(item.lat, item.lng, activeRegion)).length} total
+                  </span>
+                </div>
+              )}
 
               {loading
                 ? [1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: '84px', borderRadius: 'var(--radius-lg)' }} />)
