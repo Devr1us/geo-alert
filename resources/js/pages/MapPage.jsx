@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Search, AlertTriangle, AlertOctagon, ShieldAlert, RefreshCw, Activity, Droplets, Wind, Mountain, Waves, Flame, Bot, Map as MapIcon, Info, X, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
+import { Search, AlertTriangle, AlertOctagon, ShieldAlert, RefreshCw, Activity, Droplets, Wind, Mountain, Waves, Flame, Bot, Map as MapIcon, Info, X, MapPin } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -786,17 +786,8 @@ export default function MapPage() {
                 )}
               </div>
 
-              {/* Filter chips pills with scroll navigation & mouse wheel */}
-              <div className="filter-chips-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0, flex: 1 }}>
-                <button
-                  type="button"
-                  className="chips-nav-arrow"
-                  onClick={() => scrollChips(-140)}
-                  title="Geser kategori ke kiri"
-                  aria-label="Geser ke kiri"
-                >
-                  <ChevronLeft size={15} />
-                </button>
+              {/* Filter chips pills — swipe/wheel scroll, no nav arrows */}
+              <div className="filter-chips-wrapper" style={{ display: 'flex', alignItems: 'center', minWidth: 0, flex: 1 }}>
                 <div
                   className="filter-chips-pill"
                   ref={chipsScrollRef}
@@ -813,15 +804,6 @@ export default function MapPage() {
                     </button>
                   ))}
                 </div>
-                <button
-                  type="button"
-                  className="chips-nav-arrow"
-                  onClick={() => scrollChips(140)}
-                  title="Geser kategori ke kanan"
-                  aria-label="Geser ke kanan"
-                >
-                  <ChevronRight size={15} />
-                </button>
               </div>
             </div>
 

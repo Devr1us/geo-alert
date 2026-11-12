@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import { IS_GH_PAGES } from '../config/baseUrl';
 
 // Konfigurasi renderer marked: link selalu target _blank dan rel noopener noreferrer
 const markedRenderer = new marked.Renderer();
@@ -152,13 +153,13 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
     setErrorMessage(null);
     setLastUserMessage(query);
     setInput('');
-    setUserScrolledUp(false); // Reset auto-scroll saat mengirim pesan baru
+    setUserScrolledUp(false);
 
     const userMsg = { role: 'user', content: query, timestamp: Date.now() };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
 
-    // Siapkan placeholder pesan asisten dengan indikator streaming
+    // Siapkan placeholder pesan asisten
     const assistantIndex = newMessages.length;
     const assistantMsg = {
       role: 'assistant',
@@ -170,7 +171,27 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
     setMessages([...newMessages, assistantMsg]);
     setIsStreaming(true);
 
-    // Filter dan sanitasi riwayat percakapan: buang pesan error/fallback, batasi 8 pesan terakhir
+    // ── GH Pages: tidak ada backend, tampilkan pesan informatif ──
+    if (IS_GH_PAGES) {
+      setTimeout(() => {
+        setMessages(prev => {
+          const updated = [...prev];
+          if (updated[assistantIndex]) {
+            updated[assistantIndex] = {
+              ...updated[assistantIndex],
+              content: '**GeoAlert AI tidak tersedia di versi demo (GitHub Pages).**\n\nFitur AI memerlukan server backend Laravel yang hanya berjalan di lingkungan produksi penuh. Untuk pertanyaan seputar mitigasi bencana, silakan gunakan menu **Mitigasi** di navbar, atau hubungi darurat:\n\n📞 **112** (BNPB) · **115** (BASARNAS)',
+              isStreaming: false,
+              isError: false,
+            };
+          }
+          return updated;
+        });
+        setIsStreaming(false);
+      }, 600);
+      return;
+    }
+
+    // Filter dan sanitasi riwayat percakapan
     const cleanHistory = newMessages
       .filter(m => !m.isError && m.content && !m.content.startsWith('⚠️'))
       .slice(-8)
@@ -204,6 +225,9 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
       if (!response.ok) {
         if (response.status === 429) {
           throw new Error('Kuota penyedia AI sedang mencapai batas sesaat (Rate Limit 429). Silakan tunggu sebentar.');
+        }
+        if (response.status === 405) {
+          throw new Error('Fitur AI tidak tersedia di lingkungan ini. Pastikan server backend aktif.');
         }
         const errJson = await response.json().catch(() => ({}));
         throw new Error(errJson.error || `Server merespons error (HTTP ${response.status})`);

@@ -13,3 +13,6 @@ export const ASSET_BASE = isGhPages && import.meta.env.BASE_URL
   ? (import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`)
   : '/';
 
+// Flag apakah sedang berjalan di GitHub Pages (tanpa backend Laravel)
+export const IS_GH_PAGES = isGhPages;
+
