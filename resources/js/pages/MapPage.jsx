@@ -792,8 +792,7 @@ export default function MapPage() {
                   className="filter-chips-pill"
                   ref={chipsScrollRef}
                   onWheel={handleChipsWheel}
-                >
-                  {['Semua', 'Gempa', 'Tsunami', 'Karhutla', 'Banjir', 'Longsor', 'Gunung Api'].map(chip => (
+                >                  {['Semua', 'Gempa', 'Tsunami', 'Karhutla', 'Banjir', 'Longsor', 'Gunung Api'].map(chip => (
                     <button
                       key={chip}
                       className={`chip-pill ${activeFilter === chip ? 'active' : ''}`}

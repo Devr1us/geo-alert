@@ -54,19 +54,12 @@
   border-radius: var(--radius-full);
   border: 1px solid rgba(224, 217, 205, 0.8);
   box-shadow: 0 10px 30px rgba(14, 42, 92, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
-  padding: 8px 12px 8px 18px;
+  padding: 7px 14px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   gap: 10px;
   transition: all var(--transition-fast);
-}
-
-@media (min-width: 768px) {
-  .map-toolbar-floating {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
 }
 
 /* ============================================================
@@ -171,7 +164,6 @@
   padding: 6px 14px;
   border: 1px solid var(--color-border);
   width: 100%;
-  max-width: 280px;
   transition: all var(--transition-fast);
 }
 
@@ -199,41 +191,49 @@
 
 .filter-chips-pill {
   display: flex;
-  gap: 6px;
+  gap: 0;
   overflow-x: auto;
-  padding: 4px 2px 8px 2px;
+  padding: 2px 0;
   align-items: center;
-  scrollbar-width: thin;
-  scrollbar-color: #94a3b8 rgba(14, 42, 92, 0.08);
+  justify-content: space-between;
+  scrollbar-width: none;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
 }
 
 .filter-chips-pill::-webkit-scrollbar {
-  height: 8px;
+  display: none;
 }
 
-.filter-chips-pill::-webkit-scrollbar-track {
-  background: rgba(14, 42, 92, 0.06);
+.chip-pill {
+  padding: 5px 14px;
   border-radius: var(--radius-full);
-  margin: 0 4px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-white);
+  color: var(--color-text-main);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  flex: 1;
+  text-align: center;
 }
 
-.filter-chips-pill::-webkit-scrollbar-thumb {
-  background-color: #94a3b8;
-  border-radius: var(--radius-full);
-  border: 1.5px solid #ffffff;
-  cursor: grab;
-  transition: background-color var(--transition-fast);
+.chip-pill:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: rgba(14, 42, 92, 0.03);
 }
 
-.filter-chips-pill::-webkit-scrollbar-thumb:hover {
+.chip-pill.active {
   background-color: var(--color-primary);
-}
-
-.filter-chips-pill::-webkit-scrollbar-thumb:active {
-  cursor: grabbing;
-  background-color: #08162b;
+  color: var(--color-white);
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(14, 42, 92, 0.2);
 }
 
 .chips-nav-arrow {
@@ -261,32 +261,6 @@
 
 .chips-nav-arrow:active {
   transform: scale(0.92);
-}
-
-.chip-pill {
-  padding: 5px 14px;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--color-border);
-  background-color: var(--color-white);
-  color: var(--color-text-main);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all var(--transition-fast);
-}
-
-.chip-pill:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  background-color: rgba(14, 42, 92, 0.03);
-}
-
-.chip-pill.active {
-  background-color: var(--color-primary);
-  color: var(--color-white);
-  border-color: var(--color-primary);
-  box-shadow: 0 4px 12px rgba(14, 42, 92, 0.2);
 }
 
 /* Floating Notice Toast */
@@ -651,14 +625,29 @@
 }
 
 @media (max-width: 480px) {
-  .chip-pill {
-    padding: 4px 10px;
-    font-size: 0.75rem;
+  .map-main-card {
+    height: 60vmax;
+    min-height: 340px;
   }
 
-  .map-main-card {
-    height: 52vh;
-    min-height: 360px;
+  .map-sidebar-card {
+    height: 45vh;
+    min-height: 280px;
+  }
+
+  .filter-chips-pill {
+    padding: 0 4px;
+  }
+
+  .chip-pill {
+    padding: 4px 10px;
+    font-size: 0.72rem;
+  }
+
+  /* Leaflet zoom controls compact */
+  .leaflet-control-zoom {
+    transform: scale(0.9);
+    transform-origin: top left;
   }
 }
 
@@ -740,18 +729,17 @@
 
 
 /* ============================================================
-   MAP SEARCH WRAPPER — mobile-friendly search bar container
+   MAP SEARCH WRAPPER — proporsi seimbang dengan chips
    ============================================================ */
 .map-search-wrapper {
   position: relative;
-  flex-shrink: 0;
-  width: 240px;
-  max-width: 280px;
+  flex: 0 0 220px;   /* lebar tetap, tidak terlalu lebar */
+  min-width: 0;
 }
 
 @media (max-width: 767px) {
   .map-search-wrapper {
-    width: 100%;
+    flex: 1 1 100%;
     max-width: 100%;
   }
 }
@@ -965,5 +953,44 @@
     width: 280px;
     height: 100%;
     flex-shrink: 0;
+  }
+}
+
+/* ============================================================
+   TOOLBAR BALANCE — divider + mobile stack fix
+   ============================================================ */
+
+/* Divider tipis antara search bar dan chips */
+.map-toolbar-floating .map-search-wrapper::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: 15%;
+  height: 70%;
+  width: 1px;
+  background: rgba(14, 42, 92, 0.12);
+  pointer-events: none;
+}
+
+/* Mobile: stack vertikal */
+@media (max-width: 600px) {
+  .map-toolbar-floating {
+    flex-direction: column;
+    border-radius: 20px;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .map-toolbar-floating .map-search-wrapper::after {
+    display: none;
+  }
+
+  .map-search-wrapper {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .filter-chips-pill {
+    padding-bottom: 2px;
   }
 }
