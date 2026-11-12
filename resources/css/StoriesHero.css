@@ -1967,7 +1967,9 @@ html.js-enabled .stories-hero:not(.is-visible) .sh-coord-secondary {
     overflow: hidden;
   }
 
-  /* SVG peta: crop sisi kanan yang terlalu lebar (Papua terpotong tipis, OK) */
+  /* SVG peta: geser ke kiri agar Indonesia lebih centered di mobile.
+     ViewBox asli mulai dari x=380, tapi di layar sempit peta terdorong kanan.
+     translateX negatif menggeser ke kiri ~6%, width diperlebar sedikit agar tidak blank. */
   .sh-map-viewport {
     width: 100%;
     overflow: hidden;
@@ -1975,6 +1977,9 @@ html.js-enabled .stories-hero:not(.is-visible) .sh-coord-secondary {
 
   .sh-map-svg {
     overflow: hidden;
+    transform: translateX(-6%);
+    width: 112%;
+    max-width: none;
   }
 }
 
