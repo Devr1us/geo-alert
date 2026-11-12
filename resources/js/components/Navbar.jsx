@@ -7,7 +7,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isHoveredOrFocused, setIsHoveredOrFocused] = useState(false);
+  const lastScrollYRef = useRef(0);
   const scrollStopTimerRef = useRef(null);
   const tickingRef = useRef(false);
   const navigate = useNavigate();
@@ -18,43 +18,61 @@ export default function Navbar() {
   };
 
   useEffect(() => {
+    const getScrollY = () =>
+      window.scrollY ||
+      document.documentElement.scrollTop ||
+      document.body.scrollTop ||
+      0;
+
+    // Inisialisasi posisi scroll awal
+    lastScrollYRef.current = getScrollY();
+
     const handleScroll = () => {
-      const currentScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      const currentScrollY = getScrollY();
       setIsScrolled(currentScrollY > 50);
 
-      // 1. Jika di posisi paling atas (scrollY <= 10), navbar selalu tampil
+      // Posisi di paling atas (scrollY <= 10px) → navbar selalu terlihat
       if (currentScrollY <= 10) {
         if (scrollStopTimerRef.current) {
           clearTimeout(scrollStopTimerRef.current);
           scrollStopTimerRef.current = null;
         }
         setIsVisible(true);
+        lastScrollYRef.current = currentScrollY;
         return;
       }
 
-      // 2. Jika pengguna mulai scroll (arah apa pun), navbar langsung disembunyikan
-      if (!tickingRef.current) {
-        window.requestAnimationFrame(() => {
-          setIsVisible(false);
-          tickingRef.current = false;
-        });
-        tickingRef.current = true;
+      // Deteksi adanya aktivitas scroll (ke bawah maupun ke atas)
+      const diff = currentScrollY - lastScrollYRef.current;
+      const threshold = 6;
+
+      if (Math.abs(diff) >= threshold) {
+        if (!tickingRef.current) {
+          window.requestAnimationFrame(() => {
+            // Saat user sedang aktif scroll (baik scroll DOWN maupun scroll UP) → navbar menghilang ke atas
+            setIsVisible(false);
+            tickingRef.current = false;
+          });
+          tickingRef.current = true;
+        }
+        lastScrollYRef.current = currentScrollY;
       }
 
-      // 3. Debounce: tampilkan navbar kembali HANYA setelah scroll berhenti (200ms tanpa event scroll)
+      // Jika user BERHENTI scroll (tidak scroll up maupun down selama 250ms) → otomatis muncul kembali
       if (scrollStopTimerRef.current) {
         clearTimeout(scrollStopTimerRef.current);
       }
       scrollStopTimerRef.current = setTimeout(() => {
         setIsVisible(true);
-      }, 200);
+      }, 250);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    // Check initial scroll
-    handleScroll();
+    document.addEventListener('scroll', handleScroll, { passive: true });
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('scroll', handleScroll);
       if (scrollStopTimerRef.current) {
         clearTimeout(scrollStopTimerRef.current);
       }
@@ -108,21 +126,11 @@ export default function Navbar() {
   };
 
   const isDarkHero = false;
-  const isHidden = !isVisible && !isOpen && !isHoveredOrFocused;
-  const navClass = `navbar ${isScrolled ? 'navbar-scrolled' : ''} ${isHidden ? 'navbar-hidden' : ''}`;
+  const isHidden = !isVisible && !isOpen;
+  const navClass = `navbar ${isScrolled ? 'navbar-scrolled' : ''} ${isHidden ? 'navbar--hidden navbar-hidden' : 'navbar--visible'}`;
 
   return (
-    <nav
-      className={navClass}
-      onMouseEnter={() => setIsHoveredOrFocused(true)}
-      onMouseLeave={() => setIsHoveredOrFocused(false)}
-      onFocus={() => setIsHoveredOrFocused(true)}
-      onBlur={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget)) {
-          setIsHoveredOrFocused(false);
-        }
-      }}
-    >
+    <nav className={navClass}>
       <div className="container nav-pill-container">
         {/* Mobile Spacer (for 3-way balance: Spacer | Logo Center | Toggle Right) */}
         <div className="nav-mobile-spacer" aria-hidden="true" />

@@ -283,7 +283,7 @@ export default function StoriesHero({ onCekBencana }) {
     <section
       ref={heroRef}
       className={`stories-hero ${isNavigating ? 'is-navigating' : ''}`}
-      aria-label="Kisah Tangguh Nusantara — Hero Section GeoAlert"
+      aria-label="Mitigasi Bencana Nusantara — Hero Section GeoAlert"
     >
       {/* Hidden Video element for animation texture */}
       <video
@@ -330,19 +330,18 @@ export default function StoriesHero({ onCekBencana }) {
           <div className="stories-hero-left">
             {/* Eyebrow & Brand Tagline */}
             <div className="stories-hero-eyebrow-row">
-              <span className="stories-hero-badge">GEOALERT STORIES</span>
+              <span className="stories-hero-badge">GEOALERT</span>
               <span className="stories-hero-tagline">Deteksi Dini, Lindungi Diri</span>
             </div>
 
             {/* H1 Headline */}
             <h1 className="stories-hero-title">
-              Jelajahi <span className="sh-terracotta">kisah</span> di seluruh Indonesia
+              Siaga <span className="sh-terracotta">bencana</span> di seluruh Indonesia
             </h1>
 
             {/* Paragraph (max ~60 karakter per baris) */}
             <p className="stories-hero-desc">
-              Lima wilayah, lima kisah ketangguhan warga memitigasi bencana di tanah air.
-              Arahkan kursor ke zona untuk melihat dekat, lalu klik wilayah untuk membuka peta bencana interaktif.
+              Pantau potensi bencana di lima wilayah Indonesia, pelajari langkah mitigasinya, dan siapkan diri sebelum bencana terjadi. Arahkan kursor ke zona untuk melihat lebih dekat, lalu klik wilayah untuk membuka peta bencana interaktif.
             </p>
 
             {/* Tombol Aksi */}

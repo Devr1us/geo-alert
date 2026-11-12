@@ -8,9 +8,7 @@ import {
 } from 'lucide-react';
 import '../../css/LandingPage.css';
 import MitigationModal from '../components/MitigationModal';
-import CitySelectModal from '../components/CitySelectModal';
 import RevealSection from '../components/RevealSection';
-import HeroEarthquakeRadarCard from '../components/HeroEarthquakeRadarCard';
 import StoriesHero from '../components/StoriesHero';
 import { BMKG_TERKINI_URL, BMKG_DIRASAKAN_URL } from '../config/bmkgApi';
 import { ASSET_BASE } from '../config/baseUrl';
@@ -100,91 +98,7 @@ const EDUCATION_DATA = [
   { icon: <Mountain size={32} color="var(--navy)" />, bg: 'rgba(18, 40, 92, 0.08)', accentColor: 'var(--navy)', title: 'Erupsi Gunung Api', desc: 'Keluarnya magma, awan panas (wedhus gembel), lontaran batu pijar, dan abu silika dari kawah aktif. Kenakan masker debu/N95 dan patuhi radius Kawasan Rawan Bencana (KRB).' },
 ];
 
-// ============================================================
-// Haversine distance (km) antara dua koordinat
-// ============================================================
-function haversineKm(lat1, lng1, lat2, lng2) {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLng = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-    Math.cos((lat2 * Math.PI) / 180) *
-    Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
 
-// ============================================================
-// Hitung status wilayah berdasarkan jarak ke event terdekat
-// Termasuk aturan 50 km untuk Karhutla berstatus warning/danger
-// ============================================================
-function calcAreaStatus(userLat, userLng, events) {
-  if (!events || events.length === 0) {
-    return { status: 'safe', reason: 'Wilayah terpantau aman dari anomali bencana.' };
-  }
-
-  let minDist = Infinity;
-  let worstRisk = 'safe';
-  let reason = 'Wilayah terpantau aman dari potensi bencana terdekat.';
-  const riskOrder = { danger: 3, warning: 2, standby: 1, safe: 0 };
-
-  for (const ev of events) {
-    if (isNaN(ev.lat) || isNaN(ev.lng)) continue;
-    const dist = haversineKm(userLat, userLng, ev.lat, ev.lng);
-
-    if (ev.type === 'Karhutla') {
-      // Spesifikasi: jika user dalam radius 50 km dari cluster karhutla warning / danger
-      if (dist <= 50) {
-        if (ev.risk === 'danger') {
-          return {
-            status: 'danger',
-            reason: `Titik panas Karhutla Bahaya Tinggi terdeteksi berjarak ${Math.round(dist)} km (${ev.location}). Gunakan masker N95 dan kurangi aktivitas luar.`
-          };
-        }
-        if (ev.risk === 'warning' && riskOrder[worstRisk] < riskOrder.warning) {
-          worstRisk = 'warning';
-          reason = `Titik panas Karhutla Waspada terdeteksi berjarak ${Math.round(dist)} km (${ev.location}).`;
-        }
-      }
-    } else {
-      // BMKG Gempa Bumi / simulasi
-      if (dist < minDist) minDist = dist;
-      const r = ev.risk;
-      if (r === 'danger' && dist < 100) {
-        worstRisk = 'danger';
-        reason = `Gempa bumi signifikan ${ev.magnitude ? 'M ' + ev.magnitude : ''} terdeteksi berjarak ${Math.round(dist)} km (${ev.location}).`;
-      } else if (dist < 200 && riskOrder[r] >= 2 && riskOrder[worstRisk] < 2) {
-        worstRisk = 'warning';
-        reason = `Aktivitas seismik berjarak ${Math.round(dist)} km (${ev.location}).`;
-      }
-    }
-  }
-
-  return {
-    status: worstRisk === 'safe' ? 'safe' : worstRisk,
-    reason
-  };
-}
-
-// ============================================================
-// Reverse geocode via Nominatim (OpenStreetMap, bebas biaya)
-// ============================================================
-async function reverseGeocode(lat, lng) {
-  const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=id`;
-  const res = await fetch(url, { headers: { 'User-Agent': 'GeoAlert/1.0 (+https://geoalert.id)' } });
-  const data = await res.json();
-  const addr = data.address || {};
-  return (
-    addr.city ||
-    addr.town ||
-    addr.county ||
-    addr.municipality ||
-    addr.state_district ||
-    addr.state ||
-    'Lokasi Anda'
-  );
-}
 
 // ============================================================
 // Fetch Disaster events (BMKG Earthquakes + NASA FIRMS Karhutla)
@@ -343,24 +257,9 @@ export default function LandingPage() {
   const [events, setEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(true);
 
-  // Ambil lokasi tersimpan dari sesi sebelumnya jika ada
-  const [savedLocData] = useState(() => {
-    try {
-      const item = localStorage.getItem('geoalert_user_location');
-      return item ? JSON.parse(item) : null;
-    } catch { return null; }
-  });
-
-  // Geolocation state — Poin 3
-  const [userCoords, setUserCoords] = useState(() => savedLocData?.coords || null);
-  const [locationName, setLocationName] = useState(() => savedLocData?.name || null);
-  const [locationStatus, setLocationStatus] = useState(() => savedLocData ? 'ready' : 'prompt'); // 'prompt' | 'detecting' | 'ready' | 'denied'
-  const [areaStatus, setAreaStatus] = useState(() => savedLocData?.areaStatus || 'none'); // 'none' | 'safe' | 'warning' | 'danger'
-  const [areaReason, setAreaReason] = useState(() => savedLocData?.areaReason || '');
-  const [lastUpdatedTime, setLastUpdatedTime] = useState(() => savedLocData?.updatedAt || null);
-
   // Modals state
-  const [showCityModal, setShowCityModal] = useState(false);
+  const [openFaq, setOpenFaq] = useState(null);
+  const [modal, setModal] = useState(null);
 
   // Notification state
   const [notifPref, setNotifPref] = useState(() => localStorage.getItem(NOTIF_KEY));
@@ -373,9 +272,6 @@ export default function LandingPage() {
   const alertsCount = useCountUp(liveAlerts, 1500);
   const provincesCount = useCountUp(liveProvinces, 1500);
   const speedCount = useCountUp(3, 1500);
-
-  const [openFaq, setOpenFaq] = useState(null);
-  const [modal, setModal] = useState(null);
 
   // ============================================================
   // Fetch Disaster events (BMKG + NASA FIRMS Karhutla)
@@ -401,120 +297,17 @@ export default function LandingPage() {
     return () => { cancelled = true; };
   }, []);
 
-  // Re-kalkulasi status wilayah jika events selesai dimuat & koordinat tersedia
-  useEffect(() => {
-    if (events.length === 0 || !userCoords) return;
-    const res = calcAreaStatus(userCoords[0], userCoords[1], events);
-    setAreaStatus(res.status);
-    setAreaReason(res.reason);
-
-    if (localStorage.getItem(NOTIF_KEY) === 'true' && res.status === 'danger') {
-      sendBrowserNotification(
-        '⚠️ GeoAlert — Peringatan Bahaya',
-        res.reason || 'Terdapat bencana tingkat BAHAYA di dekat wilayah Anda. Cek peta GeoAlert sekarang.'
-      );
-    }
-  }, [events, userCoords]);
-
-  // Alur minta izin lokasi otomatis
-  const requestLocation = (navigateOnSuccess = false) => {
-    if (!('geolocation' in navigator)) {
-      setShowCityModal(true);
-      return;
-    }
-
-    setLocationStatus('detecting');
-
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const { latitude, longitude } = pos.coords;
-          const coords = [latitude, longitude];
-          setUserCoords(coords);
-
-          const name = await reverseGeocode(latitude, longitude);
-          setLocationName(name);
-
-          const currentEvents = events.length > 0 ? events : [];
-          const res = calcAreaStatus(latitude, longitude, currentEvents);
-          setAreaStatus(res.status);
-          setAreaReason(res.reason);
-
-          const nowStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
-          setLastUpdatedTime(nowStr);
-          setLocationStatus('ready');
-
-          try {
-            localStorage.setItem('geoalert_user_location', JSON.stringify({
-              coords,
-              name,
-              areaStatus: res.status,
-              areaReason: res.reason,
-              updatedAt: nowStr
-            }));
-          } catch { }
-
-          if (navigateOnSuccess) {
-            navigate('/peta', { state: { userCoords: coords, locationName: name } });
-          }
-        } catch {
-          setLocationName('Lokasi Terdeteksi');
-          setLocationStatus('ready');
-          if (navigateOnSuccess) {
-            navigate('/peta');
-          }
-        }
-      },
-      (err) => {
-        console.warn('Geolocation failed or denied:', err.message);
-        setLocationStatus('denied');
-        setShowCityModal(true);
-      },
-      { timeout: 8000, maximumAge: 5 * 60 * 1000 }
-    );
-  };
-
-  // Pilih kota manual
-  const handleSelectManualCity = (city) => {
-    const coords = [city.lat, city.lng];
-    setUserCoords(coords);
-    setLocationName(city.name);
-
-    const currentEvents = events.length > 0 ? events : [];
-    const res = calcAreaStatus(city.lat, city.lng, currentEvents);
-    setAreaStatus(res.status);
-    setAreaReason(res.reason);
-
-    const nowStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
-    setLastUpdatedTime(nowStr);
-    setLocationStatus('ready');
-
-    try {
-      localStorage.setItem('geoalert_user_location', JSON.stringify({
-        coords,
-        name: city.name,
-        areaStatus: res.status,
-        areaReason: res.reason,
-        updatedAt: nowStr
-      }));
-    } catch { }
-  };
-
   // Tombol aksi Hero & CTA
   const handleCekBencana = (e) => {
     if (e && e.preventDefault) e.preventDefault();
-    if (locationStatus === 'ready' && userCoords) {
-      navigate('/peta', { state: { userCoords, locationName } });
-    } else {
-      requestLocation(true);
-    }
+    navigate('/peta');
   };
 
   // ============================================================
   // Poin 2: Handle klik "Aktifkan Notifikasi"
   // Selalu sync state dengan Notification.permission asli dari browser
   // ============================================================
-  const [notifBrowserPerm, setNotifBrowserPerm] = useState(() => {
+    const [notifBrowserPerm, setNotifBrowserPerm] = useState(() => {
     if (!('Notification' in window)) return 'unsupported';
     return Notification.permission; // 'default' | 'granted' | 'denied'
   });
@@ -556,34 +349,10 @@ export default function LandingPage() {
   };
 
 
-  // ---- Helpers untuk status wilayah ----
-  const areaStatusConfig = {
-    safe: { label: 'Aman', color: 'var(--color-status-safe)', glow: 'var(--color-status-safe)' },
-    warning: { label: 'Waspada', color: 'var(--color-status-warning)', glow: 'var(--color-status-warning)' },
-    danger: { label: 'Bahaya', color: 'var(--color-alert)', glow: 'var(--color-alert)' },
-  };
-  const currentStatus = areaStatusConfig[areaStatus] || areaStatusConfig.safe;
-
   return (
     <div>
       {/* =================== STORIES HERO SECTION (INTERACTIVE INDONESIA MAP) =================== */}
       <StoriesHero onCekBencana={handleCekBencana} />
-
-      {/* =================== FLOATING OVERLAP RADAR CARD =================== */}
-      {/* Kartu Gempa Terbaru (Radar + Status) Menjorok Konsisten -48px Menimpa Krem */}
-      <div className="hero-card-overlap-wrapper">
-        <div className="container">
-          <HeroEarthquakeRadarCard
-            events={events}
-            eventsLoading={eventsLoading}
-            userCoords={userCoords}
-            locationName={locationName}
-            locationStatus={locationStatus}
-            areaStatus={areaStatus}
-            onSelectLocation={() => setShowCityModal(true)}
-          />
-        </div>
-      </div>
 
       {/* =================== STATS + TRUST BAR (GABUNGAN) =================== */}
       <section className="stats-section">
@@ -1131,14 +900,7 @@ export default function LandingPage() {
       {/* Mitigation SOP Modal */}
       {modal && <MitigationModal type={modal} onClose={() => setModal(null)} />}
 
-      {/* Manual City Selector Modal */}
-      {showCityModal && (
-        <CitySelectModal
-          isOpen={showCityModal}
-          onClose={() => setShowCityModal(false)}
-          onSelectCity={handleSelectManualCity}
-        />
-      )}
+
     </div>
   );
 }
