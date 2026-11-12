@@ -42,20 +42,24 @@
 
 /* Container */
 .stories-hero-container {
-  max-width: 1380px;
+  max-width: 1720px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding-left: clamp(24px, 3.5vw, 64px);
+  padding-right: clamp(32px, 5vw, 96px); /* Jarak ke tepi kanan minimal clamp(32px, 5vw, 96px) */
   position: relative;
   z-index: 2;
+  box-sizing: border-box;
 }
 
 /* Grid Layout (Desktop >= 1024px: ~36% text left, ~64% interactive map right) */
 .stories-hero-grid {
   display: grid;
-  grid-template-columns: 36% 64%;
+  grid-template-columns: minmax(0, 32%) minmax(0, 1fr) auto;
   align-items: center;
-  gap: 2rem;
-  min-height: 560px;
+  column-gap: clamp(24px, 2.5vw, 44px);
+  min-height: 580px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* ==========================================================================
@@ -181,34 +185,43 @@
 /* ==========================================================================
    RIGHT COLUMN: INTERACTIVE MAP & SEPARATED ZONE SELECTOR
    ========================================================================== */
+.stories-hero-center {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  z-index: 10;
+}
+
 .stories-hero-right {
   position: relative;
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  width: 100%;
-  min-height: 520px;
+  justify-content: flex-end;
+  z-index: 20;
+  min-width: 170px;
+  flex-shrink: 0;
 }
 
 /* Coordinates in top-right corner of the right column */
 .sh-coords-block {
   position: absolute;
-  top: -8px;
-  right: 185px; /* Sits to the left of the selector */
-  text-align: right;
+  top: 6px;
+  right: 12px;
   font-family: var(--sh-font-mono);
   font-size: 10.5px;
   line-height: 1.6;
   color: var(--sh-ink-subtle);
-  z-index: 10;
+  z-index: 15;
   pointer-events: none;
   background: rgba(246, 243, 234, 0.85);
   backdrop-filter: blur(4px);
   padding: 4px 10px;
   border-radius: 6px;
   border: 1px solid rgba(28, 26, 23, 0.08);
+  text-align: right;
 }
 
 .sh-coord-active {
@@ -219,10 +232,12 @@
 /* Map Viewport Wrapper */
 .sh-map-viewport {
   position: relative;
-  flex: 1;
-  min-width: 0;
-  aspect-ratio: 1440 / 810;
-  max-height: 540px;
+  width: 100%;
+  aspect-ratio: 880 / 370;
+  min-height: clamp(360px, 58vh, 600px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sh-map-svg {
@@ -254,10 +269,7 @@
   filter: drop-shadow(0 0 16px rgba(195, 89, 51, 0.6));
 }
 
-.sh-zoom-stage.is-zooming .sh-active-ring-group {
-  opacity: 0 !important;
-  transition: opacity 200ms ease;
-}
+
 
 /* Map Coastline Paths */
 .sh-coastline-path {
@@ -329,20 +341,28 @@
 
 .sh-dot-pulse {
   fill: var(--sh-terracotta);
-  opacity: 0.35;
-  animation: shDotPulse 2.4s ease-out infinite;
+  opacity: 0.45;
+  transform-box: fill-box;
   transform-origin: center;
+  animation: shDotPulse 2.4s ease-out infinite;
 }
 
 @keyframes shDotPulse {
-  0% { transform: scale(1); opacity: 0.55; }
-  100% { transform: scale(3.2); opacity: 0; }
+  0% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
 }
 
 .sh-dot-core {
   fill: var(--sh-terracotta);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), fill 0.2s ease;
+  transform-box: fill-box;
   transform-origin: center;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), fill 0.2s ease;
 }
 
 .sh-dot-group:hover .sh-dot-core,
@@ -357,47 +377,7 @@
   fill: var(--sh-ink);
 }
 
-/* Active Ring with Spinning Circular Text (Pointer events none) */
-.sh-active-ring-group {
-  pointer-events: none !important;
-  opacity: 0;
-  transform: scale(0.6);
-  transition: opacity 0.4s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-  transform-origin: center;
-}
-
-.sh-active-ring-group.is-visible {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.sh-active-ring-group.is-hidden {
-  opacity: 0 !important;
-}
-
-.sh-ring-disc {
-  fill: var(--sh-paper);
-  stroke: var(--sh-ink);
-  stroke-width: 1.5;
-  filter: drop-shadow(0 4px 14px rgba(28, 26, 23, 0.18));
-}
-
-.sh-ring-plus {
-  stroke: var(--sh-ink);
-  stroke-width: 2.2;
-  stroke-linecap: round;
-}
-
-.sh-ring-spin-text {
-  font-family: var(--sh-font-mono);
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  fill: var(--sh-ink);
-  transform-origin: center;
-  animation: shSpinCircleText 14s linear infinite;
-}
-
+/* Keyframes rotasi untuk lencana modal (hero ring sudah dihapus) */
 @keyframes shSpinCircleText {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -408,11 +388,11 @@
    ========================================================================== */
 .sh-zone-selector {
   position: relative;
-  flex-shrink: 0;
-  width: 175px;
   display: flex;
   align-items: flex-start;
-  gap: 14px;
+  gap: 16px;
+  width: auto;
+  min-width: 170px;
   z-index: 25;
 }
 
@@ -444,7 +424,7 @@
   background: none;
   border: none;
   font-family: var(--sh-font-mono);
-  font-size: 1.15rem;
+  font-size: clamp(0.95rem, 1.1vw, 1.15rem);
   line-height: 2.1;
   font-weight: 500;
   color: var(--sh-ink-faint);
@@ -453,11 +433,7 @@
   white-space: nowrap;
   padding: 2px 6px;
   text-align: right;
-  border-radius: 4px;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  outline: none;
 }
 
 .sh-zone-item:hover,
@@ -474,38 +450,6 @@
 
 .sh-zone-item:focus-visible {
   box-shadow: 0 0 0 2px var(--sh-terracotta);
-}
-
-/* Secondary Story Trigger Link under Region List */
-.sh-story-link-wrap {
-  margin-top: 14px;
-  text-align: right;
-}
-
-.sh-read-story-trigger {
-  background: rgba(195, 89, 51, 0.08);
-  border: 1px solid rgba(195, 89, 51, 0.25);
-  color: var(--sh-terracotta);
-  font-family: var(--sh-font-mono);
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 9999px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.sh-read-story-trigger:hover,
-.sh-read-story-trigger:focus-visible {
-  background: var(--sh-terracotta);
-  color: #FFFFFF;
-  border-color: var(--sh-terracotta);
-  box-shadow: 0 4px 14px var(--sh-terracotta-glow);
-  outline: none;
 }
 
 /* Vertical 220px Ruler with Ticks */
@@ -675,35 +619,19 @@
 }
 
 .sh-touch-btn-primary {
+  width: 100%;
   flex: 1;
   background: var(--sh-ink);
   color: #FFFFFF;
   border: none;
   border-radius: 9999px;
-  padding: 10px 14px;
-  font-size: 0.85rem;
+  padding: 10px 16px;
+  font-size: 0.88rem;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  cursor: pointer;
-  min-height: 44px;
-}
-
-.sh-touch-btn-secondary {
-  flex: 1;
-  background: rgba(195, 89, 51, 0.1);
-  color: var(--sh-terracotta);
-  border: 1px solid rgba(195, 89, 51, 0.25);
-  border-radius: 9999px;
-  padding: 10px 14px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
+  gap: 8px;
   cursor: pointer;
   min-height: 44px;
 }
@@ -1072,10 +1000,37 @@
 /* ==========================================================================
    RESPONSIVENESS (Mobile & Tablet < 1024px)
    ========================================================================== */
+/* ==========================================================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================================================== */
+
+/* 1024px - 1279px: Kolom teks ~38%, peta mengisi sisa, daftar terlihat penuh */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .stories-hero-container {
+    padding-left: 28px;
+    padding-right: 40px;
+  }
+
+  .stories-hero-grid {
+    grid-template-columns: minmax(0, 36%) minmax(0, 1fr) auto;
+    column-gap: 24px;
+  }
+
+  .sh-zone-selector {
+    min-width: 150px;
+    gap: 12px;
+  }
+
+  .sh-zone-item {
+    font-size: 0.95rem;
+    line-height: 2.0;
+  }
+}
+
 @media (max-width: 1023px) {
   .stories-hero {
-    padding-top: calc(var(--navbar-height, 70px) + 1.5rem);
-    padding-bottom: 4rem;
+    padding-top: calc(var(--navbar-height, 70px) + 1.25rem);
+    padding-bottom: 3.5rem;
     min-height: auto;
   }
 
@@ -1085,11 +1040,12 @@
 
   .stories-hero-grid {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1.75rem;
   }
 
   .stories-hero-left {
     text-align: left;
+    max-width: 640px;
   }
 
   .stories-hero-title {
@@ -1114,22 +1070,26 @@
     font-size: 1rem;
   }
 
-  /* Right column mobile adjustments */
+  .stories-hero-center {
+    width: 100%;
+  }
+
   .stories-hero-right {
     min-height: auto;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
+    width: 100%;
+    justify-content: flex-start;
+    min-width: auto;
   }
 
   .sh-coords-block {
-    display: none; /* Hidden on mobile */
+    display: none !important; /* Hidden on mobile < 768px/tablet */
   }
 
   .sh-map-viewport {
     width: 100%;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 880 / 370;
     max-height: 380px;
+    min-height: auto;
     margin: 0.5rem 0;
   }
 
@@ -1187,16 +1147,11 @@
     border-color: var(--sh-terracotta);
   }
 
-  .sh-story-link-wrap {
-    text-align: center;
-    margin-top: 8px;
-  }
+  
 
   /* Custom cursor and spinning rings disabled on mobile */
   .sh-custom-cursor,
-  .sh-active-ring-group {
-    display: none !important;
-  }
+  
 
   /* Modal Mobile */
   .sh-story-overlay {
@@ -1297,7 +1252,7 @@
     opacity: 0.3 !important;
   }
 
-  .sh-ring-spin-text,
+  
   .sh-card-spin-badge svg {
     animation: none !important;
   }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, X, MapPin, BookOpen, ExternalLink, Compass } from 'lucide-react';
+import { ArrowLeft, ArrowRight, X, MapPin, ExternalLink, Compass } from 'lucide-react';
 import {
   STORIES,
   REGION_SVG_PATHS,
@@ -368,23 +368,24 @@ export default function StoriesHero({ onCekBencana }) {
             </div>
           </div>
 
-          {/* ================= 2. KOLOM KANAN (PETA INTERAKTIF & SELECTOR) ================= */}
+          {/* ================= 2. KOLOM TENGAH (PETA INTERAKTIF INDONESIA) ================= */}
           <div
-            className="stories-hero-right"
+            className="stories-hero-center"
             onPointerMove={handlePointerMove}
             onPointerLeave={handlePointerLeave}
           >
-            {/* Koordinat Pojok Kanan Atas (Disembunyikan di Mobile) */}
+            {/* Koordinat Pojok Kanan Atas Peta (Disembunyikan di Mobile < 768px) */}
             <div className="sh-coords-block" aria-hidden="true">
               <div className="sh-coord-active">{activeStory.coords}</div>
               <div>0° 47' 00" S, 113° 55' 00" E</div>
             </div>
 
-            {/* SVG Map Container (Separated cleanly from zone selector) */}
+            {/* SVG Map Container (Enlarged 880x370 Framing, Papua utuh & Sumatera dekat teks) */}
             <div ref={mapViewportRef} className="sh-map-viewport">
               <svg
                 className="sh-map-svg"
-                viewBox="0 0 1440 810"
+                viewBox="380 250 880 370"
+                preserveAspectRatio="xMidYMid meet"
                 role="img"
                 aria-label="Peta Vektor Interaktif Wilayah Indonesia — Klik untuk Zoom ke Peta Bencana"
               >
@@ -401,12 +402,6 @@ export default function StoriesHero({ onCekBencana }) {
                       <path d={REGION_SVG_PATHS[s.id]} />
                     </clipPath>
                   ))}
-
-                  {/* Circular text path for active ring */}
-                  <path
-                    id="sh-ring-text-path"
-                    d="M 50,50 m -34,0 a 34,34 0 1,1 68,0 a 34,34 0 1,1 -68,0"
-                  />
                 </defs>
 
                 {/* Main Zoom Stage Group: zooms smoothly to clicked region in SVG coordinates */}
@@ -420,7 +415,7 @@ export default function StoriesHero({ onCekBencana }) {
                           transform: `scale(${zoomingRegion.zoomScale || 2.2})`,
                         }
                       : {
-                          transformOrigin: '720px 405px',
+                          transformOrigin: '820px 435px',
                           transform: 'scale(1)',
                         }
                   }
@@ -533,27 +528,10 @@ export default function StoriesHero({ onCekBencana }) {
                       );
                     })}
                   </g>
-
-                  {/* Layer 5: Active Ring with Rotating Badge Text (Pointer Events None) */}
-                  <g
-                    className={`sh-active-ring-group ${zoomingRegion ? 'is-hidden' : 'is-visible'}`}
-                    transform={`translate(${activeStory.dot.x}, ${activeStory.dot.y})`}
-                    pointerEvents="none"
-                    aria-hidden="true"
-                  >
-                    <circle cx="0" cy="0" r="28" className="sh-ring-disc" />
-                    <line x1="-8" y1="0" x2="8" y2="0" className="sh-ring-plus" />
-                    <line x1="0" y1="-8" x2="0" y2="8" className="sh-ring-plus" />
-                    <text className="sh-ring-spin-text">
-                      <textPath href="#sh-ring-text-path">
-                        KISAH TANGGUH &bull; GEOALERT &bull;
-                      </textPath>
-                    </text>
-                  </g>
                 </g>
               </svg>
 
-              {/* Touch Device Action Card (Muncul saat wilayah disentuh pada layar sentuh) */}
+              {/* Touch Device Action Card (Hanya tombol utama 'Lihat di Peta Bencana') */}
               {touchActiveStory && !isNavigating && (
                 <div className="sh-touch-action-card" role="dialog" aria-label={`Pilihan wilayah ${touchActiveStory.name}`}>
                   <div className="sh-touch-card-top">
@@ -582,26 +560,16 @@ export default function StoriesHero({ onCekBencana }) {
                       }}
                     >
                       <Compass size={14} />
-                      <span>Buka di Peta Bencana</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="sh-touch-btn-secondary"
-                      onClick={() => {
-                        const idx = STORIES.findIndex((s) => s.id === touchActiveStory.id);
-                        setTouchActiveStory(null);
-                        openStory(idx >= 0 ? idx : activeZoneIndex);
-                      }}
-                    >
-                      <BookOpen size={14} />
-                      <span>Baca Kisah</span>
+                      <span>Lihat di Peta Bencana</span>
                     </button>
                   </div>
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Zone Selector (Right Edge on Desktop, Horizontal Chips on Mobile, separated from Map) */}
+          {/* ================= 3. KOLOM KANAN (DAFTAR PILIH WILAYAH & RULER) ================= */}
+          <div className="stories-hero-right">
             <div className="sh-zone-selector" role="tablist" aria-label="Pilih Wilayah Indonesia">
               <div className="sh-zone-list-wrap">
                 <div className="sh-zone-title" id="sh-zone-label">PILIH WILAYAH</div>
@@ -624,22 +592,6 @@ export default function StoriesHero({ onCekBencana }) {
                       </button>
                     );
                   })}
-                </div>
-
-                {/* Secondary link to read story without opening modal from map click */}
-                <div className="sh-story-link-wrap">
-                  <button
-                    type="button"
-                    className="sh-read-story-trigger"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openStory(activeZoneIndex);
-                    }}
-                    aria-label={`Baca kisah ketangguhan wilayah ${activeStory.name}`}
-                  >
-                    <BookOpen size={13} aria-hidden="true" />
-                    <span>Baca kisah {activeStory.name} &rarr;</span>
-                  </button>
                 </div>
               </div>
 
@@ -666,7 +618,7 @@ export default function StoriesHero({ onCekBencana }) {
       {/* ==========================================================================
           MODAL KISAH LENGKAP (Full Story Dialog)
           Ported with high fidelity from public/stories.html #story-view
-          Diakses via tautan sekunder "Baca kisah" atau menu Kisah
+          Diakses via menu navbar Kisah atau rute /kisah
           ========================================================================== */}
       <div
         className={`sh-story-overlay ${isStoryOpen ? 'is-open' : ''}`}
@@ -783,6 +735,12 @@ export default function StoriesHero({ onCekBencana }) {
                   {/* Spinning Badge with Plus */}
                   <div className="sh-card-spin-badge" aria-hidden="true">
                     <svg viewBox="0 0 48 48">
+                      <defs>
+                        <path
+                          id="sh-modal-card-ring-path"
+                          d="M 24,24 m -16,0 a 16,16 0 1,1 32,0 a 16,16 0 1,1 -32,0"
+                        />
+                      </defs>
                       <circle
                         cx="24"
                         cy="24"
@@ -799,7 +757,7 @@ export default function StoriesHero({ onCekBencana }) {
                         letterSpacing="0.18em"
                         fill={modalStory.textColor}
                       >
-                        <textPath href="#sh-ring-text-path">
+                        <textPath href="#sh-modal-card-ring-path">
                           KISAH TANGGUH &bull; GEOALERT &bull;
                         </textPath>
                       </text>
