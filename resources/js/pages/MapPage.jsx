@@ -9,6 +9,7 @@ import '../../css/LandingPage.css';
 import AIChat from '../components/AIChat';
 import MitigationModal from '../components/MitigationModal';
 import { BMKG_TERKINI_URL, BMKG_DIRASAKAN_URL } from '../config/bmkgApi';
+import { fetchKarhutla } from '../config/karhutlaApi';
 import { formatLocation } from '../utils/locationFormatter';
 import { evaluateRisk, hasTsunamiThreat } from '../utils/riskEvaluator';
 import { REGION_BOUNDS, getRegionBySlug, isCoordinateInRegion } from '../data/regionBounds';
@@ -477,7 +478,7 @@ export default function MapPage() {
       const [resTerkini, resDirasakan, resKarhutla] = await Promise.allSettled([
         fetch(BMKG_TERKINI_URL),
         fetch(BMKG_DIRASAKAN_URL),
-        fetch('/api/karhutla'),
+        fetchKarhutla(),
       ]);
 
       let formattedData = [];
@@ -545,9 +546,10 @@ export default function MapPage() {
 
       // Process NASA FIRMS Karhutla Clusters
       let karhutlaData = [];
-      if (resKarhutla.status === 'fulfilled' && resKarhutla.value.ok) {
+      if (resKarhutla.status === 'fulfilled') {
         try {
-          const khJson = await resKarhutla.value.json();
+          // fetchKarhutla() mengembalikan JSON langsung (bukan Response object)
+          const khJson = resKarhutla.value;
           setKarhutlaInfo({
             stale: khJson.stale || false,
             updatedAt: khJson.updated_at || null,
@@ -749,7 +751,7 @@ export default function MapPage() {
             {/* Floating Toolbar Overlay */}
             <div className="map-toolbar-floating">
               {/* Search bar dengan geocoding */}
-              <div style={{ position: 'relative', flexShrink: 0, width: '240px', maxWidth: '280px' }}>
+              <div className="map-search-wrapper">
                 <div className="search-bar-pill">
                   <Search size={17} color="var(--color-primary)" />
                   <input
@@ -856,27 +858,7 @@ export default function MapPage() {
             {/* Satellite Disclaimer Banner */}
             {!satelliteNoticeDismissed && (
               <div
-                className="map-firms-permanent-banner"
-                style={{
-                  position: 'absolute',
-                  top: activeRegion ? '142px' : '95px',
-                  left: '16px',
-                  right: '16px',
-                  maxWidth: '620px',
-                  zIndex: 999,
-                  background: 'rgba(255, 255, 255, 0.94)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(234, 88, 12, 0.3)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '6px 12px',
-                  fontSize: '0.78rem',
-                  color: '#334155',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  pointerEvents: 'auto',
-                }}
+                className={`map-firms-permanent-banner${activeRegion ? ' has-region-banner' : ''}`}
               >
                 <Flame size={15} color="#EA580C" style={{ flexShrink: 0 }} />
                 <div style={{ flex: 1, lineHeight: '1.4' }}>
@@ -893,27 +875,7 @@ export default function MapPage() {
                   onClick={() => setSatelliteNoticeDismissed(true)}
                   title="Tutup informasi satelit"
                   aria-label="Tutup informasi satelit"
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: '#64748b',
-                    padding: '4px',
-                    borderRadius: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    transition: 'color 0.2s, background 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = '#0E2A5C';
-                    e.currentTarget.style.background = 'rgba(0,0,0,0.05)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = '#64748b';
-                    e.currentTarget.style.background = 'transparent';
-                  }}
+                  className="map-firms-banner-close"
                 >
                   <X size={15} />
                 </button>
@@ -923,12 +885,7 @@ export default function MapPage() {
             {/* Floating Notice Toast */}
             {!noticeDismissed && (hasSampleItems || error) && (
               <div
-                className="map-notice-toast"
-                style={{
-                  top: activeRegion
-                    ? (!satelliteNoticeDismissed ? '194px' : '142px')
-                    : (!satelliteNoticeDismissed ? '146px' : '95px'),
-                }}
+                className={`map-notice-toast${activeRegion ? ' has-region-banner' : ''}${!satelliteNoticeDismissed ? ' has-firms-banner' : ''}`}
               >
                 <Info size={16} color="var(--color-standby)" style={{ flexShrink: 0 }} />
                 <div style={{ flex: 1 }}>

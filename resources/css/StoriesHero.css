@@ -1686,27 +1686,29 @@ html.js-enabled .stories-hero:not(.is-visible) .sh-coord-secondary {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-top: calc(var(--navbar-height, 70px) + 2rem);
+    padding-top: calc(var(--navbar-height, 70px) + 1.5rem);
     padding-bottom: clamp(48px, 6vh, 64px);
     overflow: visible;
   }
 
   .stories-hero-container {
-    padding-inline: clamp(20px, 4vw, 32px);
+    padding-inline: clamp(16px, 4vw, 32px);
   }
 
   .stories-hero-grid {
     grid-template-columns: 1fr;
-    gap: 1.75rem;
+    gap: 1.5rem;
   }
 
   .stories-hero-right-col {
+    /* Peta full lebar, zone selector di bawah (bukan di samping) pada tablet */
     grid-template-columns: 1fr;
-    gap: 1.25rem;
+    gap: 1rem;
   }
 
   .stories-hero-left {
     text-align: left;
+    max-width: 100%; /* full width pada tablet portrait */
     max-width: 640px;
   }
 

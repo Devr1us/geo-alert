@@ -12,6 +12,7 @@ import RevealSection from '../components/RevealSection';
 import StoriesHero from '../components/StoriesHero';
 import TrustBarSection from '../components/TrustBarSection';
 import { BMKG_TERKINI_URL, BMKG_DIRASAKAN_URL } from '../config/bmkgApi';
+import { fetchKarhutla } from '../config/karhutlaApi';
 import { ASSET_BASE } from '../config/baseUrl';
 import { formatLocation } from '../utils/locationFormatter';
 import { evaluateRisk } from '../utils/riskEvaluator';
@@ -108,7 +109,7 @@ async function fetchDisasterEvents() {
   const [resTerkini, resDirasakan, resKarhutla] = await Promise.allSettled([
     fetch(BMKG_TERKINI_URL),
     fetch(BMKG_DIRASAKAN_URL),
-    fetch('/api/karhutla'),
+    fetchKarhutla(),
   ]);
 
   let allEvents = [];
@@ -175,9 +176,10 @@ async function fetchDisasterEvents() {
   }
 
   // 2. Olah data Karhutla (NASA FIRMS)
-  if (resKarhutla.status === 'fulfilled' && resKarhutla.value.ok) {
+  if (resKarhutla.status === 'fulfilled') {
     try {
-      const khJson = await resKarhutla.value.json();
+      // fetchKarhutla() mengembalikan JSON langsung (bukan Response object)
+      const khJson = resKarhutla.value;
       if (Array.isArray(khJson.events)) {
         // Hanya ambil kejadian Karhutla berstatus Waspada & Bahaya Tinggi
         const karhutlaEvents = khJson.events

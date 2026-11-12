@@ -2686,3 +2686,232 @@ html.js-ready[data-scroll-dir="up"] .shuffle-card-slot.reveal-on-scroll.is-visib
 
 
 
+
+/* ============================================================
+   MOBILE RESPONSIVE — LandingPage comprehensive fixes
+   ============================================================ */
+
+/* Stats section mobile */
+@media (max-width: 480px) {
+  .stats-section {
+    padding: clamp(48px, 8vw, 64px) 0 !important;
+  }
+
+  .stats-container {
+    padding-inline: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .stat-item {
+    padding: 1rem 0.75rem;
+    min-height: 100px;
+    border-radius: 12px;
+  }
+
+  .stat-number {
+    font-size: 1.75rem;
+  }
+
+  .stat-label {
+    font-size: 0.78rem;
+  }
+}
+
+/* About modern section mobile */
+@media (max-width: 768px) {
+  .about-modern-section {
+    padding: 3.5rem 0 4rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .about-unified-grid {
+    gap: 1rem;
+  }
+
+  .about-card-col-span-2 {
+    grid-column: span 1 !important;
+  }
+
+  .about-quote-card,
+  .about-info-card,
+  .about-mini-card {
+    padding: 1.25rem;
+  }
+
+  .about-quote-text {
+    font-size: clamp(1.4rem, 5vw, 1.8rem);
+  }
+}
+
+/* How to use section mobile */
+@media (max-width: 640px) {
+  .how-to-use-centered-container {
+    max-width: 100%;
+    margin-top: 2rem;
+  }
+
+  .how-to-use-timeline {
+    gap: 2rem;
+  }
+
+  .how-to-use-step {
+    gap: 1rem;
+  }
+
+  .step-circle-num {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .step-title-text {
+    font-size: 1.1rem;
+  }
+
+  .step-desc-text {
+    font-size: 0.875rem;
+  }
+
+  .timeline-connector-vertical {
+    left: 18px;
+  }
+}
+
+/* Education cards mobile */
+@media (max-width: 640px) {
+  .about-features-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .about-feature-card {
+    padding: 1.5rem 1.25rem;
+  }
+}
+
+/* FAQ mobile */
+@media (max-width: 640px) {
+  .faq-item {
+    padding: var(--spacing-3) 0;
+  }
+
+  .faq-question {
+    font-size: 1rem;
+  }
+
+  .faq-answer {
+    font-size: 0.875rem;
+  }
+}
+
+/* Trust logos mobile */
+@media (max-width: 480px) {
+  .trust-logos-grid {
+    gap: 8px;
+  }
+
+  .trust-item-card {
+    padding: 5px 10px;
+    font-size: 0.72rem;
+  }
+
+  .trust-badge-unified {
+    padding: 2px 6px;
+    font-size: 0.65rem;
+  }
+}
+
+/* Live status pill card mobile  */
+@media (max-width: 480px) {
+  .live-status-pill-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 16px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .status-pill-divider {
+    display: none;
+  }
+
+  .status-pill-col {
+    padding: 8px;
+    border-radius: 10px;
+    background: rgba(14, 42, 92, 0.03);
+    border: 1px solid rgba(14, 42, 92, 0.06);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .status-pill-val {
+    font-size: 0.82rem;
+    justify-content: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .status-pill-label {
+    font-size: 0.6rem;
+  }
+}
+
+/* Siaga card section mobile */
+@media (max-width: 768px) {
+  .siaga-card-graphic {
+    height: 180px;
+  }
+
+  .siaga-card-body {
+    padding: 1.5rem;
+  }
+
+  .siaga-title {
+    font-size: 1.4rem;
+  }
+
+  .radar-graphic {
+    width: 160px;
+    height: 160px;
+  }
+}
+
+/* How to use white section background image mobile */
+@media (max-width: 768px) {
+  .how-to-use-white-section {
+    background-attachment: scroll !important;
+    background-size: cover;
+  }
+}
+
+/* General section padding reduction on mobile */
+@media (max-width: 640px) {
+  .section {
+    padding: var(--spacing-8) 0;
+  }
+
+  .section-lg {
+    padding: calc(var(--spacing-8) * 1.25) 0;
+  }
+
+  .section-title {
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+    margin-bottom: 0.75rem;
+  }
+
+  .section-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 2.5rem;
+  }
+}
