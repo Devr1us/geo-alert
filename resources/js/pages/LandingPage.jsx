@@ -10,6 +10,7 @@ import '../../css/LandingPage.css';
 import MitigationModal from '../components/MitigationModal';
 import RevealSection from '../components/RevealSection';
 import StoriesHero from '../components/StoriesHero';
+import TrustBarSection from '../components/TrustBarSection';
 import { BMKG_TERKINI_URL, BMKG_DIRASAKAN_URL } from '../config/bmkgApi';
 import { ASSET_BASE } from '../config/baseUrl';
 import { formatLocation } from '../utils/locationFormatter';
@@ -402,48 +403,8 @@ export default function LandingPage() {
             ))}
           </div>
 
-          {/* Section Terhubung Dengan Sumber Data Resmi */}
-          <div className="trust-bar-inline">
-            <div className="trust-groups-wrapper">
-              {/* Group 1: Sumber Data Terintegrasi (BMKG & NASA FIRMS) */}
-              <div className="trust-group">
-                <span className="trust-bar-label">
-                  SUMBER DATA TERINTEGRASI (REAL-TIME)
-                </span>
-                <div className="trust-logos-grid">
-                  <a href="https://www.bmkg.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="Badan Meteorologi, Klimatologi, & Geofisika">
-                    <span className="trust-badge-unified">BMKG</span>
-                    <span className="trust-name-unified">Badan Meteorologi, Klimatologi, &amp; Geofisika</span>
-                  </a>
-                  <a href="https://firms.modaps.eosdis.nasa.gov" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="NASA Fire Information for Resource Management System">
-                    <span className="trust-badge-unified">NASA FIRMS</span>
-                    <span className="trust-name-unified">Pemantauan Satelit Titik Panas Karhutla</span>
-                  </a>
-                </div>
-              </div>
-
-              {/* Group 2: Rujukan Informasi & SOP Mitigasi (BNPB, InaRISK, Kementerian Kehutanan) */}
-              <div className="trust-group">
-                <span className="trust-bar-label">
-                  RUJUKAN INFORMASI &amp; STANDAR MITIGASI
-                </span>
-                <div className="trust-logos-grid">
-                  <a href="https://www.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="Badan Nasional Penanggulangan Bencana">
-                    <span className="trust-badge-unified badge-secondary">BNPB</span>
-                    <span className="trust-name-unified">Badan Penanggulangan Bencana</span>
-                  </a>
-                  <a href="https://inarisk.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="Portal Risiko Bencana BNPB">
-                    <span className="trust-badge-unified badge-secondary">InaRISK</span>
-                    <span className="trust-name-unified">Portal Risiko Bencana</span>
-                  </a>
-                  <a href="https://sipongi.menlhk.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="Sistem Pemantauan Karhutla, Kementerian Kehutanan">
-                    <span className="trust-badge-unified badge-secondary">SiPongi</span>
-                    <span className="trust-name-unified">Sistem Pemantauan Karhutla, Kementerian Kehutanan</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Section Terhubung Dengan Sumber Data Resmi & Rujukan Mitigasi */}
+          <TrustBarSection />
         </div>
       </section>
 

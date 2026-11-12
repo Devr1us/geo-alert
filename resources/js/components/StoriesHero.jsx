@@ -16,12 +16,27 @@ import '../../css/StoriesHero.css';
 
 const RULER_TOP_POSITIONS = [10, 56, 108, 158, 206];
 
+// Pemecahan kata judul "Siaga bencana di seluruh Indonesia"
+// Saat scroll down: Siaga (0) -> di (1) -> seluruh (2) -> Indonesia (3) -> bencana (4, oranye muncul paling akhir)
+// Saat scroll up: urutan dibalik (bencana -> Indonesia -> seluruh -> di -> Siaga)
+const HERO_WORDS = [
+  { text: 'Siaga', isAccent: false, downOrder: 0, upOrder: 4 },
+  { text: 'bencana', isAccent: true, downOrder: 4, upOrder: 0 },
+  { text: 'di', isAccent: false, downOrder: 1, upOrder: 3 },
+  { text: 'seluruh', isAccent: false, downOrder: 2, upOrder: 2 },
+  { text: 'Indonesia', isAccent: false, downOrder: 3, upOrder: 1 },
+];
+
 console.info('[GeoAlert hero v2] loaded');
 
 export default function StoriesHero({ onCekBencana }) {
   const navigate = useNavigate();
   const [activeZoneIndex, setActiveZoneIndex] = useState(0);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0, visible: false });
+
+  // Scroll Direction & Bi-directional Reveal States
+  const [scrollDir, setScrollDir] = useState('down');
+  const [isVisible, setIsVisible] = useState(false);
 
   // Zoom to region & navigation states
   const [isNavigating, setIsNavigating] = useState(false);
@@ -82,6 +97,91 @@ export default function StoriesHero({ onCekBencana }) {
       if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
     };
   }, []);
+
+  // 2b. IntersectionObserver & Scroll Direction Tracker (down / up)
+  useEffect(() => {
+    // Putar otomatis saat pertama kali dimuat
+    setIsVisible(true);
+
+    const isMobileInit = typeof window !== 'undefined' && window.innerWidth < 768;
+    document.documentElement.setAttribute('data-scroll-dir', 'down');
+    document.documentElement.style.setProperty('--enter-from', isMobileInit ? '20px' : '40px');
+    document.documentElement.style.setProperty('--exit-to', isMobileInit ? '-15px' : '-30px');
+    document.documentElement.style.setProperty('--word-enter-y', '100%');
+
+    // Observer dua arah: threshold 0.15, rootMargin "0px 0px -10% 0px"
+    const heroEl = heroRef.current;
+    let observer;
+    if (heroEl && typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          setIsVisible(entry.isIntersecting);
+        },
+        {
+          threshold: 0.15,
+          rootMargin: '0px 0px -10% 0px',
+        }
+      );
+      observer.observe(heroEl);
+    }
+
+    // Passive listener + requestAnimationFrame untuk mendeteksi arah scroll
+    let lastScrollY = typeof window !== 'undefined' ? (window.scrollY || window.pageYOffset || 0) : 0;
+    let ticking = false;
+
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY || window.pageYOffset || 0;
+          const diff = currentScrollY - lastScrollY;
+
+          if (Math.abs(diff) > 2) {
+            const nextDir = diff > 0 ? 'down' : 'up';
+            setScrollDir(nextDir);
+            document.documentElement.setAttribute('data-scroll-dir', nextDir);
+
+            const isMobile = window.innerWidth < 768;
+            const enterDist = isMobile ? '20px' : '40px';
+            const exitDist = isMobile ? '15px' : '30px';
+
+            if (nextDir === 'down') {
+              document.documentElement.style.setProperty('--enter-from', enterDist);
+              document.documentElement.style.setProperty('--exit-to', `-${exitDist}`);
+              document.documentElement.style.setProperty('--word-enter-y', '100%');
+            } else {
+              document.documentElement.style.setProperty('--enter-from', `-${enterDist}`);
+              document.documentElement.style.setProperty('--exit-to', exitDist);
+              document.documentElement.style.setProperty('--word-enter-y', '-100%');
+            }
+            lastScrollY = currentScrollY;
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (observer) observer.disconnect();
+    };
+  }, []);
+
+  // Hitung stagger delay (data-order * 100ms):
+  // Scroll down: order 0 -> 4
+  // Scroll up: urutan dibalik (elemen bawah muncul lebih dulu: order 4 -> 0)
+  const getElementDelay = (order) => {
+    const effectiveOrder = scrollDir === 'up' ? 4 - order : order;
+    return effectiveOrder * 100;
+  };
+
+  const getWordDelay = (word) => {
+    const baseTitleDelay = getElementDelay(1);
+    const wordOrder = scrollDir === 'up' ? word.upOrder : word.downOrder;
+    return baseTitleDelay + wordOrder * 60;
+  };
 
   // 3. Fungsi menggambar cell video/gambar ke canvas
   const renderCellToCanvas = useCallback((canvas, cCol, cRow) => {
@@ -246,7 +346,7 @@ export default function StoriesHero({ onCekBencana }) {
   return (
     <section
       ref={heroRef}
-      className={`stories-hero ${isNavigating ? 'is-navigating' : ''}`}
+      className={`stories-hero ${isNavigating ? 'is-navigating' : ''} ${isVisible ? 'is-visible' : ''}`}
       aria-label="Mitigasi Bencana Nusantara — Hero Section GeoAlert"
     >
       {/* Hidden Video element for animation texture */}
@@ -292,42 +392,83 @@ export default function StoriesHero({ onCekBencana }) {
         <div className="stories-hero-grid">
           {/* ================= 1. KOLOM KIRI (TEKS & AKSI) ================= */}
           <div className="stories-hero-left">
-            {/* Eyebrow & Brand Tagline */}
-            <div className="stories-hero-eyebrow-row">
+            {/* 1. Badge "GEOALERT" + Tagline (order 0) */}
+            <div
+              className={`stories-hero-eyebrow-row ${isVisible ? 'is-visible' : ''}`}
+              data-reveal="hero-badge"
+              data-order="0"
+              style={{ '--delay': `${getElementDelay(0)}ms` }}
+            >
               <span className="stories-hero-badge">GEOALERT</span>
               <span className="stories-hero-tagline">Deteksi Dini, Lindungi Diri</span>
             </div>
 
-            {/* H1 Headline */}
-            <h1 className="stories-hero-title">
-              Siaga <span className="sh-terracotta">bencana</span> di seluruh Indonesia
+            {/* 2. Judul "Siaga bencana di seluruh Indonesia" (order 1) */}
+            <h1
+              className={`stories-hero-title ${isVisible ? 'is-visible' : ''}`}
+              data-reveal="hero-title"
+              data-order="1"
+              style={{ '--delay': `${getElementDelay(1)}ms` }}
+            >
+              {HERO_WORDS.map((w, i) => (
+                <React.Fragment key={i}>
+                  <span className="sh-title-mask">
+                    <span
+                      className={`sh-title-word ${w.isAccent ? 'sh-terracotta sh-title-word-accent' : ''}`}
+                      style={{ '--word-delay': `${getWordDelay(w)}ms` }}
+                    >
+                      {w.text}
+                    </span>
+                  </span>
+                  {i < HERO_WORDS.length - 1 && ' '}
+                </React.Fragment>
+              ))}
             </h1>
 
-            {/* Paragraph (max ~60 karakter per baris) */}
-            <p className="stories-hero-desc">
+            {/* 3. Paragraf deskripsi (order 2) */}
+            <p
+              className={`stories-hero-desc ${isVisible ? 'is-visible' : ''}`}
+              data-reveal="hero-desc"
+              data-order="2"
+              style={{ '--delay': `${getElementDelay(2)}ms` }}
+            >
               Pantau potensi bencana di lima wilayah Indonesia, pelajari langkah mitigasinya, dan siapkan diri sebelum bencana terjadi. Arahkan kursor ke zona untuk melihat lebih dekat, lalu klik wilayah untuk membuka peta bencana interaktif.
             </p>
 
-            {/* Tombol Aksi */}
+            {/* 4. Tombol Aksi (order 3 & order 4) */}
             <div className="stories-hero-actions">
-              <button
-                type="button"
-                onClick={onCekBencana}
-                className="sh-btn sh-btn-primary"
-                aria-label="Cek Bencana Terdekat pada Peta Interaktif"
+              <div
+                className={`sh-btn-reveal-wrap ${isVisible ? 'is-visible' : ''}`}
+                data-reveal="hero-btn-primary"
+                data-order="3"
+                style={{ '--delay': `${getElementDelay(3)}ms` }}
               >
-                <Compass size={19} aria-hidden="true" />
-                <span>Cek Bencana Terdekat</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={onCekBencana}
+                  className="sh-btn sh-btn-primary"
+                  aria-label="Cek Bencana Terdekat pada Peta Interaktif"
+                >
+                  <Compass size={19} aria-hidden="true" />
+                  <span>Cek Bencana Terdekat</span>
+                </button>
+              </div>
 
-              <a
-                href="#tentang"
-                onClick={handleScrollToTentang}
-                className="sh-btn sh-btn-secondary"
-                aria-label="Pelajari Lebih Lanjut tentang GeoAlert"
+              <div
+                className={`sh-btn-reveal-wrap ${isVisible ? 'is-visible' : ''}`}
+                data-reveal="hero-btn-secondary"
+                data-order="4"
+                style={{ '--delay': `${getElementDelay(4)}ms` }}
               >
-                <span>Pelajari Lebih Lanjut</span>
-              </a>
+                <a
+                  href="#tentang"
+                  onClick={handleScrollToTentang}
+                  className="sh-btn sh-btn-secondary"
+                  aria-label="Pelajari Lebih Lanjut tentang GeoAlert"
+                >
+                  <span>Pelajari Lebih Lanjut</span>
+                </a>
+              </div>
             </div>
           </div>
 

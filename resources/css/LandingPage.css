@@ -536,9 +536,11 @@
   background-color: var(--stats-bg, #F6F3EA);
   background: var(--stats-bg, #F6F3EA);
   color: var(--stats-text, #0E2A5C);
-  padding: 5.5rem 0 1.25rem;
+  padding: 2rem 0 5.5rem; /* Padding atas dirapatkan (32px, total jarak ke tombol hero ~60px), padding bawah 88px agar chip SiPongi tidak terpotong */
+  height: auto;
+  min-height: auto;
   position: relative;
-  overflow: hidden;
+  overflow: visible; /* Hapus overflow: hidden agar konten bawah tidak terpotong */
   border-top: none;
   border-bottom: 1px solid rgba(28, 26, 23, 0.08);
 }
@@ -621,24 +623,36 @@
 /* Trust Bar di dalam Stats Section (Cream Theme) */
 .trust-bar-inline {
   text-align: center;
-  margin-top: 1.85rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  margin-top: 2.25rem;
+  padding-top: 0.5rem;
+  position: relative;
+}
+
+/* 1. Garis Pemisah Horizontal: scaleX 0 ke 1 dari tengah */
+.trust-divider-line {
+  width: 100%;
+  max-width: 960px;
+  height: 1px;
+  background: rgba(15, 23, 42, 0.08);
+  margin: 0 auto 2.25rem;
+  transform-origin: center center;
 }
 
 .trust-groups-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  max-width: 980px;
+  gap: 32px; /* Jarak antar grup: 32px */
+  max-width: 960px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .trust-group {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.45rem;
+  gap: 14px; /* Jarak label ke chip-nya: 14px */
+  width: 100%;
 }
 
 .trust-bar-label {
@@ -655,8 +669,20 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.75rem;
+  gap: 12px; /* Jarak antar chip: 12px horizontal dan vertikal */
   flex-wrap: wrap;
+  width: 100%;
+}
+
+.trust-logos-grid-wide {
+  max-width: 960px; /* Muat satu baris di desktop */
+  margin: 0 auto;
+}
+
+.trust-chip-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .trust-item-card {
@@ -672,14 +698,22 @@
   text-decoration: none;
   font-size: 0.82rem;
   font-weight: 500;
-  transition: all 0.25s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease;
 }
 
+/* Micro-interaction: saat hover naik 2px dan bayangan sedikit menebal */
 .trust-item-card:hover {
   background: #FFFFFF;
-  border-color: rgba(14, 42, 92, 0.25);
-  box-shadow: 0 4px 14px rgba(14, 42, 92, 0.08);
+  border-color: rgba(14, 42, 92, 0.22);
+  box-shadow: 0 6px 18px rgba(14, 42, 92, 0.09);
   transform: translateY(-2px);
+}
+
+.trust-item-card:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(14, 42, 92, 0.05);
 }
 
 .trust-badge-unified {
@@ -701,6 +735,79 @@
   color: #1E293B;
   font-size: 0.8rem;
   font-weight: 600;
+}
+
+/* ============================================================
+   ANIMASI SCROLL DUA ARAH (TRUST BAR SECTION)
+   Threshold 0.2, rootMargin: 0px 0px -8% 0px
+   Hanya transform & opacity, easing cubic-bezier(0.22, 1, 0.36, 1), durasi 600-700ms
+   ============================================================ */
+
+/* 1. Garis pemisah horizontal: scaleX 0 ke 1 dari tengah */
+html.js-ready .trust-divider-line,
+html.js-enabled .trust-divider-line {
+  transform: scaleX(0);
+  transition: transform 650ms cubic-bezier(0.22, 1, 0.36, 1) 0ms;
+  will-change: transform;
+}
+
+html.js-ready .trust-bar-inline.is-visible .trust-divider-line,
+html.js-enabled .trust-bar-inline.is-visible .trust-divider-line {
+  transform: scaleX(1);
+}
+
+/* 2 & 4. Label judul grup: fade in + translateY 12px ke 0 + letter-spacing menyempit (0.2em ke 0.1em) */
+html.js-ready .trust-bar-label,
+html.js-enabled .trust-bar-label {
+  opacity: 0;
+  transform: translateY(12px);
+  letter-spacing: 0.2em;
+  transition: opacity 650ms cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 100ms),
+              transform 650ms cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 100ms),
+              letter-spacing 650ms cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 100ms);
+  will-change: opacity, transform, letter-spacing;
+}
+
+html.js-ready .trust-bar-inline.is-visible .trust-bar-label,
+html.js-enabled .trust-bar-inline.is-visible .trust-bar-label {
+  opacity: 1;
+  transform: translateY(0);
+  letter-spacing: 0.1em;
+}
+
+/* 3 & 5. Chip item wrapper: fade in + translateY 16px ke 0 + scale 0.95 ke 1 */
+html.js-ready .trust-chip-wrap,
+html.js-enabled .trust-chip-wrap {
+  opacity: 0;
+  transform: translateY(16px) scale(0.95);
+  transition: opacity 650ms cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 200ms),
+              transform 650ms cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 200ms);
+  will-change: opacity, transform;
+}
+
+html.js-ready .trust-bar-inline.is-visible .trust-chip-wrap,
+html.js-enabled .trust-bar-inline.is-visible .trust-chip-wrap {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Accessibility: nonaktifkan semua animasi jika prefers-reduced-motion aktif */
+@media (prefers-reduced-motion: reduce) {
+  html.js-ready .trust-divider-line,
+  html.js-enabled .trust-divider-line,
+  html.js-ready .trust-bar-label,
+  html.js-enabled .trust-bar-label,
+  html.js-ready .trust-chip-wrap,
+  html.js-enabled .trust-chip-wrap {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    letter-spacing: 0.1em !important;
+  }
+
+  .trust-item-card:hover {
+    transform: none !important;
+  }
 }
 
 /* Responsivitas Stats Grid */
