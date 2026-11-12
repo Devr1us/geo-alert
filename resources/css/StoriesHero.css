@@ -24,7 +24,7 @@
   font-family: var(--sh-font-sans);
   /* Top clearance: Generous breathing room below floating pill navbar */
   padding-top: calc(var(--navbar-height, 96px) + 2rem);
-  padding-bottom: 1.75rem; /* Jarak bawah hero dirapatkan agar jarak ke kartu stats menjadi ~60px */
+  padding-bottom: 0 !important; /* Dinolkan agar jarak tombol ke kartu diatur di SATU tempat oleh margin-top wrapper 4 kartu */
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -1173,9 +1173,11 @@ html.js-enabled [data-reveal^="hero-btn"] {
 html.js-ready .stories-hero:not(.is-visible) .sh-btn-reveal-wrap,
 html.js-ready .sh-btn-reveal-wrap:not(.is-visible),
 html.js-ready [data-reveal^="hero-btn"]:not(.is-visible),
+html.js-ready .reveal-btn:not(.is-visible),
 html.js-enabled .stories-hero:not(.is-visible) .sh-btn-reveal-wrap,
 html.js-enabled .sh-btn-reveal-wrap:not(.is-visible),
-html.js-enabled [data-reveal^="hero-btn"]:not(.is-visible) {
+html.js-enabled [data-reveal^="hero-btn"]:not(.is-visible),
+html.js-enabled .reveal-btn:not(.is-visible) {
   opacity: 0;
   transform: translateY(var(--exit-to, -30px)) scale(0.95);
   transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -1184,147 +1186,380 @@ html.js-enabled [data-reveal^="hero-btn"]:not(.is-visible) {
 html.js-ready .stories-hero.is-visible .sh-btn-reveal-wrap,
 html.js-ready .sh-btn-reveal-wrap.is-visible,
 html.js-ready [data-reveal^="hero-btn"].is-visible,
+html.js-ready .reveal-btn.is-visible,
 html.js-enabled .stories-hero.is-visible .sh-btn-reveal-wrap,
 html.js-enabled .sh-btn-reveal-wrap.is-visible,
-html.js-enabled [data-reveal^="hero-btn"].is-visible {
+html.js-enabled [data-reveal^="hero-btn"].is-visible,
+html.js-enabled .reveal-btn.is-visible {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
 
-/* 5. Peta Indonesia (delay 200ms): fade + slide dari kanan (translateX 60px) + scale 0.96 ke 1 */
+/* 5. Peta Indonesia (delay 200ms): fade + slide dari kanan (translateX 60px ke 0) + scale 0.96 ke 1 */
+html.js-ready .sh-map-viewport,
 html.js-ready [data-reveal="map"],
-html.js-enabled [data-reveal="map"] {
+html.js-ready .reveal-map,
+html.js-enabled .sh-map-viewport,
+html.js-enabled [data-reveal="map"],
+html.js-enabled .reveal-map {
   opacity: 0;
   transform: translateX(60px) scale(0.96);
-  transition: opacity 850ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 200ms),
-              transform 850ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 200ms);
+  transition: opacity 850ms cubic-bezier(0.22, 1, 0.36, 1) 200ms,
+              transform 850ms cubic-bezier(0.22, 1, 0.36, 1) 200ms;
   will-change: opacity, transform;
 }
-html.js-ready .stories-hero.is-visible [data-reveal="map"],
+html.js-ready .stories-hero:not(.is-visible) .sh-map-viewport,
+html.js-ready [data-reveal="map"]:not(.is-visible),
+html.js-ready .reveal-map:not(.is-visible),
+html.js-enabled .stories-hero:not(.is-visible) .sh-map-viewport,
+html.js-enabled [data-reveal="map"]:not(.is-visible),
+html.js-enabled .reveal-map:not(.is-visible) {
+  opacity: 0;
+  transform: translateX(40px) scale(0.96);
+  transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+html.js-ready .stories-hero.is-visible .sh-map-viewport,
 html.js-ready [data-reveal="map"].is-visible,
-html.js-enabled .stories-hero.is-visible [data-reveal="map"],
-html.js-enabled [data-reveal="map"].is-visible {
+html.js-ready .reveal-map.is-visible,
+html.js-enabled .stories-hero.is-visible .sh-map-viewport,
+html.js-enabled [data-reveal="map"].is-visible,
+html.js-enabled .reveal-map.is-visible {
   opacity: 1;
   transform: translateX(0) scale(1);
 }
 
-/* Garis outline pulau SVG menggambar dengan stroke-dashoffset (durasi ~1.4s), lalu isi warna fade in */
+/* Outline pulau SVG: menggambar dengan stroke-dasharray / stroke-dashoffset (durasi 1.4s, stagger 100ms per wilayah) */
 html.js-ready .sh-coastline-path,
 html.js-enabled .sh-coastline-path {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
+  stroke-dasharray: var(--path-length, 1200px);
+  stroke-dashoffset: var(--path-length, 1200px);
   fill: rgba(28, 26, 23, 0);
-  transition: stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1) var(--coastline-delay, 200ms),
-              fill 0.8s ease calc(var(--coastline-delay, 200ms) + 600ms),
-              stroke 0.3s ease;
+  transition: stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1) var(--coastline-delay, 0ms),
+              fill 500ms ease calc(var(--coastline-delay, 0ms) + 1.2s),
+              stroke 300ms ease,
+              stroke-width 300ms ease;
   will-change: stroke-dashoffset, fill;
+}
+html.js-ready .stories-hero:not(.is-visible) .sh-coastline-path,
+html.js-enabled .stories-hero:not(.is-visible) .sh-coastline-path {
+  stroke-dashoffset: var(--path-length, 1200px);
+  fill: rgba(28, 26, 23, 0);
+  transition: stroke-dashoffset 800ms cubic-bezier(0.22, 1, 0.36, 1),
+              fill 400ms ease;
 }
 html.js-ready .stories-hero.is-visible .sh-coastline-path,
 html.js-ready [data-reveal="map"].is-visible .sh-coastline-path,
+html.js-ready .reveal-map.is-visible .sh-coastline-path,
 html.js-enabled .stories-hero.is-visible .sh-coastline-path,
-html.js-enabled [data-reveal="map"].is-visible .sh-coastline-path {
+html.js-enabled [data-reveal="map"].is-visible .sh-coastline-path,
+html.js-enabled .reveal-map.is-visible .sh-coastline-path {
   stroke-dashoffset: 0;
   fill: rgba(28, 26, 23, 0.02);
 }
 
-/* Titik pulsa / lingkaran zona: muncul belakangan dengan scale 0 ke 1, stagger 120ms per titik */
+/* Isi foto canvas pulau: fade in setelah outline selesai (durasi 500ms) */
+html.js-ready .sh-photo-fill,
+html.js-enabled .sh-photo-fill {
+  opacity: 0;
+  transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1) var(--fill-delay, 1.4s);
+  will-change: opacity;
+}
+html.js-ready .stories-hero:not(.is-visible) .sh-photo-fill,
+html.js-enabled .stories-hero:not(.is-visible) .sh-photo-fill {
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+html.js-ready .stories-hero.is-visible .sh-photo-fill.is-active,
+html.js-ready .reveal-map.is-visible .sh-photo-fill.is-active,
+html.js-enabled .stories-hero.is-visible .sh-photo-fill.is-active,
+html.js-enabled .reveal-map.is-visible .sh-photo-fill.is-active {
+  opacity: 1;
+}
+
+/* Titik pusat zona dan lingkaran pulsa: scale 0 ke 1 dengan efek pegas ringan (cubic-bezier(0.34, 1.56, 0.64, 1)), stagger 120ms, muncul paling akhir */
 html.js-ready .sh-dot-reveal-wrap,
 html.js-enabled .sh-dot-reveal-wrap {
   transform-box: fill-box;
-  transform-origin: center;
+  transform-origin: center center;
   transform: scale(0);
   opacity: 0;
-  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1) var(--dot-delay, 500ms),
-              opacity 600ms cubic-bezier(0.22, 1, 0.36, 1) var(--dot-delay, 500ms);
+  transition: transform 650ms cubic-bezier(0.34, 1.56, 0.64, 1) var(--dot-delay, 1400ms),
+              opacity 400ms ease var(--dot-delay, 1400ms);
   will-change: transform, opacity;
+}
+html.js-ready .stories-hero:not(.is-visible) .sh-dot-reveal-wrap,
+html.js-enabled .stories-hero:not(.is-visible) .sh-dot-reveal-wrap {
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 400ms ease, opacity 400ms ease;
 }
 html.js-ready .stories-hero.is-visible .sh-dot-reveal-wrap,
 html.js-ready [data-reveal="map"].is-visible .sh-dot-reveal-wrap,
+html.js-ready .reveal-map.is-visible .sh-dot-reveal-wrap,
 html.js-enabled .stories-hero.is-visible .sh-dot-reveal-wrap,
-html.js-enabled [data-reveal="map"].is-visible .sh-dot-reveal-wrap {
+html.js-enabled [data-reveal="map"].is-visible .sh-dot-reveal-wrap,
+html.js-enabled .reveal-map.is-visible .sh-dot-reveal-wrap {
   transform: scale(1);
   opacity: 1;
 }
 
-/* 6. Daftar PILIH WILAYAH (delay 400ms): tiap item muncul dari kanan (translateX 24px), stagger 80ms */
-html.js-ready .sh-zone-item-wrap,
-html.js-enabled .sh-zone-item-wrap {
+/* 6. Daftar PILIH WILAYAH:
+   Label "PILIH WILAYAH" (delay 0ms): fade + translateY -10px ke 0, letter-spacing menyempit sedikit */
+html.js-ready .sh-zone-title,
+html.js-ready [data-reveal="zone-label"],
+html.js-ready .reveal-zone-title,
+html.js-enabled .sh-zone-title,
+html.js-enabled [data-reveal="zone-label"],
+html.js-enabled .reveal-zone-title {
   opacity: 0;
-  transform: translateX(24px);
-  transition: opacity 650ms cubic-bezier(0.22, 1, 0.36, 1) var(--item-delay, 400ms),
-              transform 650ms cubic-bezier(0.22, 1, 0.36, 1) var(--item-delay, 400ms);
+  transform: translateY(-10px);
+  letter-spacing: 0.28em;
+  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1) 0ms,
+              transform 700ms cubic-bezier(0.22, 1, 0.36, 1) 0ms,
+              letter-spacing 700ms cubic-bezier(0.22, 1, 0.36, 1) 0ms;
+  will-change: opacity, transform, letter-spacing;
+}
+html.js-ready .stories-hero:not(.is-visible) .sh-zone-title,
+html.js-ready .stories-hero:not(.is-visible) [data-reveal="zone-label"],
+html.js-ready .reveal-zone-title:not(.is-visible),
+html.js-enabled .stories-hero:not(.is-visible) .sh-zone-title,
+html.js-enabled .stories-hero:not(.is-visible) [data-reveal="zone-label"],
+html.js-enabled .reveal-zone-title:not(.is-visible) {
+  opacity: 0;
+  transform: translateY(-10px);
+  letter-spacing: 0.28em;
+  transition: opacity 500ms ease, transform 500ms ease;
+}
+html.js-ready .stories-hero.is-visible .sh-zone-title,
+html.js-ready [data-reveal="zone-selector"].is-visible .sh-zone-title,
+html.js-ready .reveal-zone-title.is-visible,
+html.js-enabled .stories-hero.is-visible .sh-zone-title,
+html.js-enabled [data-reveal="zone-selector"].is-visible .sh-zone-title,
+html.js-enabled .reveal-zone-title.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  letter-spacing: 0.2em;
+}
+
+/* Item wilayah (delay 100ms, stagger 80ms per item): fade + translateX 28px ke 0 (mobile 16px) */
+html.js-ready .sh-zone-item-wrap,
+html.js-ready .reveal-zone-item,
+html.js-enabled .sh-zone-item-wrap,
+html.js-enabled .reveal-zone-item {
+  opacity: 0;
+  transform: translateX(28px);
+  transition-property: opacity, transform;
+  transition-duration: 600ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity, transform;
+}
+
+/* Stagger saat scroll ke bawah: Sumatera (0) -> Jawa (1) -> Kalimantan (2) -> Sulawesi (3) -> Papua (4) */
+html[data-scroll-dir="down"] .sh-zone-item-wrap,
+html:not([data-scroll-dir="up"]) .sh-zone-item-wrap,
+html[data-scroll-dir="down"] .reveal-zone-item,
+html:not([data-scroll-dir="up"]) .reveal-zone-item {
+  transition-delay: calc(var(--i, 0) * 80ms + 100ms);
+}
+
+/* Stagger saat scroll ke atas dibalik: Papua (4) -> Sulawesi (3) -> Kalimantan (2) -> Jawa (1) -> Sumatera (0) */
+html[data-scroll-dir="up"] .sh-zone-item-wrap,
+html[data-scroll-dir="up"] .reveal-zone-item {
+  transition-delay: calc((4 - var(--i, 0)) * 80ms + 100ms);
+}
+
+html.js-ready .stories-hero:not(.is-visible) .sh-zone-item-wrap,
+html.js-ready .reveal-zone-item:not(.is-visible),
+html.js-enabled .stories-hero:not(.is-visible) .sh-zone-item-wrap,
+html.js-enabled .reveal-zone-item:not(.is-visible) {
+  opacity: 0;
+  transform: translateX(28px);
+  transition: opacity 500ms ease, transform 500ms ease;
 }
 html.js-ready .stories-hero.is-visible .sh-zone-item-wrap,
 html.js-ready [data-reveal="zone-selector"].is-visible .sh-zone-item-wrap,
+html.js-ready .reveal-zone-item.is-visible,
 html.js-enabled .stories-hero.is-visible .sh-zone-item-wrap,
-html.js-enabled [data-reveal="zone-selector"].is-visible .sh-zone-item-wrap {
+html.js-enabled [data-reveal="zone-selector"].is-visible .sh-zone-item-wrap,
+html.js-enabled .reveal-zone-item.is-visible {
   opacity: 1;
   transform: translateX(0);
 }
 
-/* Judul PILIH WILAYAH fade in */
-html.js-ready .sh-zone-title,
-html.js-enabled .sh-zone-title {
-  opacity: 0;
-  transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1) 360ms;
-}
-html.js-ready .stories-hero.is-visible .sh-zone-title,
-html.js-ready [data-reveal="zone-selector"].is-visible .sh-zone-title,
-html.js-enabled .stories-hero.is-visible .sh-zone-title,
-html.js-enabled [data-reveal="zone-selector"].is-visible .sh-zone-title {
-  opacity: 1;
+/* Transisi teks aktif saat wilayah berganti (300ms) */
+.sh-zone-item {
+  transition: color 300ms ease, background-color 300ms ease, border-color 300ms ease, transform 0.2s ease;
 }
 
-/* Garis penanda skala di kanan: menggambar dari atas ke bawah (scaleY 0 ke 1, transform-origin top) */
+/* Garis skala di sisi kanan: menggambar dari atas ke bawah (scaleY 0 ke 1, transform-origin top, durasi 900ms) */
 html.js-ready .sh-ruler-line,
-html.js-enabled .sh-ruler-line {
+html.js-ready .reveal-ruler,
+html.js-enabled .sh-ruler-line,
+html.js-enabled .reveal-ruler {
   transform: scaleY(0);
   transform-origin: top center;
-  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1) 400ms;
+  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1) 150ms;
   will-change: transform;
+}
+html.js-ready .stories-hero:not(.is-visible) .sh-ruler-line,
+html.js-ready .reveal-ruler:not(.is-visible),
+html.js-enabled .stories-hero:not(.is-visible) .sh-ruler-line,
+html.js-enabled .reveal-ruler:not(.is-visible) {
+  transform: scaleY(0);
+  transition: transform 500ms ease;
 }
 html.js-ready .stories-hero.is-visible .sh-ruler-line,
 html.js-ready [data-reveal="zone-selector"].is-visible .sh-ruler-line,
+html.js-ready .reveal-ruler.is-visible,
 html.js-enabled .stories-hero.is-visible .sh-ruler-line,
-html.js-enabled [data-reveal="zone-selector"].is-visible .sh-ruler-line {
+html.js-enabled [data-reveal="zone-selector"].is-visible .sh-ruler-line,
+html.js-enabled .reveal-ruler.is-visible {
   transform: scaleY(1);
 }
 
-/* Ruler ticks & marker */
+/* Tick kecil: muncul bertahap mengikuti garis skala */
 html.js-ready .sh-ruler-tick,
-html.js-ready .sh-ruler-marker,
-html.js-enabled .sh-ruler-tick,
-html.js-enabled .sh-ruler-marker {
+html.js-enabled .sh-ruler-tick {
   opacity: 0;
-  transition: opacity 600ms ease 600ms;
-}
-html.js-ready .stories-hero.is-visible .sh-ruler-tick,
-html.js-ready .stories-hero.is-visible .sh-ruler-marker,
-html.js-ready [data-reveal="zone-selector"].is-visible .sh-ruler-tick,
-html.js-ready [data-reveal="zone-selector"].is-visible .sh-ruler-marker,
-html.js-enabled .stories-hero.is-visible .sh-ruler-tick,
-html.js-enabled .stories-hero.is-visible .sh-ruler-marker,
-html.js-enabled [data-reveal="zone-selector"].is-visible .sh-ruler-tick,
-html.js-enabled [data-reveal="zone-selector"].is-visible .sh-ruler-marker {
-  opacity: 1;
-}
-
-/* 7. Kotak koordinat di atas peta (delay 600ms): fade in + sedikit slide dari atas (translateY -10px) */
-html.js-ready [data-reveal="coords"],
-html.js-enabled [data-reveal="coords"] {
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 600ms),
-              transform 700ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 600ms);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: opacity 350ms ease calc(200ms + var(--tick-i, 0) * 25ms),
+              transform 350ms ease calc(200ms + var(--tick-i, 0) * 25ms);
   will-change: opacity, transform;
 }
-html.js-ready .stories-hero.is-visible [data-reveal="coords"],
-html.js-ready [data-reveal="coords"].is-visible,
-html.js-enabled .stories-hero.is-visible [data-reveal="coords"],
-html.js-enabled [data-reveal="coords"].is-visible {
+html.js-ready .stories-hero:not(.is-visible) .sh-ruler-tick,
+html.js-enabled .stories-hero:not(.is-visible) .sh-ruler-tick {
+  opacity: 0;
+  transform: scaleX(0);
+  transition: opacity 400ms ease, transform 400ms ease;
+}
+html.js-ready .stories-hero.is-visible .sh-ruler-tick,
+html.js-ready [data-reveal="zone-selector"].is-visible .sh-ruler-tick,
+html.js-enabled .stories-hero.is-visible .sh-ruler-tick,
+html.js-enabled [data-reveal="zone-selector"].is-visible .sh-ruler-tick {
   opacity: 1;
-  transform: translateY(0);
+  transform: scaleX(1);
+}
+
+/* Penanda oranye (indikator wilayah aktif): muncul terakhir dengan scaleX 0 ke 1 (transform-origin right), lalu geser mulus ke wilayah aktif */
+html.js-ready .sh-ruler-marker,
+html.js-ready .reveal-marker,
+html.js-enabled .sh-ruler-marker,
+html.js-enabled .reveal-marker {
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: top 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 500ms cubic-bezier(0.22, 1, 0.36, 1) 750ms,
+              opacity 400ms ease 750ms;
+  will-change: transform, opacity, top;
+}
+html.js-ready .stories-hero:not(.is-visible) .sh-ruler-marker,
+html.js-ready .reveal-marker:not(.is-visible),
+html.js-enabled .stories-hero:not(.is-visible) .sh-ruler-marker,
+html.js-enabled .reveal-marker:not(.is-visible) {
+  opacity: 0;
+  transform: scaleX(0);
+  transition: opacity 400ms ease, transform 400ms ease;
+}
+html.js-ready .stories-hero.is-visible .sh-ruler-marker,
+html.js-ready [data-reveal="zone-selector"].is-visible .sh-ruler-marker,
+html.js-ready .reveal-marker.is-visible,
+html.js-enabled .stories-hero.is-visible .sh-ruler-marker,
+html.js-enabled [data-reveal="zone-selector"].is-visible .sh-ruler-marker,
+html.js-enabled .reveal-marker.is-visible {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+/* 7. Kotak koordinat di atas peta (delay 500ms): fade + translateY -12px ke 0 + scale 0.96 ke 1 */
+html.js-ready .sh-coords-block,
+html.js-ready [data-reveal="coords"],
+html.js-ready .reveal-coords,
+html.js-enabled .sh-coords-block,
+html.js-enabled [data-reveal="coords"],
+html.js-enabled .reveal-coords {
+  opacity: 0;
+  transform: translateY(-12px) scale(0.96);
+  font-variant-numeric: tabular-nums;
+  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1) 500ms,
+              transform 700ms cubic-bezier(0.22, 1, 0.36, 1) 500ms;
+  will-change: opacity, transform;
+}
+html.js-ready .stories-hero:not(.is-visible) .sh-coords-block,
+html.js-ready [data-reveal="coords"]:not(.is-visible),
+html.js-ready .reveal-coords:not(.is-visible),
+html.js-enabled .stories-hero:not(.is-visible) .sh-coords-block,
+html.js-enabled [data-reveal="coords"]:not(.is-visible),
+html.js-enabled .reveal-coords:not(.is-visible) {
+  opacity: 0;
+  transform: translateY(-12px) scale(0.96);
+  transition: opacity 500ms ease, transform 500ms ease;
+}
+html.js-ready .stories-hero.is-visible .sh-coords-block,
+html.js-ready [data-reveal="coords"].is-visible,
+html.js-ready .reveal-coords.is-visible,
+html.js-enabled .stories-hero.is-visible .sh-coords-block,
+html.js-enabled [data-reveal="coords"].is-visible,
+html.js-enabled .reveal-coords.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Baris koordinat utama: efek ticker/odometer per karakter (slide dari bawah) */
+.sh-coord-active {
+  font-variant-numeric: tabular-nums;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.sh-ticker-line {
+  display: inline-flex;
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+}
+
+.sh-ticker-char-wrap {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  height: 1.25em;
+  line-height: 1.25;
+}
+
+.sh-ticker-char {
+  display: inline-block;
+  animation: shTickerDigit 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--char-i, 0) * 25ms);
+  will-change: transform, opacity;
+}
+
+@keyframes shTickerDigit {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Baris koordinat kedua (redup): fade in delay 150ms setelah baris utama (500ms + 150ms = 650ms) */
+.sh-coord-secondary {
+  opacity: 0;
+  font-variant-numeric: tabular-nums;
+  transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1) 650ms;
+}
+html.js-ready .stories-hero.is-visible .sh-coord-secondary,
+html.js-enabled .stories-hero.is-visible .sh-coord-secondary {
+  opacity: 0.65;
+}
+html.js-ready .stories-hero:not(.is-visible) .sh-coord-secondary,
+html.js-enabled .stories-hero:not(.is-visible) .sh-coord-secondary {
+  opacity: 0;
+  transition: opacity 400ms ease;
 }
 
 /* ==========================================================================
@@ -1360,7 +1595,7 @@ html.js-enabled [data-reveal="coords"].is-visible {
 @media (max-width: 1023px) {
   .stories-hero {
     padding-top: calc(var(--navbar-height, 70px) + 1.25rem);
-    padding-bottom: 2rem;
+    padding-bottom: 0 !important;
     min-height: auto;
   }
 
@@ -1573,10 +1808,32 @@ html.js-enabled [data-reveal="coords"].is-visible {
     transform: none !important;
   }
 
+  html.js-ready .sh-map-viewport,
   html.js-ready [data-reveal="map"],
-  html.js-enabled [data-reveal="map"] {
-    transform: translateX(24px) scale(0.96);
+  html.js-ready .reveal-map,
+  html.js-enabled .sh-map-viewport,
+  html.js-enabled [data-reveal="map"],
+  html.js-enabled .reveal-map {
+    transform: translateX(20px) scale(0.96);
   }
+
+  html.js-ready .sh-zone-item-wrap,
+  html.js-ready .reveal-zone-item,
+  html.js-enabled .sh-zone-item-wrap,
+  html.js-enabled .reveal-zone-item {
+    transform: translateX(16px);
+  }
+
+  /* Di mobile: matikan efek ticker digit slider (cukup fade biasa) */
+  .sh-ticker-char {
+    animation: shTickerFade 250ms ease both !important;
+    transform: none !important;
+  }
+}
+
+@keyframes shTickerFade {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 /* Extreme mobile width: 360px without horizontal scroll */
@@ -1604,14 +1861,20 @@ html.js-enabled [data-reveal="coords"].is-visible {
     transform: none !important;
   }
 
+  html.js-ready .reveal,
+  html.js-enabled .reveal,
   html.js-ready [data-reveal],
   html.js-enabled [data-reveal],
   html.js-ready .sh-title-word,
   html.js-enabled .sh-title-word,
   html.js-ready .sh-btn-reveal-wrap,
   html.js-enabled .sh-btn-reveal-wrap,
+  html.js-ready .sh-map-viewport,
+  html.js-enabled .sh-map-viewport,
   html.js-ready .sh-coastline-path,
   html.js-enabled .sh-coastline-path,
+  html.js-ready .sh-photo-fill,
+  html.js-enabled .sh-photo-fill,
   html.js-ready .sh-dot-reveal-wrap,
   html.js-enabled .sh-dot-reveal-wrap,
   html.js-ready .sh-zone-item-wrap,
@@ -1623,11 +1886,21 @@ html.js-enabled [data-reveal="coords"].is-visible {
   html.js-ready .sh-ruler-tick,
   html.js-enabled .sh-ruler-tick,
   html.js-ready .sh-ruler-marker,
-  html.js-enabled .sh-ruler-marker {
+  html.js-enabled .sh-ruler-marker,
+  html.js-ready .sh-coords-block,
+  html.js-enabled .sh-coords-block,
+  html.js-ready .sh-coord-secondary,
+  html.js-enabled .sh-coord-secondary {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
     stroke-dashoffset: 0 !important;
+  }
+
+  .sh-ticker-char {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
   }
 
   .sh-map-svg {

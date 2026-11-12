@@ -5,6 +5,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
+        <!-- Progressive Enhancement: Deteksi JavaScript Sejak Awal di Head -->
+        <script>
+            document.documentElement.classList.add('js-enabled', 'js-ready');
+        </script>
+
         <!-- Primary Meta -->
         <title>GeoAlert — Deteksi Dini Bencana Alam Indonesia Real-time</title>
         <meta name="description" content="GeoAlert memantau bencana alam Indonesia secara real-time: gempa bumi, banjir, longsor, dan cuaca ekstrem. Data langsung dari BMKG & BNPB. Dapatkan peringatan dini dan panduan mitigasi instan.">
@@ -48,18 +53,21 @@
             if (!window.location.hash) {
                 window.scrollTo(0, 0);
             }
-            if ('serviceWorker' in navigator && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-                navigator.serviceWorker.getRegistrations().then(function(regs) {
-                    for (var i = 0; i < regs.length; i++) {
-                        regs[i].unregister();
-                    }
-                });
-                if ('caches' in window) {
-                    caches.keys().then(function(keys) {
-                        for (var j = 0; j < keys.length; j++) {
-                            caches.delete(keys[j]);
+            if ('serviceWorker' in navigator) {
+                var h = window.location.hostname;
+                if (h === 'localhost' || h === '127.0.0.1' || h.endsWith('.test') || h.endsWith('.local') || h === '') {
+                    navigator.serviceWorker.getRegistrations().then(function(regs) {
+                        for (var i = 0; i < regs.length; i++) {
+                            regs[i].unregister();
                         }
                     });
+                    if ('caches' in window) {
+                        caches.keys().then(function(keys) {
+                            for (var j = 0; j < keys.length; j++) {
+                                caches.delete(keys[j]);
+                            }
+                        });
+                    }
                 }
             }
         </script>

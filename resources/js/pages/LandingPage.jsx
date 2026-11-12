@@ -377,12 +377,12 @@ export default function LandingPage() {
               },
               {
                 value: '38',
-                label: '38 Provinsi Terpantau',
+                label: 'Provinsi Terpantau',
                 note: 'Seluruh wilayah Indonesia',
               },
               {
                 value: '5 Menit',
-                label: 'Interval Pembaruan Data',
+                label: 'Interval Pembaruan',
                 note: 'Sinkronisasi BMKG & NASA FIRMS',
               },
               {

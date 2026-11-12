@@ -27,6 +27,26 @@ const HERO_WORDS = [
   { text: 'Indonesia', isAccent: false, downOrder: 3, upOrder: 1 },
 ];
 
+/**
+ * Komponen ticker/odometer per karakter untuk angka koordinat:
+ * Setiap karakter berganti atau saat muncul, berputar/slide dari bawah (translateY 100% ke 0),
+ * dengan stagger 25ms antar karakter dan tabular-nums untuk mencegah layout shift.
+ */
+function CoordinateTicker({ text }) {
+  if (!text) return null;
+  return (
+    <span className="sh-ticker-line" aria-label={text}>
+      {text.split('').map((char, i) => (
+        <span key={`${i}-${char}`} className="sh-ticker-char-wrap" aria-hidden="true">
+          <span className="sh-ticker-char" style={{ '--char-i': i }}>
+            {char === ' ' ? '\u00A0' : char}
+          </span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
 console.info('[GeoAlert hero v2] loaded');
 
 export default function StoriesHero({ onCekBencana }) {
@@ -48,6 +68,7 @@ export default function StoriesHero({ onCekBencana }) {
   const mapViewportRef = useRef(null);
   const videoRef = useRef(null);
   const canvasMapRefs = useRef({});
+  const coastlineRefs = useRef({});
   const animFrameIdRef = useRef(null);
   const stillImageRef = useRef(null);
   const navigationTimerRef = useRef(null);
@@ -100,8 +121,9 @@ export default function StoriesHero({ onCekBencana }) {
 
   // 2b. IntersectionObserver & Scroll Direction Tracker (down / up)
   useEffect(() => {
-    // Putar otomatis saat pertama kali dimuat
-    setIsVisible(true);
+    // 5. Verifikasi Console: Log jumlah elemen .reveal
+    const revealElements = document.querySelectorAll('.reveal');
+    console.log('reveal init', revealElements.length);
 
     const isMobileInit = typeof window !== 'undefined' && window.innerWidth < 768;
     document.documentElement.setAttribute('data-scroll-dir', 'down');
@@ -109,20 +131,43 @@ export default function StoriesHero({ onCekBencana }) {
     document.documentElement.style.setProperty('--exit-to', isMobileInit ? '-15px' : '-30px');
     document.documentElement.style.setProperty('--word-enter-y', '100%');
 
-    // Observer dua arah: threshold 0.15, rootMargin "0px 0px -10% 0px"
+    // Satu IntersectionObserver (threshold 0.15)
     const heroEl = heroRef.current;
     let observer;
-    if (heroEl && typeof IntersectionObserver !== 'undefined') {
+    if (typeof IntersectionObserver !== 'undefined') {
       observer = new IntersectionObserver(
-        ([entry]) => {
-          setIsVisible(entry.isIntersecting);
+        (entries) => {
+          entries.forEach((entry) => {
+            // Baris JS yang menambah/menghapus class is-visible (Verifikasi #4)
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+            } else {
+              entry.target.classList.remove('is-visible');
+            }
+            if (entry.target === heroEl) {
+              setIsVisible(entry.isIntersecting);
+            }
+          });
         },
         {
           threshold: 0.15,
           rootMargin: '0px 0px -10% 0px',
         }
       );
-      observer.observe(heroEl);
+
+      if (heroEl) observer.observe(heroEl);
+      revealElements.forEach((el) => observer.observe(el));
+    }
+
+    // Putar otomatis saat pertama kali dimuat jika hero sudah terlihat
+    if (heroEl && typeof window !== 'undefined') {
+      const rect = heroEl.getBoundingClientRect();
+      const inView = rect.top < window.innerHeight && rect.bottom > 0;
+      if (inView) {
+        heroEl.classList.add('is-visible');
+        revealElements.forEach((el) => el.classList.add('is-visible'));
+        setIsVisible(true);
+      }
     }
 
     // Passive listener + requestAnimationFrame untuk mendeteksi arah scroll
@@ -182,6 +227,31 @@ export default function StoriesHero({ onCekBencana }) {
     const wordOrder = scrollDir === 'up' ? word.upOrder : word.downOrder;
     return baseTitleDelay + wordOrder * 60;
   };
+
+  // Stagger delay untuk item wilayah (delay 100ms, stagger 80ms per item):
+  // Saat scroll down: index 0 (Sumatera) -> index 4 (Papua & Maluku)
+  // Saat scroll up: dibalik (index 4 -> index 0)
+  const getZoneItemDelay = (idx) => {
+    const effectiveIdx = scrollDir === 'up' ? 4 - idx : idx;
+    return 100 + effectiveIdx * 80;
+  };
+
+  // Ukur panjang path SVG setiap pulau dengan getTotalLength() untuk animasi stroke-dashoffset
+  useEffect(() => {
+    STORIES.forEach((s) => {
+      const el = coastlineRefs.current[s.id];
+      if (el && typeof el.getTotalLength === 'function') {
+        try {
+          const len = Math.ceil(el.getTotalLength());
+          el.style.setProperty('--path-length', `${len}px`);
+          el.style.strokeDasharray = `${len}`;
+          el.style.strokeDashoffset = isVisible ? '0' : `${len}`;
+        } catch (_) {
+          // Fallback aman jika SVG belum terpasang penuh
+        }
+      }
+    });
+  }, [isVisible]);
 
   // 3. Fungsi menggambar cell video/gambar ke canvas
   const renderCellToCanvas = useCallback((canvas, cCol, cRow) => {
@@ -394,7 +464,7 @@ export default function StoriesHero({ onCekBencana }) {
           <div className="stories-hero-left">
             {/* 1. Badge "GEOALERT" + Tagline (order 0) */}
             <div
-              className={`stories-hero-eyebrow-row ${isVisible ? 'is-visible' : ''}`}
+              className={`stories-hero-eyebrow-row reveal reveal-eyebrow ${isVisible ? 'is-visible' : ''}`}
               data-reveal="hero-badge"
               data-order="0"
               style={{ '--delay': `${getElementDelay(0)}ms` }}
@@ -405,7 +475,7 @@ export default function StoriesHero({ onCekBencana }) {
 
             {/* 2. Judul "Siaga bencana di seluruh Indonesia" (order 1) */}
             <h1
-              className={`stories-hero-title ${isVisible ? 'is-visible' : ''}`}
+              className={`stories-hero-title reveal reveal-title ${isVisible ? 'is-visible' : ''}`}
               data-reveal="hero-title"
               data-order="1"
               style={{ '--delay': `${getElementDelay(1)}ms` }}
@@ -427,7 +497,7 @@ export default function StoriesHero({ onCekBencana }) {
 
             {/* 3. Paragraf deskripsi (order 2) */}
             <p
-              className={`stories-hero-desc ${isVisible ? 'is-visible' : ''}`}
+              className={`stories-hero-desc reveal reveal-desc ${isVisible ? 'is-visible' : ''}`}
               data-reveal="hero-desc"
               data-order="2"
               style={{ '--delay': `${getElementDelay(2)}ms` }}
@@ -438,7 +508,7 @@ export default function StoriesHero({ onCekBencana }) {
             {/* 4. Tombol Aksi (order 3 & order 4) */}
             <div className="stories-hero-actions">
               <div
-                className={`sh-btn-reveal-wrap ${isVisible ? 'is-visible' : ''}`}
+                className={`sh-btn-reveal-wrap reveal reveal-btn ${isVisible ? 'is-visible' : ''}`}
                 data-reveal="hero-btn-primary"
                 data-order="3"
                 style={{ '--delay': `${getElementDelay(3)}ms` }}
@@ -455,7 +525,7 @@ export default function StoriesHero({ onCekBencana }) {
               </div>
 
               <div
-                className={`sh-btn-reveal-wrap ${isVisible ? 'is-visible' : ''}`}
+                className={`sh-btn-reveal-wrap reveal reveal-btn ${isVisible ? 'is-visible' : ''}`}
                 data-reveal="hero-btn-secondary"
                 data-order="4"
                 style={{ '--delay': `${getElementDelay(4)}ms` }}
@@ -479,13 +549,23 @@ export default function StoriesHero({ onCekBencana }) {
             onPointerLeave={handlePointerLeave}
           >
             {/* Koordinat Pojok Kanan Atas Peta (Disembunyikan di Mobile < 768px) */}
-            <div className="sh-coords-block" aria-hidden="true">
-              <div className="sh-coord-active">{activeStory.coords}</div>
-              <div>0° 47' 00" S, 113° 55' 00" E</div>
+            <div
+              className={`sh-coords-block reveal reveal-coords ${isVisible ? 'is-visible' : ''}`}
+              data-reveal="coords"
+              aria-hidden="true"
+            >
+              <div className="sh-coord-active">
+                <CoordinateTicker text={activeStory.coords} />
+              </div>
+              <div className="sh-coord-secondary">0° 47' 00" S, 113° 55' 00" E</div>
             </div>
 
             {/* SVG Map Container (Enlarged 880x370 Framing, Papua utuh & Sumatera dekat teks) */}
-            <div ref={mapViewportRef} className="sh-map-viewport">
+            <div
+              ref={mapViewportRef}
+              className={`sh-map-viewport reveal reveal-map ${isVisible ? 'is-visible' : ''}`}
+              data-reveal="map"
+            >
               <svg
                 className="sh-map-svg"
                 viewBox="380 250 880 370"
@@ -526,7 +606,7 @@ export default function StoriesHero({ onCekBencana }) {
                 >
                   {/* Layer 1: Photo Fill Canvases inside Region ClipPaths */}
                   <g id="sh-photo-fills" pointerEvents="none">
-                    {STORIES.map((s) => {
+                    {STORIES.map((s, idx) => {
                       const isActive = s.id === activeStory.id;
                       const isTarget = zoomingRegion
                         ? zoomingRegion.slug === s.id || (s.id === 'papua' && zoomingRegion.slug === 'papua-maluku')
@@ -540,6 +620,9 @@ export default function StoriesHero({ onCekBencana }) {
                           height="810"
                           clipPath={`url(#sh-clip-${s.id})`}
                           className={`sh-photo-fill ${isActive ? 'is-active' : ''} ${isTarget ? 'is-target' : ''}`}
+                          style={{
+                            '--fill-delay': `${1200 + idx * 100}ms`,
+                          }}
                           pointerEvents="none"
                         >
                           <canvas
@@ -565,9 +648,15 @@ export default function StoriesHero({ onCekBencana }) {
                       return (
                         <path
                           key={`coastline-${s.id}`}
+                          ref={(el) => {
+                            coastlineRefs.current[s.id] = el;
+                          }}
                           className={`sh-coastline-path sh-region-${s.id} ${isActive ? 'is-active' : ''} ${isTarget ? 'is-target' : ''}`}
                           d={REGION_SVG_PATHS[s.id]}
                           pathLength="1"
+                          style={{
+                            '--coastline-delay': `${idx * 100}ms`,
+                          }}
                           role="button"
                           tabIndex={0}
                           aria-label={`Buka peta bencana wilayah ${s.name}`}
@@ -612,6 +701,9 @@ export default function StoriesHero({ onCekBencana }) {
                           key={`dot-${s.id}`}
                           className={`sh-dot-group ${isActive ? 'is-active' : ''} ${isTarget ? 'is-target' : ''}`}
                           transform={`translate(${s.dot.x}, ${s.dot.y})`}
+                          style={{
+                            '--dot-delay': `${1400 + idx * 120}ms`,
+                          }}
                           onClick={(e) => handleRegionClick(s.id, idx, e)}
                           onMouseEnter={() => setActiveZoneIndex(idx)}
                           role="button"
@@ -624,10 +716,12 @@ export default function StoriesHero({ onCekBencana }) {
                             }
                           }}
                         >
-                          {/* Minimum 48px hit target area */}
-                          <circle cx="0" cy="0" r="24" fill="transparent" pointerEvents="all" />
-                          <circle cx="0" cy="0" r="14" className="sh-dot-pulse" />
-                          <circle cx="0" cy="0" r="5" className="sh-dot-core" />
+                          <g className="sh-dot-reveal-wrap">
+                            {/* Minimum 48px hit target area */}
+                            <circle cx="0" cy="0" r="24" fill="transparent" pointerEvents="all" />
+                            <circle cx="0" cy="0" r="14" className="sh-dot-pulse" />
+                            <circle cx="0" cy="0" r="5" className="sh-dot-core" />
+                          </g>
                         </g>
                       );
                     })}
@@ -673,27 +767,35 @@ export default function StoriesHero({ onCekBencana }) {
           </div>
 
           {/* ================= 3. KOLOM KANAN (DAFTAR PILIH WILAYAH & RULER) ================= */}
-          <div className="stories-hero-right">
+          <div className={`stories-hero-right reveal ${isVisible ? 'is-visible' : ''}`} data-reveal="zone-selector">
             <div className="sh-zone-selector" role="tablist" aria-label="Pilih Wilayah Indonesia">
               <div className="sh-zone-list-wrap">
-                <div className="sh-zone-title" id="sh-zone-label">PILIH WILAYAH</div>
+                <div className={`sh-zone-title reveal reveal-zone-title ${isVisible ? 'is-visible' : ''}`} id="sh-zone-label" data-reveal="zone-label">PILIH WILAYAH</div>
                 <div className="sh-zone-list" aria-labelledby="sh-zone-label">
                   {STORIES.map((s, idx) => {
                     const isActive = idx === activeZoneIndex;
                     return (
-                      <button
+                      <div
                         key={s.id}
-                        type="button"
-                        role="tab"
-                        aria-selected={isActive}
-                        aria-label={`Buka peta bencana wilayah ${s.name}`}
-                        className={`sh-zone-item ${isActive ? 'is-active' : ''}`}
-                        onClick={() => triggerRegionZoom(s.id)}
-                        onMouseEnter={() => setActiveZoneIndex(idx)}
-                        onFocus={() => setActiveZoneIndex(idx)}
+                        className={`sh-zone-item-wrap reveal reveal-zone-item ${isVisible ? 'is-visible' : ''}`}
+                        style={{
+                          '--i': idx,
+                          '--item-delay': `${getZoneItemDelay(idx)}ms`,
+                        }}
                       >
-                        {s.name}
-                      </button>
+                        <button
+                          type="button"
+                          role="tab"
+                          aria-selected={isActive}
+                          aria-label={`Buka peta bencana wilayah ${s.name}`}
+                          className={`sh-zone-item ${isActive ? 'is-active' : ''}`}
+                          onClick={() => triggerRegionZoom(s.id)}
+                          onMouseEnter={() => setActiveZoneIndex(idx)}
+                          onFocus={() => setActiveZoneIndex(idx)}
+                        >
+                          {s.name}
+                        </button>
+                      </div>
                     );
                   })}
                 </div>
@@ -701,16 +803,19 @@ export default function StoriesHero({ onCekBencana }) {
 
               {/* 220px Vertical Ruler Track (Desktop only) */}
               <div className="sh-ruler-track" aria-hidden="true">
-                <div className="sh-ruler-line" />
+                <div className={`sh-ruler-line reveal reveal-ruler ${isVisible ? 'is-visible' : ''}`} />
                 {Array.from({ length: 29 }).map((_, i) => (
                   <div
                     key={`tick-${i}`}
                     className={`sh-ruler-tick ${i % 7 === 0 ? 'major' : 'minor'}`}
-                    style={{ top: `${(i / 28) * 100}%` }}
+                    style={{
+                      top: `${(i / 28) * 100}%`,
+                      '--tick-i': i,
+                    }}
                   />
                 ))}
                 <div
-                  className="sh-ruler-marker"
+                  className={`sh-ruler-marker reveal reveal-marker ${isVisible ? 'is-visible' : ''}`}
                   style={{ top: `${RULER_TOP_POSITIONS[activeZoneIndex] || 10}px` }}
                 />
               </div>
