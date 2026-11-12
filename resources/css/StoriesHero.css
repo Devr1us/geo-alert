@@ -46,21 +46,22 @@
 
 /* Container */
 .stories-hero-container {
-  max-width: 1280px;
+  max-width: 1360px;
   width: 100%;
   margin-inline: auto;
-  padding-inline: clamp(24px, 5vw, 64px);
+  padding-inline: clamp(20px, 4vw, 56px);
   position: relative;
   z-index: 2;
   box-sizing: border-box;
 }
 
-/* Grid Layout (Desktop >= 1024px: 2 columns, left content & right map+selector) */
+/* Grid Layout (Desktop >= 1024px: 2 columns, left content & right map+selector)
+   Layout referensi: kolom kiri teks ~36%, kolom kanan peta+selector ~64% */
 .stories-hero-grid {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
+  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.6fr);
   align-items: center;
-  column-gap: clamp(32px, 4vw, 64px);
+  column-gap: clamp(16px, 2.5vw, 40px);
   min-height: auto;
   width: 100%;
   box-sizing: border-box;
@@ -75,6 +76,8 @@
   justify-content: center;
   z-index: 5;
   will-change: transform;
+  /* Batasi lebar teks agar tidak terlalu lebar & peta tetap dominan */
+  max-width: 420px;
 }
 
 .sh-btn-reveal-wrap {
@@ -127,7 +130,7 @@
 
 .stories-hero-title {
   font-family: var(--sh-font-sans);
-  font-size: clamp(2.3rem, 4vw, 3.5rem);
+  font-size: clamp(2.1rem, 3.2vw, 3.5rem);
   font-weight: 700;
   line-height: 1.12;
   letter-spacing: -0.025em;
@@ -144,7 +147,7 @@
   font-size: 1.02rem;
   line-height: 1.6;
   color: var(--sh-ink-subtle);
-  max-width: 52ch; /* Disetel ~52 karakter per baris agar rapi dan tidak terlalu lebar */
+  max-width: 44ch; /* Sedikit lebih pendek agar teks rapi */
   margin: 0 0 1.75rem 0;
 }
 
@@ -207,14 +210,17 @@
 
 /* ==========================================================================
    RIGHT COLUMN: PETA INDONESIA (KIRI) + PILIH WILAYAH (KANAN) DALAM 1 WRAPPER
+   Layout mengikuti referensi: peta besar di tengah, zone selector menempel di kanan
    ========================================================================== */
 .stories-hero-right-col {
   display: grid;
   grid-template-columns: 1fr auto;
-  column-gap: clamp(24px, 2.5vw, 32px);
+  column-gap: clamp(16px, 2vw, 24px);
   align-items: center;
   position: relative;
   width: 100%;
+  /* Izinkan peta sedikit extend ke kiri agar terasa lebih luas */
+  margin-left: -8px;
 }
 
 .stories-hero-center {
@@ -262,13 +268,12 @@
   color: var(--sh-ink);
 }
 
-/* Map Viewport Wrapper */
+/* Map Viewport Wrapper — Full size, no max-height cap */
 .sh-map-viewport {
   position: relative;
   width: 100%;
   aspect-ratio: 880 / 370;
-  min-height: 220px;
-  max-height: 340px;
+  min-height: 260px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1632,15 +1637,15 @@ html.js-enabled .stories-hero:not(.is-visible) .sh-coord-secondary {
    RESPONSIVE MEDIA QUERIES
    ========================================================================== */
 
-/* 1024px - 1279px: Kolom teks ~40%, peta + daftar mengisi sisa */
+/* 1024px - 1279px: Kolom teks ~37%, peta + daftar mengisi sisa */
 @media (min-width: 1024px) and (max-width: 1279px) {
   .stories-hero-container {
     padding-inline: clamp(24px, 4vw, 40px);
   }
 
   .stories-hero-grid {
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
-    column-gap: 28px;
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.5fr);
+    column-gap: 20px;
   }
 
   .sh-zone-selector {
@@ -1651,6 +1656,26 @@ html.js-enabled .stories-hero:not(.is-visible) .sh-coord-secondary {
   .sh-zone-item {
     font-size: 0.95rem;
     line-height: 2.0;
+  }
+}
+
+/* Layar lebar ≥ 1280px: tingkatkan ukuran font judul & peta semakin besar */
+@media (min-width: 1280px) {
+  .stories-hero-grid {
+    grid-template-columns: minmax(0, 0.65fr) minmax(0, 1.7fr);
+    column-gap: clamp(20px, 2.5vw, 48px);
+  }
+
+  .stories-hero-left {
+    max-width: 400px;
+  }
+
+  .stories-hero-title {
+    font-size: clamp(2.5rem, 3.2vw, 3.75rem);
+  }
+
+  .sh-map-viewport {
+    min-height: 300px;
   }
 }
 

@@ -62,6 +62,49 @@
   outline-offset: 3px;
 }
 
+/* ============================================================
+   btn-cta-contrast — Tombol CTA utama untuk section cream/paper
+   Matching dengan tema GeoAlert: terracotta (#C35933) on paper (#F6F3EA)
+   Dipakai di section "Jangan Tunggu Sampai Terlambat"
+   ============================================================ */
+.btn-cta-contrast {
+  background-color: #C35933;
+  color: #FFFFFF;
+  border-color: #C35933;
+  box-shadow: 0 6px 24px rgba(195, 89, 51, 0.32), 0 2px 8px rgba(28, 26, 23, 0.1);
+  font-family: 'Source Sans 3', 'Inter', -apple-system, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.2s ease;
+}
+
+.btn-cta-contrast:hover:not(:disabled) {
+  background-color: #A84522;
+  border-color: #A84522;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(195, 89, 51, 0.42), 0 4px 12px rgba(28, 26, 23, 0.12);
+}
+
+.btn-cta-contrast:active:not(:disabled) {
+  background-color: #923B1E;
+  border-color: #923B1E;
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(195, 89, 51, 0.25);
+}
+
+.btn-cta-contrast:focus-visible {
+  outline: 3px solid rgba(195, 89, 51, 0.5);
+  outline-offset: 4px;
+}
+
+.btn-cta-contrast:disabled {
+  cursor: wait;
+  opacity: 0.75;
+}
+
 /* Card */
 .card {
   background-color: var(--color-white);

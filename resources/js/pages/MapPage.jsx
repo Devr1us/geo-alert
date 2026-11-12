@@ -310,7 +310,25 @@ function MapViewController({ activeRegion, center, zoom }) {
         map.flyToBounds(INDONESIA_BOUNDS, { padding: [10, 10], duration: 1.0 });
       }
     } else if (!activeRegion && center) {
-      map.setView(center, zoom || 5);
+      // Normalkan center — bisa array [lat, lng] atau object {lat, lng}
+      const lat = Array.isArray(center) ? center[0] : center.lat;
+      const lng = Array.isArray(center) ? center[1] : center.lng;
+      // Jika zoom 13+ (dari flyToUser/Pantau Wilayah), pakai flyTo dengan animasi mulus
+      if (zoom >= 13) {
+        const t = setTimeout(() => {
+          try {
+            map.invalidateSize();
+            if (prefersReducedMotion) {
+              map.setView([lat, lng], zoom);
+            } else {
+              map.flyTo([lat, lng], zoom, { duration: 1.8 });
+            }
+          } catch (_) {}
+        }, 100);
+        return () => clearTimeout(t);
+      } else {
+        map.setView([lat, lng], zoom || 5);
+      }
     }
   }, [activeRegion, center, zoom, map]);
 
@@ -407,11 +425,13 @@ export default function MapPage() {
     navigate('/peta', { replace: true });
   };
 
-  // Auto-pan map jika diarahkan dari tombol "Cek Bencana Terdekat" / CTA di LandingPage (hanya jika tanpa ?wilayah=)
+  // Auto-pan map jika diarahkan dari tombol "Pantau Wilayah Saya Sekarang" / CTA di LandingPage (hanya jika tanpa ?wilayah=)
   useEffect(() => {
     if (location.state?.userCoords && !activeRegion) {
       setMapCenter(location.state.userCoords);
-      setMapZoom(10);
+      // flyToUser: zoom sangat dekat ke lokasi user (zoom 15)
+      // tanpa flyToUser: zoom sedang (zoom 10, perilaku lama)
+      setMapZoom(location.state?.flyToUser ? 15 : 10);
     }
   }, [location.state, activeRegion]);
 

@@ -342,6 +342,38 @@ export default function LandingPage() {
     navigate('/peta');
   };
 
+  // Tombol "Pantau Wilayah Saya Sekarang" — minta geolocation lalu zoom dekat ke lokasi user
+  const [pantauLoading, setPantauLoading] = useState(false);
+
+  const handlePantauWilayah = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!('geolocation' in navigator)) {
+      navigate('/peta');
+      return;
+    }
+    setPantauLoading(true);
+    try {
+      const pos = await new Promise((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 8000,
+          maximumAge: 60000,
+        })
+      );
+      navigate('/peta', {
+        state: {
+          userCoords: { lat: pos.coords.latitude, lng: pos.coords.longitude },
+          flyToUser: true,
+        },
+      });
+    } catch {
+      // Jika user menolak atau gagal, tetap buka peta normal
+      navigate('/peta');
+    } finally {
+      setPantauLoading(false);
+    }
+  };
+
   // ============================================================
   // Poin 2: Handle klik "Aktifkan Notifikasi"
   // Selalu sync state dengan Notification.permission asli dari browser
@@ -961,24 +993,6 @@ export default function LandingPage() {
               )}
             </div>
           ))}
-        </div>
-      </RevealSection>
-
-      {/* =================== FINAL CTA =================== */}
-      <RevealSection className="section section-lg text-center cta-navy-section">
-        <div className="container" style={{ position: 'relative', zIndex: 2 }}>
-          <h2 className="section-title" style={{ marginBottom: '1.5rem', fontSize: 'clamp(2.2rem, 4vw, 3rem)' }}>Jangan Tunggu Sampai Terlambat</h2>
-          <p className="section-subtitle">
-            Pantau kondisi lingkungan Anda dan jadilah selangkah lebih maju dalam menghadapi potensi bencana. Keselamatan Anda adalah prioritas utama.
-          </p>
-          <button
-            type="button"
-            onClick={handleCekBencana}
-            className="btn btn-cta-contrast"
-            style={{ padding: '1.25rem 3rem', fontSize: '1.25rem', borderRadius: 'var(--radius-full)', cursor: 'pointer' }}
-          >
-            Pantau Wilayah Saya Sekarang
-          </button>
         </div>
       </RevealSection>
 
