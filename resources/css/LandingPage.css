@@ -529,23 +529,40 @@
 }
 
 /* ============================================================
-   STATS SECTION — DARK NAVY THEME (Sesuai Desain Foto 1)
+   STATS SECTION — MATCHING HERO SECTION PAPER THEME (#F6F3EA)
    ============================================================ */
 
 .stats-section {
-  background: var(--stats-bg, #F3EEE3);
+  background-color: var(--stats-bg, #F6F3EA);
+  background: var(--stats-bg, #F6F3EA);
   color: var(--stats-text, #0E2A5C);
-  padding: 4.5rem 0 3.5rem;
+  padding: 5.5rem 0 1.25rem;
   position: relative;
   overflow: hidden;
-  border-top: 1px solid rgba(15, 23, 42, 0.06);
-  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  border-top: none;
+  border-bottom: 1px solid rgba(28, 26, 23, 0.08);
+}
+
+/* Subtle dot texture matching the hero section above it */
+.stats-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(28, 26, 23, 0.055) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.stats-section > .container {
+  position: relative;
+  z-index: 1;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
+  gap: 1.25rem;
   max-width: 1080px;
   margin: 0 auto;
 }
@@ -553,8 +570,8 @@
 .stat-item {
   background: var(--stats-card-bg, #FFFFFF);
   border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 18px;
-  padding: 2.25rem 1.25rem;
+  border-radius: 16px;
+  padding: 1.15rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -562,7 +579,7 @@
   text-align: center;
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
-  min-height: 180px;
+  min-height: 124px;
   box-sizing: border-box;
 }
 
@@ -574,45 +591,45 @@
 
 .stat-number {
   font-family: var(--font-heading), 'Merriweather', serif;
-  font-size: clamp(2.4rem, 3.5vw, 3.1rem);
+  font-size: clamp(1.9rem, 2.6vw, 2.4rem);
   font-weight: 900;
   color: var(--stats-text, #0E2A5C);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   line-height: 1;
   letter-spacing: -0.02em;
 }
 
 .stat-label {
   font-family: var(--font-body), 'Inter', sans-serif;
-  font-size: 0.95rem;
+  font-size: 0.86rem;
   font-weight: 700;
   color: #334155;
-  line-height: 1.35;
-  margin-bottom: 4px;
+  line-height: 1.3;
+  margin-bottom: 2px;
   max-width: 160px;
   text-align: center;
 }
 
 .stat-note {
   font-family: var(--font-body), 'Inter', sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   color: var(--stats-muted, #64748B);
-  line-height: 1.3;
+  line-height: 1.25;
   text-align: center;
 }
 
 /* Trust Bar di dalam Stats Section (Cream Theme) */
 .trust-bar-inline {
   text-align: center;
-  margin-top: 3.5rem;
-  padding-top: 2.25rem;
+  margin-top: 1.85rem;
+  padding-top: 1.25rem;
   border-top: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .trust-groups-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
   max-width: 980px;
   margin: 0 auto;
 }
@@ -621,12 +638,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.45rem;
 }
 
 .trust-bar-label {
   font-family: var(--font-body), 'Inter', sans-serif;
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   color: #475569;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -638,7 +655,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
 }
 
@@ -646,7 +663,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 16px;
+  padding: 6px 15px;
   border-radius: 9999px;
   background: #FFFFFF;
   border: 1px solid rgba(15, 23, 42, 0.08);
@@ -696,7 +713,7 @@
 
 @media (max-width: 640px) {
   .stats-section {
-    padding: 2.75rem 0;
+    padding: 1.5rem 0 2.5rem;
   }
 
   .stats-grid {
@@ -1739,7 +1756,8 @@
   position: relative;
   background: var(--bg-cream);
   color: #1e293b;
-  padding: 5.5rem 0 6rem;
+  padding: 5.5rem 0 6.5rem;
+  margin-bottom: 2.5rem;
   overflow: hidden;
   border-bottom: 1px solid rgba(14, 42, 92, 0.06);
 }
@@ -1776,21 +1794,34 @@
 
 .how-to-use-white-section {
   position: relative;
-  background: var(--bg-cream-soft);
+  background-color: var(--bg-cream, #F6F3EA);
+  background: var(--bg-cream, #F6F3EA);
   color: #1e293b;
   padding: 5.5rem 0 6rem;
-  border-top: 1px solid rgba(14, 42, 92, 0.08);
-  border-bottom: 1px solid rgba(14, 42, 92, 0.08);
+  border-top: none;
+  border-bottom: 1px solid rgba(28, 26, 23, 0.08);
   overflow: hidden;
+}
+
+/* Subtle dot texture matching the rest of the paper cream theme */
+.how-to-use-white-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(28, 26, 23, 0.055) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .how-to-use-dark-section {
   position: relative;
-  background: var(--bg-cream-soft);
+  background-color: var(--bg-cream, #F6F3EA);
+  background: var(--bg-cream, #F6F3EA);
   color: #1e293b;
   padding: 5.5rem 0 6rem;
-  border-top: 1px solid rgba(14, 42, 92, 0.08);
-  border-bottom: 1px solid rgba(14, 42, 92, 0.08);
+  border-top: none;
+  border-bottom: 1px solid rgba(28, 26, 23, 0.08);
   overflow: hidden;
 }
 
@@ -2025,35 +2056,134 @@
   left: 48%;
 }
 
+:root {
+  --card-gap: 24px;
+}
+
+/* ============================================================
+   TENTANG KAMI - UNIFIED SINGLE GRID ARCHITECTURE
+   Semua 6 kartu menjadi anak langsung dari SATU container grid,
+   sehingga lebar, tepi kiri/kanan, dan gap 24px (horizontal & vertikal)
+   terkunci matematis dan simetris sempurna.
+   ============================================================ */
+
+.about-unified-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--card-gap, 24px);
+  align-items: stretch;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Kartu Baris Atas: span 2 kolom */
+.about-card-col-span-2 {
+  grid-column: span 2;
+}
+
+/* Kartu Baris Bawah: span 1 kolom */
+.about-card-col-span-1 {
+  grid-column: span 1;
+}
+
+/* Reset margin pada kartu agar 100% jarak dikendalikan oleh grid gap */
+.about-unified-grid > * {
+  margin: 0 !important;
+}
+
+/* ============================================================
+   TENTANG KAMI - SHUFFLE CARD ANIMATION & CARD LAYOUT
+   ============================================================ */
+
+/* Wrapper slot for the shuffle-from-left scroll animation */
+.shuffle-card-slot {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  margin: 0 !important;
+}
+
+/* Progressive enhancement: hide cards initially only when JS is active */
+html.js-ready .shuffle-card-slot.reveal-on-scroll,
+html.js-ready[data-scroll-dir="down"] .shuffle-card-slot.reveal-on-scroll,
+html.js-ready[data-scroll-dir="up"] .shuffle-card-slot.reveal-on-scroll {
+  opacity: 0 !important;
+  transform: translateX(-120px) rotate(var(--shuffle-rot, -6deg)) scale(0.92) !important;
+  transition:
+    transform 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 400ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+  transition-delay: 0ms !important;
+  will-change: transform, opacity;
+}
+
+/* When visible in viewport, shuffle into place with stagger delay */
+html.js-ready .shuffle-card-slot.reveal-on-scroll.is-visible,
+html.js-ready[data-scroll-dir="down"] .shuffle-card-slot.reveal-on-scroll.is-visible,
+html.js-ready[data-scroll-dir="up"] .shuffle-card-slot.reveal-on-scroll.is-visible {
+  opacity: 1 !important;
+  transform: translateX(0) rotate(0deg) scale(1) !important;
+  transition:
+    transform 750ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 750ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+  transition-delay: var(--shuffle-delay, 0ms) !important;
+}
+
+/* Unique rotation and stagger delay per card slot */
+.shuffle-card-1 { --shuffle-rot: -7deg; --shuffle-delay: 0ms; }
+.shuffle-card-2 { --shuffle-rot: -4deg; --shuffle-delay: 100ms; }
+.shuffle-card-3 { --shuffle-rot: -8deg; --shuffle-delay: 200ms; }
+.shuffle-card-4 { --shuffle-rot: -5deg; --shuffle-delay: 300ms; }
+.shuffle-card-5 { --shuffle-rot: -7deg; --shuffle-delay: 400ms; }
+.shuffle-card-6 { --shuffle-rot: -4deg; --shuffle-delay: 500ms; }
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  html.js-ready .shuffle-card-slot.reveal-on-scroll,
+  html.js-ready[data-scroll-dir="down"] .shuffle-card-slot.reveal-on-scroll,
+  html.js-ready[data-scroll-dir="up"] .shuffle-card-slot.reveal-on-scroll,
+  html.js-ready .shuffle-card-slot.reveal-on-scroll.is-visible,
+  html.js-ready[data-scroll-dir="down"] .shuffle-card-slot.reveal-on-scroll.is-visible,
+  html.js-ready[data-scroll-dir="up"] .shuffle-card-slot.reveal-on-scroll.is-visible {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Top Row: Left Quote Card */
 .about-quote-card {
   background: #ffffff;
   border-radius: 24px;
-  padding: 3rem 2.75rem;
+  padding: 2.5rem 2.25rem;
   box-shadow: 0 16px 40px rgba(14, 42, 92, 0.08);
   display: flex;
   flex-direction: column;
   justify-content: center;
   border: 1px solid rgba(220, 210, 190, 0.8);
-  min-height: 280px;
+  height: 100%;
+  width: 100%;
   position: relative;
   overflow: hidden;
+  margin: 0 !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .about-quote-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   box-shadow: 0 22px 50px rgba(14, 42, 92, 0.12);
 }
 
 .about-quote-mark {
   position: absolute;
-  top: -0.6rem;
-  left: 1.5rem;
+  top: 1rem;
+  left: 2rem;
   font-family: var(--font-heading), 'Merriweather', Georgia, serif;
-  font-size: 8rem;
-  line-height: 1;
+  font-size: 5.5rem;
+  line-height: 0.8;
   color: var(--color-alert, #C0492B);
-  opacity: 0.2;
+  opacity: 0.16;
   pointer-events: none;
   user-select: none;
   z-index: 0;
@@ -2065,14 +2195,14 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  height: 100%;
+  width: 100%;
 }
 
 .about-quote-text {
   font-family: var(--font-heading), 'Merriweather', serif;
-  font-size: clamp(1.75rem, 2.6vw, 2.35rem);
+  font-size: clamp(1.75rem, 2.5vw, 2.25rem);
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.3;
   margin: 0;
   padding: 0;
   border: none;
@@ -2090,122 +2220,62 @@
   display: block;
 }
 
-.about-quote-footer {
-  margin-top: 1.75rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.about-quote-divider {
-  width: 44px;
-  height: 3px;
-  background-color: var(--color-alert, #C0492B);
-  border-radius: 2px;
-}
-
-.about-quote-tag {
-  font-family: var(--font-mono), 'Fira Code', monospace;
-  font-size: 0.76rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #555555;
-}
-
+/* Top Row: Right Info Card ("Apa itu GeoAlert?") */
 .about-info-card {
   background: #ffffff;
   border-radius: 24px;
-  padding: 3rem 2.75rem;
+  padding: 2.5rem 2.25rem;
   box-shadow: 0 16px 40px rgba(14, 42, 92, 0.08);
   display: flex;
   flex-direction: column;
   justify-content: center;
   border: 1px solid rgba(220, 210, 190, 0.8);
-  min-height: 280px;
+  height: 100%;
+  width: 100%;
+  margin: 0 !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .about-info-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   box-shadow: 0 22px 50px rgba(14, 42, 92, 0.12);
-}
-
-/* Scroll Down & Scroll Up Bi-Directional Animations for Tentang Kami Cards */
-.about-quote-card.reveal-on-scroll {
-  opacity: 0;
-  transform: translateX(-70px) scale(0.94);
-  transition:
-    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
-}
-
-.about-quote-card.reveal-on-scroll.is-visible {
-  opacity: 1;
-  transform: translateX(0) scale(1);
-}
-
-.about-info-card.reveal-on-scroll {
-  opacity: 0;
-  transform: translateX(70px) scale(0.94);
-  transition:
-    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
-}
-
-.about-info-card.reveal-on-scroll.is-visible {
-  opacity: 1;
-  transform: translateX(0) scale(1);
 }
 
 .info-card-title {
   font-family: var(--font-heading), 'Merriweather', serif;
-  font-size: clamp(2rem, 3.2vw, 2.5rem);
+  font-size: clamp(1.9rem, 3vw, 2.35rem);
   font-weight: 700;
   color: #0b1a32 !important;
-  margin-bottom: 1.25rem;
-  line-height: 1.2;
+  margin-bottom: 1rem;
+  line-height: 1.25;
 }
 
 .info-card-desc {
   font-family: var(--font-body), 'Inter', sans-serif;
   color: #475569;
   font-size: 1.025rem;
-  line-height: 1.65;
+  line-height: 1.7;
+  margin: 0;
 }
 
+/* Bottom Row: 4 Feature Mini Cards */
 .about-mini-card {
   background: #ffffff;
   border-radius: 20px;
-  padding: 1.85rem 1.6rem 1.6rem;
+  padding: 1.85rem 1.5rem 1.6rem;
   box-shadow: 0 12px 32px rgba(14, 42, 92, 0.06);
   border: 1px solid rgba(220, 210, 190, 0.9);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  height: 100%;
+  width: 100%;
+  margin: 0 !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Dynamic Scroll-Down Animation for the 4 Feature Cards */
-.about-mini-card.reveal-on-scroll {
-  opacity: 0;
-  transform: translateY(50px) scale(0.92);
-  transition:
-    opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
-}
-
-.about-mini-card.reveal-on-scroll.is-visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-.about-mini-card.reveal-on-scroll.is-visible:hover {
-  transform: translateY(-8px) scale(1.025);
+.about-mini-card:hover {
+  transform: translateY(-6px);
   box-shadow: 0 22px 48px rgba(14, 42, 92, 0.14);
 }
 
@@ -2238,8 +2308,7 @@
   color: #64748b;
   font-size: 0.875rem;
   line-height: 1.6;
-  flex: 1;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .mini-card-link {
@@ -2251,6 +2320,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  margin-top: auto;
+  padding-top: 0.5rem;
   transition: gap 0.2s ease, color 0.2s ease;
 }
 
@@ -2262,14 +2333,54 @@
 /* ============================================================
    Responsive Adjustments for Landing Page (Tablet & Mobile)
    ============================================================ */
+@media (max-width: 1024px) {
+  .about-unified-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--card-gap, 24px);
+  }
+
+  .about-card-col-span-2 {
+    grid-column: span 2;
+  }
+
+  .about-card-col-span-1 {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --card-gap: 18px;
+  }
+
+  .about-unified-grid {
+    grid-template-columns: 1fr;
+    gap: var(--card-gap, 18px);
+  }
+
+  .about-card-col-span-2,
+  .about-card-col-span-1 {
+    grid-column: span 1;
+  }
+}
+
+/* ============================================================
+   Responsive Adjustments for Landing Page (Tablet & Mobile)
+   ============================================================ */
 @media (max-width: 992px) {
   .about-quote-card,
   .about-info-card {
-    padding: 2.25rem 2rem;
+    padding: 2rem 1.75rem;
+  }
+
+  .about-quote-mark {
+    font-size: 4.5rem;
+    top: 0.75rem;
+    left: 1.5rem;
   }
 
   .about-quote-text {
-    font-size: clamp(1.85rem, 3.6vw, 2.5rem);
+    font-size: clamp(1.6rem, 3.2vw, 2.1rem);
   }
 
   .siaga-card-body {
@@ -2300,13 +2411,13 @@
   }
 
   .about-quote-mark {
-    font-size: 6rem;
-    top: -0.4rem;
-    left: 1rem;
+    font-size: 4rem;
+    top: 0.6rem;
+    left: 1.25rem;
   }
 
   .about-quote-text {
-    font-size: clamp(1.6rem, 5.5vw, 2.2rem);
+    font-size: clamp(1.4rem, 5vw, 1.85rem);
   }
 
   .info-card-title {
@@ -2324,6 +2435,17 @@
 }
 
 @media (max-width: 480px) {
+  .about-quote-card,
+  .about-info-card {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .about-quote-mark {
+    font-size: 3.25rem;
+    top: 0.5rem;
+    left: 1rem;
+  }
+
   .about-mini-card {
     padding: 1.5rem 1.25rem;
   }

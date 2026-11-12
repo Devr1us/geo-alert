@@ -8,16 +8,27 @@ import { ROUTER_BASENAME } from './config/baseUrl';
 
 // Progressive enhancement flag: sembunyikan elemen animasi HANYA jika JavaScript siap
 if (typeof document !== 'undefined') {
-  document.documentElement.classList.add('js-ready');
+  document.documentElement.classList.add('js-ready', 'js-enabled');
   if (!document.documentElement.hasAttribute('data-scroll-dir')) {
     document.documentElement.setAttribute('data-scroll-dir', 'down');
   }
 }
 
 // Nonaktifkan scroll restoration otomatis browser SEBELUM React mount,
-// supaya Firefox/Chrome tidak sempat me-restore posisi scroll dari sesi
-// sebelumnya bahkan selama jeda singkat sebelum hydration selesai.
-window.history.scrollRestoration = 'manual';
+// dan pastikan setiap refresh web selalu kembali ke Beranda paling atas (scrollY = 0).
+if (typeof window !== 'undefined') {
+  if ('scrollRestoration' in window.history) {
+    window.history.scrollRestoration = 'manual';
+  }
+
+  // Jika URL membawa hash (misalnya #kontak) saat direfresh, segera bersihkan dan reset ke atas
+  if (window.location.hash) {
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
+  window.scrollTo(0, 0);
+  if (document.documentElement) document.documentElement.scrollTop = 0;
+  if (document.body) document.body.scrollTop = 0;
+}
 
 // Hapus Service Worker lama di lingkungan pengujian lokal (127.0.0.1 / localhost)
 // untuk mencegah masalah white screen akibat cache Service Worker yang kadaluarsa saat rebuild asset.

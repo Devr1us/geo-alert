@@ -330,7 +330,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
     setErrorMessage(null);
     try {
       sessionStorage.removeItem('geoalert_chat_history');
-    } catch {}
+    } catch { }
   };
 
   // Salin jawaban AI ke clipboard
@@ -357,70 +357,55 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
         flexDirection: 'column',
         height: '100%',
         width: '100%',
-        background: 'var(--chat-bg, #FFFFFF)',
-        color: 'var(--chat-text, #0F1E3D)',
+        background: '#FFFFFF',
+        color: '#0F1E3D',
         fontFamily: "'Inter', sans-serif",
         position: 'relative',
         overflow: 'hidden',
         borderRadius: '24px',
-        border: '1px solid var(--chat-border, rgba(15, 23, 42, 0.08))',
+        border: '1px solid rgba(15, 23, 42, 0.08)',
         boxShadow: '0 10px 40px rgba(15, 23, 42, 0.08)'
       }}
     >
       {/* ================= HEADER BAR ================= */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '14px 20px',
-        borderBottom: '1px solid var(--chat-border, rgba(15, 23, 42, 0.08))',
-        background: '#FFFFFF',
-        zIndex: 10,
-        flexShrink: 0
-      }}>
-        {/* Logo & Header Badge */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <div style={{
-            width: '32px', height: '32px', borderRadius: '10px',
-            background: 'linear-gradient(135deg, #0284C7 0%, #4A90D9 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 2px 8px rgba(2, 132, 199, 0.25)'
-          }}>
-            <Sparkles size={18} color="#FFFFFF" />
+      {!isFloating && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '16px 24px',
+          borderBottom: '1px solid #E2E8F0',
+          background: '#FFFFFF',
+          zIndex: 10,
+          flexShrink: 0
+        }}>
+          {/* Header Title (Logo AI dan badge BNPB telah dihapus sesuai instruksi) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontWeight: '700', fontSize: '1.15rem', letterSpacing: '-0.01em', color: '#0E2A5C' }}>
+              GeoAlert AI
+            </span>
           </div>
-          <span style={{ fontWeight: '700', fontSize: '1rem', letterSpacing: '-0.01em', color: 'var(--chat-text, #0F1E3D)' }}>
-            GeoAlert AI
-          </span>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: '5px',
-            padding: '3px 10px', borderRadius: '20px',
-            background: '#EAF4FF', border: '1px solid #BAE6FD',
-            fontSize: '0.72rem', color: '#0B5CAD', fontWeight: '600'
-          }}>
-            <ShieldCheck size={13} color="#0B5CAD" />
-            Berbasis panduan BMKG &amp; BNPB
-          </span>
-        </div>
 
-        {/* Action: Percakapan Baru */}
-        {messages.length > 0 && (
-          <button
-            onClick={handleResetChat}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              padding: '6px 14px', borderRadius: '20px',
-              background: '#F1F5F9', border: '1px solid #CBD5E1',
-              color: '#334155', fontSize: '0.8rem', fontWeight: '500',
-              cursor: 'pointer', transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = '#E2E8F0'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = '#F1F5F9'; }}
-            title="Mulai percakapan baru"
-          >
-            <RotateCcw size={14} /> Percakapan Baru
-          </button>
-        )}
-      </div>
+          {/* Action: Percakapan Baru */}
+          {messages.length > 0 && (
+            <button
+              onClick={handleResetChat}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '6px 14px', borderRadius: '20px',
+                background: '#F1F5F9', border: '1px solid #E2E8F0',
+                color: '#0E2A5C', fontSize: '0.8rem', fontWeight: '600',
+                cursor: 'pointer', transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#E2E8F0'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#F1F5F9'; }}
+              title="Mulai percakapan baru"
+            >
+              <RotateCcw size={14} /> Percakapan Baru
+            </button>
+          )}
+        </div>
+      )}
 
       {/* ================= MAIN SCROLL AREA ================= */}
       <div
@@ -442,11 +427,11 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
           <div style={{
             flex: 1, display: 'flex', flexDirection: 'column',
             alignItems: 'center', justifyContent: 'center',
-            padding: '1.5rem 1rem 1rem', textAlign: 'center',
+            padding: '2rem 1rem 1.25rem', textAlign: 'center',
             width: '100%', boxSizing: 'border-box'
           }}>
             {/* Glowing Orb */}
-            <div style={{ position: 'relative', marginBottom: '1rem', flexShrink: 0 }}>
+            <div style={{ position: 'relative', marginBottom: '1.25rem', flexShrink: 0 }}>
               <div style={{
                 position: 'absolute', inset: '-10px', borderRadius: '50%',
                 border: '1px solid rgba(2, 132, 199, 0.25)',
@@ -455,18 +440,19 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
               }} />
               <div style={{
                 width: '64px', height: '64px', borderRadius: '50%',
-                background: 'radial-gradient(circle at 35% 35%, #FFFFFF 0%, #00D2FF 40%, #4A90D9 70%, #0E2A5C 100%)',
-                animation: 'orb-glow 6s infinite ease-in-out',
+                background: 'radial-gradient(circle at 35% 35%, #FFFFFF 0%, #00D2FF 40%, #0284C7 80%, #0E2A5C 100%)',
+                boxShadow: '0 8px 24px rgba(2, 132, 199, 0.35)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}>
-                <Bot size={30} color="#FFFFFF" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.25))' }} />
+                <Bot size={30} color="#FFFFFF" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.25))' }} />
               </div>
             </div>
 
             {/* Greeting Headline */}
             <h2 style={{
-              fontSize: 'clamp(1.4rem, 2.5vw, 2.1rem)', fontWeight: '700',
-              lineHeight: '1.25', color: 'var(--chat-text, #0F1E3D)', marginBottom: '0.35rem',
+              fontFamily: "var(--font-heading), 'Merriweather', serif",
+              fontSize: 'clamp(1.5rem, 2.8vw, 2.2rem)', fontWeight: '700',
+              lineHeight: '1.25', color: '#0B1A32', marginBottom: '0.4rem',
               letterSpacing: '-0.02em'
             }}>
               {getGreeting()}, Pengunjung
@@ -478,8 +464,8 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
               Ada yang bisa GeoAlert AI bantu hari ini?
             </p>
             <p style={{
-              fontSize: '0.85rem', color: 'var(--chat-muted, #475569)',
-              maxWidth: '520px', marginBottom: '1.25rem', lineHeight: '1.5'
+              fontSize: '0.85rem', color: '#64748B',
+              maxWidth: '540px', marginBottom: '1.5rem', lineHeight: '1.55'
             }}>
               Pilih salah satu saran di bawah atau ketik langsung pertanyaan Anda seputar gempa, karhutla, banjir, atau panduan mitigasi lainnya.
             </p>
@@ -493,10 +479,10 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                   onClick={() => handleSend(p.text)}
                   style={{ textAlign: 'left', cursor: 'pointer' }}
                 >
-                  <span style={{ fontSize: '0.85rem', fontWeight: '500', color: 'var(--chat-text, #0F1E3D)', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  <span style={{ fontSize: '0.875rem', fontWeight: '500', color: '#0F1E3D', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.45' }}>
                     {p.text}
                   </span>
-                  <span style={{ fontSize: '0.7rem', color: '#0284C7', fontWeight: '700', marginTop: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <span style={{ fontSize: '0.72rem', color: '#0284C7', fontWeight: '700', marginTop: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     {p.category} →
                   </span>
                 </button>
@@ -509,11 +495,11 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '6px',
                 background: 'transparent', border: 'none',
-                color: 'var(--chat-muted, #475569)', fontSize: '0.8rem',
+                color: '#64748B', fontSize: '0.82rem', fontWeight: '500',
                 cursor: 'pointer', transition: 'color 0.2s', padding: '6px 12px', marginTop: '8px'
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--chat-text, #0F1E3D)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--chat-muted, #475569)'; }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#0E2A5C'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = '#64748B'; }}
             >
               <RefreshCw size={13} /> Muat ulang saran pertanyaan
             </button>
@@ -535,9 +521,9 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                 {msg.role === 'assistant' && (
                   <div style={{
                     width: '36px', height: '36px', borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #0284C7 0%, #4A90D9 100%)',
+                    background: 'linear-gradient(135deg, #00D2FF 0%, #4A90D9 100%)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0, boxShadow: '0 2px 8px rgba(2, 132, 199, 0.3)'
+                    flexShrink: 0, boxShadow: '0 0 15px rgba(0, 210, 255, 0.3)'
                   }}>
                     <Bot size={20} color="#FFFFFF" />
                   </div>
@@ -545,12 +531,12 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
 
                 {/* Message Bubble Container */}
                 <div style={{ maxWidth: '82%', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  
+
                   {/* Emergency Alert Card (jika kondisi darurat terdeteksi) */}
                   {msg.role === 'assistant' && msg.isEmergency && (
                     <div style={{
-                      background: '#FEF2F2',
-                      border: '1px solid #FCA5A5',
+                      background: 'rgba(220, 38, 38, 0.18)',
+                      border: '1px solid rgba(239, 68, 68, 0.5)',
                       borderRadius: '14px',
                       padding: '10px 14px',
                       marginBottom: '4px',
@@ -578,14 +564,12 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                       background: msg.role === 'user'
                         ? 'linear-gradient(135deg, #0E2A5C 0%, #1e5bb8 100%)'
                         : '#F8FAFC',
-                      border: msg.role === 'user'
-                        ? '1px solid rgba(14, 42, 92, 0.4)'
-                        : '1px solid #E2E8F0',
-                      color: msg.role === 'user' ? '#FFFFFF' : 'var(--chat-text, #0F1E3D)',
+                      border: msg.role === 'user' ? 'none' : '1px solid #E2E8F0',
+                      color: msg.role === 'user' ? '#FFFFFF' : '#0F1E3D',
                       fontSize: '0.92rem',
                       lineHeight: '1.65',
                       boxShadow: msg.role === 'user'
-                        ? '0 4px 14px rgba(14, 42, 92, 0.25)'
+                        ? '0 4px 14px rgba(14, 42, 92, 0.15)'
                         : '0 2px 8px rgba(15, 23, 42, 0.04)'
                     }}
                   >
@@ -681,7 +665,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
 
       {/* ================= INPUT FOOTER BAR ================= */}
       <div className="thinkai-bottom-container" style={{ flexShrink: 0 }}>
-        <div className="thinkai-input-box">
+        <div className="thinkai-input-box" style={{ background: '#FFFFFF', border: '1px solid #CBD5E1', borderRadius: '24px' }}>
           {/* Main Input Textarea */}
           <textarea
             ref={inputRef}
@@ -694,19 +678,20 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
               isStreaming
                 ? "GeoAlert AI sedang merespons..."
                 : messages.length === 0
-                ? "Tanyakan seputar gempa, karhutla, banjir, atau panduan evakuasi..."
-                : "Ketik pertanyaan Anda..."
+                  ? "Tanyakan seputar gempa, karhutla, banjir, atau panduan evakuasi..."
+                  : "Ketik pertanyaan Anda..."
             }
             style={{
-              width: '100%', background: 'transparent', border: 'none', outline: 'none',
-              color: 'var(--chat-text, #0F1E3D)', fontSize: '0.95rem', resize: 'none', fontFamily: 'inherit',
+              width: '100%', minHeight: '44px', maxHeight: '160px',
+              background: 'transparent', border: 'none', outline: 'none',
+              color: '#0F172A', fontSize: '0.95rem', resize: 'none', fontFamily: 'inherit',
               lineHeight: '1.5'
             }}
           />
 
           {/* Action Row */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px' }}>
-            
+
             {/* Model Indicator Pill */}
             <div style={{ position: 'relative' }}>
               <button
@@ -714,9 +699,9 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: '6px',
                   padding: '5px 12px', borderRadius: '20px',
-                  background: '#F1F5F9',
-                  border: '1px solid #CBD5E1',
-                  color: '#334155', fontSize: '0.76rem',
+                  background: '#F0F9FF',
+                  border: '1px solid #BAE6FD',
+                  color: '#0284C7', fontSize: '0.76rem',
                   fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s'
                 }}
               >
@@ -728,7 +713,7 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                 <div style={{
                   position: 'absolute', bottom: 'calc(100% + 8px)', left: 0,
                   background: '#FFFFFF', border: '1px solid #E2E8F0',
-                  borderRadius: '14px', padding: '6px', width: '210px',
+                  borderRadius: '14px', padding: '6px', width: '220px',
                   boxShadow: '0 10px 30px rgba(15, 23, 42, 0.12)', zIndex: 50
                 }}>
                   {[
@@ -741,13 +726,13 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                       style={{
                         width: '100%', textAlign: 'left', padding: '8px 10px',
                         borderRadius: '8px', background: 'transparent', border: 'none',
-                        color: 'var(--chat-text, #0F1E3D)', fontSize: '0.76rem', cursor: 'pointer',
+                        color: '#0F172A', fontSize: '0.76rem', cursor: 'pointer',
                         transition: 'background 0.2s'
                       }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = '#F8FAFC'; }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = '#F1F5F9'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                     >
-                      <div style={{ fontWeight: 600 }}>{m.label}</div>
+                      <div style={{ fontWeight: 600, color: '#0F172A' }}>{m.label}</div>
                       <div style={{ fontSize: '0.68rem', color: '#64748B' }}>{m.desc}</div>
                     </button>
                   ))}
@@ -799,8 +784,8 @@ export default function AIChat({ isFloating = false, initialMessage = '' }) {
                   style={{
                     width: '36px', height: '36px', borderRadius: '50%', border: 'none',
                     background: input.trim()
-                      ? 'linear-gradient(135deg, #0284C7 0%, #0E2A5C 100%)'
-                      : '#E2E8F0',
+                      ? 'linear-gradient(135deg, #0284C7 0%, #0369A1 100%)'
+                      : '#F1F5F9',
                     color: input.trim() ? '#FFFFFF' : '#94A3B8',
                     cursor: input.trim() ? 'pointer' : 'default',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',

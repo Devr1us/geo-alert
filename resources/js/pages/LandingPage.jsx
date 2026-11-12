@@ -536,76 +536,109 @@ export default function LandingPage() {
             <Compass size={16} />
           </div>
 
-          {/* Top Row: 2 Big Cards */}
-          <div className="grid md:grid-cols-2 gap-8 items-stretch" style={{ marginBottom: '2.25rem' }}>
-            {/* Left Card: Tipografi Kutipan Siaga */}
-            <RevealSection className="about-quote-card" once={false}>
-              <span className="about-quote-mark" aria-hidden="true">“</span>
-              <div className="about-quote-content">
-                <blockquote className="about-quote-text">
-                  <span className="quote-text-primary">Siaga hari ini,</span>
-                  <span className="quote-text-accent">selamat esok hari.</span>
-                </blockquote>
-                <div className="about-quote-footer">
-                  <div className="about-quote-divider" aria-hidden="true" />
-                  <span className="about-quote-tag">DETEKSI DINI, LINDUNGI DIRI</span>
+          {/* Unified 4-Column Grid for All 6 Cards */}
+          <div className="about-unified-grid">
+            {/* Left Card: Tipografi Kutipan Siaga (Span 2) */}
+            <RevealSection
+              className="shuffle-card-slot shuffle-card-1 about-card-col-span-2"
+              threshold={0.2}
+              style={{ '--shuffle-rot': '-7deg', '--shuffle-delay': '0ms' }}
+            >
+              <div className="about-quote-card">
+                <span className="about-quote-mark" aria-hidden="true">“</span>
+                <div className="about-quote-content">
+                  <blockquote className="about-quote-text">
+                    <span className="quote-text-primary">Siaga hari ini,</span>
+                    <span className="quote-text-accent">selamat esok hari.</span>
+                  </blockquote>
                 </div>
               </div>
             </RevealSection>
 
-            {/* Right Card: Apa itu GeoAlert? */}
-            <RevealSection className="about-info-card" once={false}>
-              <h2 className="info-card-title">Apa itu GeoAlert?</h2>
-              <p className="info-card-desc">
-                Platform cerdas yang menggabungkan data otoritatif dengan kecerdasan buatan untuk memberikan peringatan yang cepat, akurat, dan dapat ditindaklanjuti.
-              </p>
-            </RevealSection>
-          </div>
-
-          {/* Bottom Row: 4 Feature Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <RevealSection className="about-mini-card" style={{ transitionDelay: '0ms' }} once={false}>
-              <div className="mini-icon-circle icon-bg-blue">
-                <RefreshCw size={18} />
+            {/* Right Card: Apa itu GeoAlert? (Span 2) */}
+            <RevealSection
+              className="shuffle-card-slot shuffle-card-2 about-card-col-span-2"
+              threshold={0.2}
+              style={{ '--shuffle-rot': '-4deg', '--shuffle-delay': '100ms' }}
+            >
+              <div className="about-info-card">
+                <h2 className="info-card-title">Apa itu GeoAlert?</h2>
+                <p className="info-card-desc">
+                  Platform cerdas yang menggabungkan data otoritatif dengan kecerdasan buatan untuk memberikan peringatan yang cepat, akurat, dan dapat ditindaklanjuti.
+                </p>
               </div>
-              <h4 className="mini-card-title">Data Real-time</h4>
-              <p className="mini-card-desc">Terintegrasi dengan sumber data resmi BMKG & BNPB.</p>
-              <Link to="/peta" className="mini-card-link">
-                Selengkapnya <span>→</span>
-              </Link>
             </RevealSection>
 
-            <RevealSection className="about-mini-card" style={{ transitionDelay: '120ms' }} once={false}>
-              <div className="mini-icon-circle icon-bg-yellow">
-                <Bell size={18} />
+            {/* Feature 1: Data Real-time (Span 1) */}
+            <RevealSection
+              className="shuffle-card-slot shuffle-card-3 about-card-col-span-1"
+              threshold={0.2}
+              style={{ '--shuffle-rot': '-8deg', '--shuffle-delay': '200ms' }}
+            >
+              <div className="about-mini-card">
+                <div className="mini-icon-circle icon-bg-blue">
+                  <RefreshCw size={18} />
+                </div>
+                <h4 className="mini-card-title">Data Real-time</h4>
+                <p className="mini-card-desc">Terintegrasi dengan sumber data resmi BMKG & BNPB.</p>
+                <Link to="/peta" className="mini-card-link">
+                  Selengkapnya <span>→</span>
+                </Link>
               </div>
-              <h4 className="mini-card-title">Peringatan Dini</h4>
-              <p className="mini-card-desc">Notifikasi instan berbasis lokasi untuk kesiapsiagaan Anda.</p>
-              <Link to="/peta" className="mini-card-link">
-                Selengkapnya <span>→</span>
-              </Link>
             </RevealSection>
 
-            <RevealSection className="about-mini-card" style={{ transitionDelay: '240ms' }} once={false}>
-              <div className="mini-icon-circle icon-bg-sky">
-                <MessageSquare size={18} />
+            {/* Feature 2: Peringatan Dini (Span 1) */}
+            <RevealSection
+              className="shuffle-card-slot shuffle-card-4 about-card-col-span-1"
+              threshold={0.2}
+              style={{ '--shuffle-rot': '-5deg', '--shuffle-delay': '300ms' }}
+            >
+              <div className="about-mini-card">
+                <div className="mini-icon-circle icon-bg-yellow">
+                  <Bell size={18} />
+                </div>
+                <h4 className="mini-card-title">Peringatan Dini</h4>
+                <p className="mini-card-desc">Notifikasi instan berbasis lokasi untuk kesiapsiagaan Anda.</p>
+                <Link to="/peta" className="mini-card-link">
+                  Selengkapnya <span>→</span>
+                </Link>
               </div>
-              <h4 className="mini-card-title">AI Assistant</h4>
-              <p className="mini-card-desc">Asisten cerdas menjawab seputar mitigasi & prosedur darurat.</p>
-              <Link to="/peta" className="mini-card-link">
-                Selengkapnya <span>→</span>
-              </Link>
             </RevealSection>
 
-            <RevealSection className="about-mini-card" style={{ transitionDelay: '360ms' }} once={false}>
-              <div className="mini-icon-circle icon-bg-rose">
-                <Map size={18} />
+            {/* Feature 3: AI Assistant (Span 1) */}
+            <RevealSection
+              className="shuffle-card-slot shuffle-card-5 about-card-col-span-1"
+              threshold={0.2}
+              style={{ '--shuffle-rot': '-7deg', '--shuffle-delay': '400ms' }}
+            >
+              <div className="about-mini-card">
+                <div className="mini-icon-circle icon-bg-sky">
+                  <MessageSquare size={18} />
+                </div>
+                <h4 className="mini-card-title">AI Assistant</h4>
+                <p className="mini-card-desc">Asisten cerdas menjawab seputar mitigasi & prosedur darurat.</p>
+                <Link to="/peta" className="mini-card-link">
+                  Selengkapnya <span>→</span>
+                </Link>
               </div>
-              <h4 className="mini-card-title">Peta Interaktif</h4>
-              <p className="mini-card-desc">Visualisasi sebaran ancaman bencana di seluruh Indonesia.</p>
-              <Link to="/peta" className="mini-card-link">
-                Selengkapnya <span>→</span>
-              </Link>
+            </RevealSection>
+
+            {/* Feature 4: Peta Interaktif (Span 1) */}
+            <RevealSection
+              className="shuffle-card-slot shuffle-card-6 about-card-col-span-1"
+              threshold={0.2}
+              style={{ '--shuffle-rot': '-4deg', '--shuffle-delay': '500ms' }}
+            >
+              <div className="about-mini-card">
+                <div className="mini-icon-circle icon-bg-rose">
+                  <Map size={18} />
+                </div>
+                <h4 className="mini-card-title">Peta Interaktif</h4>
+                <p className="mini-card-desc">Visualisasi sebaran ancaman bencana di seluruh Indonesia.</p>
+                <Link to="/peta" className="mini-card-link">
+                  Selengkapnya <span>→</span>
+                </Link>
+              </div>
             </RevealSection>
           </div>
         </div>

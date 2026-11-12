@@ -11,6 +11,8 @@ export default function RevealSection({
   id = '',
   animation = '',
   delay = 0,
+  threshold = 0.2,
+  rootMargin = '0px 0px -15px 0px',
   style = {},
   as: Component = 'div',
   ...props
@@ -25,8 +27,8 @@ export default function RevealSection({
         setIsVisible(entry.isIntersecting);
       },
       {
-        threshold: 0.15,
-        rootMargin: '0px 0px -15px 0px'
+        threshold,
+        rootMargin
       }
     );
 
@@ -39,7 +41,7 @@ export default function RevealSection({
       if (el) observer.unobserve(el);
       observer.disconnect();
     };
-  }, []);
+  }, [threshold, rootMargin]);
 
   const animClass = animation ? `reveal-${animation}` : '';
   const delayStyle = delay > 0 ? { transitionDelay: `${delay}ms` } : {};

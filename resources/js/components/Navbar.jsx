@@ -128,7 +128,6 @@ export default function Navbar() {
         if (el) el.scrollIntoView({ behavior: 'smooth' });
       }, 150);
     } else {
-      window.history.pushState(null, '', `/#${id}`);
       const el = document.getElementById(id);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth' });
@@ -225,4 +224,4 @@ export default function Navbar() {
       </div>
     </nav>
   );
-}
+} 

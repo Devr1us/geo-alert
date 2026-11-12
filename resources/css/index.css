@@ -1,7 +1,7 @@
 :root {
-  /* Background Variables */
-  --bg-cream: #FAF7F0;
-  --bg-cream-soft: #FCFAF5;
+  /* Background Variables (Harmonized with Hero #F6F3EA) */
+  --bg-cream: #F6F3EA;
+  --bg-cream-soft: #F6F3EA;
 
   /* AI Chat Theme Variables (Light Mode) */
   --chat-bg: #FFFFFF;
@@ -10,8 +10,8 @@
   --chat-border: rgba(15, 23, 42, 0.08);
   --chat-card-bg: #F8FAFC;
 
-  /* Stats Section Variables (Cream) */
-  --stats-bg: #F3EEE3;
+  /* Stats Section Variables (Matching Hero Paper Cream #F6F3EA) */
+  --stats-bg: #F6F3EA;
   --stats-card-bg: #FFFFFF;
   --stats-text: #0E2A5C;
   --stats-muted: #64748B;

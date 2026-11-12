@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 
 function ScrollController() {
   const { pathname, hash } = useLocation();
+  const isFirstLoadRef = React.useRef(true);
 
   // Global scroll direction tracker: set data-scroll-dir="down" | "up" on documentElement
   useEffect(() => {
@@ -36,6 +37,20 @@ function ScrollController() {
   }, []);
 
   useEffect(() => {
+    // Saat refresh web / pertama kali load: selalu ke Beranda paling atas (top: 0)
+    if (isFirstLoadRef.current) {
+      isFirstLoadRef.current = false;
+      const forceTop = () => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        if (document.documentElement) document.documentElement.scrollTop = 0;
+        if (document.body) document.body.scrollTop = 0;
+      };
+      forceTop();
+      setTimeout(forceTop, 30);
+      setTimeout(forceTop, 100);
+      return;
+    }
+
     if (hash) {
       const scrollToHash = () => {
         const id = hash.replace('#', '');
