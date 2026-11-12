@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, X, MapPin, ExternalLink, Compass } from 'lucide-react';
+import { X, MapPin, Compass } from 'lucide-react';
 import {
   STORIES,
   REGION_SVG_PATHS,
@@ -21,8 +21,6 @@ console.info('[GeoAlert hero v2] loaded');
 export default function StoriesHero({ onCekBencana }) {
   const navigate = useNavigate();
   const [activeZoneIndex, setActiveZoneIndex] = useState(0);
-  const [isStoryOpen, setIsStoryOpen] = useState(false);
-  const [storyIndex, setStoryIndex] = useState(0);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0, visible: false });
 
   // Zoom to region & navigation states
@@ -35,14 +33,12 @@ export default function StoriesHero({ onCekBencana }) {
   const mapViewportRef = useRef(null);
   const videoRef = useRef(null);
   const canvasMapRefs = useRef({});
-  const storyCanvasRef = useRef(null);
   const animFrameIdRef = useRef(null);
   const stillImageRef = useRef(null);
   const navigationTimerRef = useRef(null);
   const overlayTimerRef = useRef(null);
 
   const activeStory = STORIES[activeZoneIndex] || STORIES[0];
-  const modalStory = STORIES[storyIndex] || STORIES[0];
 
   // 1. Inisialisasi video & stillImage fallback untuk render canvas
   useEffect(() => {
@@ -140,14 +136,6 @@ export default function StoriesHero({ onCekBencana }) {
         }
       }
 
-      // Render canvas modal cerita jika sedang terbuka
-      if (isStoryOpen && storyCanvasRef.current) {
-        const curModalZone = STORIES[storyIndex];
-        if (curModalZone) {
-          renderCellToCanvas(storyCanvasRef.current, curModalZone.videoCol, curModalZone.videoRow);
-        }
-      }
-
       animFrameIdRef.current = requestAnimationFrame(loop);
     };
 
@@ -159,7 +147,7 @@ export default function StoriesHero({ onCekBencana }) {
         cancelAnimationFrame(animFrameIdRef.current);
       }
     };
-  }, [activeZoneIndex, isStoryOpen, storyIndex, renderCellToCanvas]);
+  }, [activeZoneIndex, renderCellToCanvas]);
 
   // 5. Eksekusi Zoom & Navigasi ke Halaman Peta Bencana
   const triggerRegionZoom = useCallback((regionIdOrSlug) => {
@@ -205,33 +193,9 @@ export default function StoriesHero({ onCekBencana }) {
     }
   }, [triggerRegionZoom]);
 
-  // 7. Buka / Tutup Modal Kisah Lengkap (Sekunder, tidak dipicu klik peta)
-  const openStory = useCallback((index) => {
-    const targetIdx = typeof index === 'number' ? index : activeZoneIndex;
-    setStoryIndex(targetIdx);
-    setActiveZoneIndex(targetIdx);
-    setIsStoryOpen(true);
-    setCursorPos((prev) => ({ ...prev, visible: false }));
-  }, [activeZoneIndex]);
-
-  const closeStory = useCallback(() => {
-    setIsStoryOpen(false);
-  }, []);
-
-  // 8. Navigasi Keyboard
+  // 7. Navigasi Keyboard
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (isStoryOpen) {
-        if (e.key === 'Escape') {
-          closeStory();
-        } else if (e.key === 'ArrowRight') {
-          setStoryIndex((prev) => Math.min(STORIES.length - 1, prev + 1));
-        } else if (e.key === 'ArrowLeft') {
-          setStoryIndex((prev) => Math.max(0, prev - 1));
-        }
-        return;
-      }
-
       if (isNavigating) return;
 
       // Saat di peta beranda: panah atas/bawah/kiri/kanan memilih wilayah
@@ -253,12 +217,12 @@ export default function StoriesHero({ onCekBencana }) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isStoryOpen, isNavigating, activeZoneIndex, closeStory, triggerRegionZoom]);
+  }, [isNavigating, activeZoneIndex, triggerRegionZoom]);
 
-  // 9. Custom cursor positioning (hanya pointer halus)
+  // 8. Custom cursor positioning (hanya pointer halus)
   const handlePointerMove = (e) => {
     if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return;
-    if (isNavigating || isStoryOpen) return;
+    if (isNavigating) return;
     setCursorPos({
       x: e.clientX,
       y: e.clientY,
@@ -314,14 +278,14 @@ export default function StoriesHero({ onCekBencana }) {
 
       {/* Custom Pointer Circle Cursor Disc (Only fine pointer devices) */}
       <div
-        className={`sh-custom-cursor ${cursorPos.visible && !isStoryOpen && !isNavigating ? 'is-visible' : ''}`}
+        className={`sh-custom-cursor ${cursorPos.visible && !isNavigating ? 'is-visible' : ''}`}
         style={{
           left: `${cursorPos.x}px`,
           top: `${cursorPos.y}px`,
         }}
         aria-hidden="true"
       >
-        <span>LIHAT PETA</span>
+        <span className="sh-cursor-text">LIHAT<br />PETA</span>
       </div>
 
       <div className="stories-hero-container">
@@ -609,184 +573,6 @@ export default function StoriesHero({ onCekBencana }) {
                   style={{ top: `${RULER_TOP_POSITIONS[activeZoneIndex] || 10}px` }}
                 />
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ==========================================================================
-          MODAL KISAH LENGKAP (Full Story Dialog)
-          Ported with high fidelity from public/stories.html #story-view
-          Diakses via menu navbar Kisah atau rute /kisah
-          ========================================================================== */}
-      <div
-        className={`sh-story-overlay ${isStoryOpen ? 'is-open' : ''}`}
-        role="dialog"
-        aria-modal="true"
-        aria-label={`Kisah Lengkap: ${modalStory.title} (${modalStory.city})`}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) closeStory();
-        }}
-      >
-        <div className="sh-story-modal">
-          {/* Left Paper Strip with Close Button */}
-          <div className="sh-modal-left-strip">
-            <button
-              type="button"
-              onClick={closeStory}
-              className="sh-modal-back-btn"
-              title="Kembali ke Peta Beranda (Esc)"
-              aria-label="Tutup kisah dan kembali ke peta"
-            >
-              <div className="sh-modal-back-arrow">
-                <ArrowLeft size={18} />
-              </div>
-              <span className="sh-modal-back-text">KEMBALI KE PETA</span>
-            </button>
-          </div>
-
-          {/* Modal Main Content */}
-          <div className="sh-story-body">
-            <div className="sh-story-card-pair">
-              {/* Landscape Photo Canvas Panel */}
-              <div className="sh-story-photo-panel">
-                <canvas
-                  ref={storyCanvasRef}
-                  width="530"
-                  height="600"
-                  className="sh-story-canvas"
-                />
-                <div className="sh-story-photo-overlay" />
-                <div className="sh-story-photo-tag">
-                  {modalStory.name} &bull; {modalStory.coords}
-                </div>
-              </div>
-
-              {/* Story Themed Card */}
-              <div
-                className="sh-story-card"
-                style={{
-                  backgroundColor: modalStory.color,
-                  color: modalStory.textColor,
-                }}
-              >
-                {/* Watermark SVG of Region Outline */}
-                <svg className="sh-card-watermark" viewBox="0 0 1440 810" aria-hidden="true">
-                  <path
-                    d={REGION_SVG_PATHS[modalStory.id]}
-                    fill="none"
-                    stroke={modalStory.textColor}
-                    strokeWidth="3.5"
-                  />
-                </svg>
-
-                {/* Card Top: Counter and Progress */}
-                <div className="sh-card-top">
-                  <span className="sh-card-counter">
-                    0{storyIndex + 1} &mdash;&mdash; 0{STORIES.length}
-                  </span>
-                  <div className="sh-card-progress-bar">
-                    <div
-                      className="sh-card-progress-fill"
-                      style={{
-                        width: `${((storyIndex + 1) / STORIES.length) * 100}%`,
-                        backgroundColor: modalStory.textColor,
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Person Profile Inset */}
-                <div className="sh-card-person-row">
-                  <div className="sh-card-portrait-wrap">
-                    <img
-                      src={modalStory.personPhoto}
-                      alt={modalStory.personName}
-                      className="sh-card-portrait-img"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="sh-card-person-info">
-                    <span className="sh-card-person-name">{modalStory.personName}</span>
-                    <span className="sh-card-person-role">{modalStory.personRole}</span>
-                  </div>
-                </div>
-
-                {/* Card Middle: Category, City, Description */}
-                <div className="sh-card-middle">
-                  <div className="sh-card-category">{modalStory.category}</div>
-                  <div className="sh-card-city">{modalStory.city}</div>
-                  <p className="sh-card-desc">{modalStory.desc}</p>
-                </div>
-
-                {/* Card Bottom: Link to Standalone /kisah and Spinning Badge */}
-                <div className="sh-card-bottom">
-                  <a
-                    href={`/kisah#${modalStory.id}`}
-                    className="sh-card-link-btn"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={`Buka kisah ${modalStory.city} di halaman mandiri /kisah`}
-                  >
-                    Buka di Halaman Kisah &rarr;
-                  </a>
-
-                  {/* Spinning Badge with Plus */}
-                  <div className="sh-card-spin-badge" aria-hidden="true">
-                    <svg viewBox="0 0 48 48">
-                      <defs>
-                        <path
-                          id="sh-modal-card-ring-path"
-                          d="M 24,24 m -16,0 a 16,16 0 1,1 32,0 a 16,16 0 1,1 -32,0"
-                        />
-                      </defs>
-                      <circle
-                        cx="24"
-                        cy="24"
-                        r="21"
-                        fill="none"
-                        stroke={modalStory.textColor}
-                        strokeWidth="1.2"
-                        opacity="0.35"
-                      />
-                      <text
-                        fontFamily="'IBM Plex Mono', monospace"
-                        fontSize="6.5px"
-                        fontWeight="600"
-                        letterSpacing="0.18em"
-                        fill={modalStory.textColor}
-                      >
-                        <textPath href="#sh-modal-card-ring-path">
-                          KISAH TANGGUH &bull; GEOALERT &bull;
-                        </textPath>
-                      </text>
-                    </svg>
-                    <span className="sh-card-spin-plus">+</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Region Navigation Controls (Prev / Next inside dialog) */}
-            <div className="sh-modal-nav-row">
-              <button
-                type="button"
-                className="sh-modal-nav-btn"
-                onClick={() => setStoryIndex((prev) => Math.max(0, prev - 1))}
-                disabled={storyIndex === 0}
-                style={{ opacity: storyIndex === 0 ? 0.4 : 1 }}
-              >
-                &larr; Wilayah Sebelumnya
-              </button>
-              <button
-                type="button"
-                className="sh-modal-nav-btn"
-                onClick={() => setStoryIndex((prev) => Math.min(STORIES.length - 1, prev + 1))}
-                disabled={storyIndex === STORIES.length - 1}
-                style={{ opacity: storyIndex === STORIES.length - 1 ? 0.4 : 1 }}
-              >
-                Wilayah Selanjutnya &rarr;
-              </button>
             </div>
           </div>
         </div>

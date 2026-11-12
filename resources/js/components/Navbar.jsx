@@ -147,7 +147,6 @@ export default function Navbar() {
           <div className="nav-group nav-group-left">
             <Link to="/" className="nav-link" onClick={() => setIsOpen(false)}>Beranda</Link>
             <a href="/peta" className="nav-link" onClick={goToMap}>Peta Bencana</a>
-            <a href="/kisah" className="nav-link" onClick={() => setIsOpen(false)}>Kisah</a>
             <a href="#mitigasi" className="nav-link" onClick={scrollToSection('mitigasi')}>Mitigasi</a>
           </div>
 
