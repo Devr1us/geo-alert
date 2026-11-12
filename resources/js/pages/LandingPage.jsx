@@ -658,22 +658,22 @@ export default function LandingPage() {
               {
                 value: eventsLoading ? '…' : alertsCount,
                 label: 'Peringatan Aktif',
-                note: 'BMKG & NASA FIRMS',
+                note: '(BMKG & NASA FIRMS)',
               },
               {
                 value: eventsLoading ? '…' : provincesCount,
                 label: 'Provinsi Terpantau',
-                note: 'Seluruh Indonesia',
+                note: '(seluruh Indonesia)',
               },
               {
                 value: `< ${speedCount}s`,
                 label: 'Kecepatan Notifikasi',
-                note: 'Respons peringatan',
+                note: '',
               },
               {
                 value: '24/7',
                 label: 'Pemantauan Aktif',
-                note: 'Tanpa jeda waktu',
+                note: '',
               },
             ].map((s, i) => (
               <RevealSection
@@ -683,7 +683,7 @@ export default function LandingPage() {
               >
                 <div className="stat-number tabular-nums">{s.value}</div>
                 <div className="stat-label">{s.label}</div>
-                <div className="stat-note">{s.note}</div>
+                {s.note ? <div className="stat-note">{s.note}</div> : null}
               </RevealSection>
             ))}
           </div>
