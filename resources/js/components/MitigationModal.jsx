@@ -205,6 +205,51 @@ export const MITIGATION_DATA = {
     ]
   },
 
+  karhutla: {
+    title: 'SOP Mitigasi Karhutla & Kabut Asap',
+    subtitle: 'Rujukan Standar Operasional Prosedur BNPB, Manggala Agni & NASA FIRMS',
+    icon: <Flame size={32} color="#EA580C" />,
+    color: '#EA580C',
+    category: 'Kebakaran Hutan & Lahan',
+    sections: [
+      {
+        phase: 'before',
+        heading: '🛡️ Sebelum Karhutla (Kesiapsiagaan & Pencegahan)',
+        steps: [
+          'Pantau titik panas (hotspot) aktif secara real-time melalui GeoAlert yang menampilkan data satelit NASA FIRMS VIIRS.',
+          'Siapkan masker N95/KN95 (bukan masker bedah biasa) dan kacamata pelindung untuk seluruh anggota keluarga di musim kemarau.',
+          'DILARANG MEMBAKAR lahan, semak, atau sampah di musim kemarau — pelanggaran dapat dikenai sanksi pidana UUPK No. 32/2009.',
+          'Tutup rapat ventilasi, celah pintu, dan jendela dengan kain lembab jika kabut asap mulai terdeteksi di sekitar hunian.',
+          'Simpan nomor darurat Manggala Agni (021-5733433) dan BPBD setempat pada kontak cepat ponsel keluarga.',
+          'Ketahui jalur evakuasi dan lokasi posko kesehatan terdekat jika kualitas udara memburuk ke level Berbahaya (ISPU > 300).'
+        ]
+      },
+      {
+        phase: 'during',
+        heading: '🚨 Saat Karhutla & Kabut Asap Aktif (Perlindungan Diri)',
+        steps: [
+          'Pantau Indeks Standar Pencemar Udara (ISPU) harian melalui aplikasi BMKG atau Kemen-LHK — hindari aktivitas luar jika ISPU > 100 (Tidak Sehat).',
+          'Selalu kenakan masker N95/KN95 saat terpaksa beraktivitas di luar ruangan, terutama bagi lansia, anak-anak, dan penderita ISPA/asma.',
+          'Kurangi drastis aktivitas fisik berat di luar ruangan — debu PM2.5 yang sangat halus dapat masuk jauh ke dalam alveoli paru-paru.',
+          'Siapkan nebulizer, bronkodilator, dan obat pernapasan bagi anggota keluarga yang memiliki riwayat penyakit asma atau PPOK.',
+          'Jangan menyalakan AC dengan sirkulasi udara dari luar — gunakan mode recirculate (sirkulasi dalam ruangan) untuk mengurangi paparan asap.',
+          'Jika melihat titik api yang baru muncul, segera laporkan ke posko BPBD terdekat atau hubungi Call Center 112 / Manggala Agni.'
+        ]
+      },
+      {
+        phase: 'after',
+        heading: '🟡 Sesudah Karhutla Mereda (Pemulihan & Pencegahan Ulang)',
+        steps: [
+          'Bersihkan rumah secara menyeluruh dari sisa partikel debu PM2.5 dan PM10 yang menempel pada permukaan furnitur dan lantai.',
+          'Ganti filter AC dan air purifier yang sudah penuh partikel debu setelah periode kabut asap yang panjang.',
+          'Periksakan kondisi kesehatan pernapasan ke dokter atau puskesmas terdekat jika mengalami batuk kering, sesak, atau iritasi mata berkepanjangan.',
+          'Laporkan kondisi lahan gambut yang rawan kebakaran di sekitar tempat tinggal kepada aparat desa atau Manggala Agni untuk dilakukan pemantauan.',
+          'Dukung program pembasahan kembali (rewetting) lahan gambut yang dilakukan BRGM dan KLHK sebagai upaya pencegahan jangka panjang.'
+        ]
+      }
+    ]
+  },
+
   gunungapi: {
     title: 'SOP Mitigasi Erupsi Gunung Api',
     subtitle: 'Rujukan Standar Operasional Prosedur PVMBG (Pusat Vulkanologi) & BNPB',
