@@ -558,18 +558,9 @@ export default function LandingPage() {
               <span className="dot dot-red" />
               <span className="dot dot-red" />
             </div>
-            <div className="about-floating-icon icon-lightning">
-              <Zap size={14} />
-            </div>
           </div>
 
-          {/* Floating decorative icons */}
-          <div className="floating-badge badge-left" aria-hidden="true">
-            <Quote size={16} />
-          </div>
-          <div className="floating-badge badge-center" aria-hidden="true">
-            <Compass size={16} />
-          </div>
+          {/* Floating decorative icons — DIHAPUS (mengganggu di mobile) */}
 
           {/* Unified 4-Column Grid for All 6 Cards */}
           <div className="about-unified-grid">

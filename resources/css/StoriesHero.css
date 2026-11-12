@@ -1704,6 +1704,8 @@ html.js-enabled .stories-hero:not(.is-visible) .sh-coord-secondary {
     /* Peta full lebar, zone selector di bawah (bukan di samping) pada tablet */
     grid-template-columns: 1fr;
     gap: 1rem;
+    overflow: hidden;
+    width: 100%;
   }
 
   .stories-hero-left {
@@ -1760,6 +1762,7 @@ html.js-enabled .stories-hero:not(.is-visible) .sh-coord-secondary {
     max-height: 380px;
     min-height: auto;
     margin: 0.5rem 0;
+    overflow: hidden;
   }
 
   /* Zone Selector becomes horizontal chips on mobile */
@@ -1939,14 +1942,39 @@ html.js-enabled .stories-hero:not(.is-visible) .sh-coord-secondary {
 @media (max-width: 640px) {
   .stories-hero {
     min-height: 100svh;
+    overflow-x: hidden;
   }
 
   .stories-hero-container {
     padding-inline: 20px;
+    overflow-x: hidden;
   }
 
   .stories-hero-title {
     font-size: clamp(1.85rem, 7.5vw, 2.5rem);
+  }
+
+  /* Peta tidak melebihi lebar container di mobile */
+  .stories-hero-right-col {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .stories-hero-center {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  /* SVG peta: crop sisi kanan yang terlalu lebar (Papua terpotong tipis, OK) */
+  .sh-map-viewport {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .sh-map-svg {
+    overflow: hidden;
   }
 }
 
