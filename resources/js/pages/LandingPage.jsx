@@ -11,6 +11,7 @@ import MitigationModal from '../components/MitigationModal';
 import CitySelectModal from '../components/CitySelectModal';
 import RevealSection from '../components/RevealSection';
 import HeroEarthquakeRadarCard from '../components/HeroEarthquakeRadarCard';
+import StoriesHero from '../components/StoriesHero';
 import { BMKG_TERKINI_URL, BMKG_DIRASAKAN_URL } from '../config/bmkgApi';
 import { ASSET_BASE } from '../config/baseUrl';
 import { formatLocation } from '../utils/locationFormatter';
@@ -565,73 +566,8 @@ export default function LandingPage() {
 
   return (
     <div>
-      {/* =================== HERO SECTION (LIGHT & TRANQUIL BROMO LANDSCAPE) =================== */}
-      <section className="hero-section">
-        {/* Layer 1: Landscape Gunung Api Indonesia (WebP, eager, 80% saturation diredam, opasitas 0.38) */}
-        <div className="hero-bg-image-layer" aria-hidden="true">
-          <img
-            src="/images/hero-bg.webp"
-            srcSet="/images/hero-bg-mobile.webp 1200w, /images/hero-bg.webp 2000w"
-            sizes="100vw"
-            alt=""
-            loading="eager"
-            fetchPriority="high"
-            className="hero-bg-img"
-          />
-        </div>
-
-        {/* Layer 2: Veil Oval Radial Gradient (Krem #F7F3EC) tepat di belakang teks tengah (kontras >= 4.5:1) */}
-        <div className="hero-veil-oval" aria-hidden="true" />
-
-        {/* Layer 3: Vertical Cream Gradient Overlay (80% area judul/paragraf, memudar ke 15% di dasar) */}
-        <div className="hero-gradient-overlay" aria-hidden="true" />
-
-        {/* Layer 4: Aksen Garis Topografi / Kontur Halus (SVG) */}
-        <div className="hero-top-contours" aria-hidden="true">
-          <svg className="hero-top-contours-svg" viewBox="0 0 1440 280" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M-60,35 C240,5 540,65 840,25 C1140,-15 1360,55 1500,15" stroke="rgba(14, 42, 92, 0.08)" strokeWidth="1.2" />
-            <path d="M-60,85 C220,55 520,115 820,75 C1120,35 1340,105 1500,65" stroke="rgba(14, 42, 92, 0.08)" strokeWidth="1.2" />
-            <path d="M-60,135 C200,105 500,165 800,125 C1100,85 1320,155 1500,115" stroke="rgba(14, 42, 92, 0.08)" strokeWidth="1.2" />
-            <path d="M-60,185 C180,155 480,215 780,175 C1080,135 1300,205 1500,165" stroke="rgba(14, 42, 92, 0.08)" strokeWidth="1.2" />
-            <path d="M-60,235 C160,205 460,265 760,225 C1060,185 1280,255 1500,215" stroke="rgba(14, 42, 92, 0.08)" strokeWidth="1.2" />
-          </svg>
-        </div>
-
-        {/* Layer 5: Gradient Mask fading bottom edge into next section */}
-        <div className="hero-bottom-fade-mask" aria-hidden="true" />
-
-        {/* Hero Content */}
-        <div className="container" style={{ position: 'relative', zIndex: 10 }}>
-          {/* Judul Besar Serif Tebal */}
-          <h1 className="hero-title hero-title-animated">
-            GeoAlert
-          </h1>
-
-          {/* Subtitle / Tagline */}
-          <p className="hero-subtitle hero-subtitle-animated">
-            Deteksi Dini, Lindungi Diri
-          </p>
-
-          {/* Deskripsi */}
-          <p className="hero-desc-animated">
-            Pantau informasi bencana alam di seluruh Indonesia secara real-time. Dapatkan panduan mitigasi instan dan peringatan dini langsung dari sumber resmi.
-          </p>
-
-          {/* Tombol Aksi Hero */}
-          <div className="hero-actions hero-actions-animated">
-            <button
-              type="button"
-              onClick={handleCekBencana}
-              className="btn btn-hero-primary"
-            >
-              <BookOpen size={20} /> Cek Bencana Terdekat
-            </button>
-            <a href="#tentang" className="btn btn-hero-secondary">
-              Pelajari Lebih Lanjut
-            </a>
-          </div>
-        </div>
-      </section>
+      {/* =================== STORIES HERO SECTION (INTERACTIVE INDONESIA MAP) =================== */}
+      <StoriesHero onCekBencana={handleCekBencana} />
 
       {/* =================== FLOATING OVERLAP RADAR CARD =================== */}
       {/* Kartu Gempa Terbaru (Radar + Status) Menjorok Konsisten -48px Menimpa Krem */}

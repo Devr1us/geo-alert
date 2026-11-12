@@ -1,166 +1,6 @@
 /* LandingPage.css */
 
-/* ============================================================
-   HERO SECTION — LATAR BENCANA ALAM INDONESIA (ERUPSI BROMO & SEMERU)
-   Foto: Erupsi Gunung Bromo & Semeru, Jawa Timur, Indonesia
-   Fotografer: Jakub Hałun
-   URL: https://commons.wikimedia.org/wiki/File:Bromo_and_Semeru_volcanoes,_Java,_Indonesia,_20220820_0754_9542.jpg
-   Lisensi: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
-   ============================================================ */
-
-.hero-section {
-  padding: calc(var(--navbar-height) + 2.5rem) 0 var(--spacing-12);
-  background-color: #E4E3E2; /* Warna latar cadangan selagi gambar dimuat */
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Layer 1: Landscape Gunung Api Indonesia (WebP, eager, 80% saturation diredam, opasitas 0.6) */
-.hero-bg-image-layer {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  background-color: #E4E3E2;
-  overflow: hidden;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.hero-bg-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center bottom;
-  filter: saturate(0.55);
-  opacity: 0.6;
-  display: block;
-  transform: translateZ(0);
-}
-
-/* Layer 2: Veil Oval Radial Gradient (Krem #F7F3EC) tepat di belakang teks tengah */
-.hero-veil-oval {
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: min(1000px, 94vw);
-  height: 480px;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(247, 243, 236, 0.94) 0%,
-    rgba(247, 243, 236, 0.82) 45%,
-    rgba(247, 243, 236, 0) 75%
-  );
-  filter: blur(20px);
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Layer 3: Vertical Cream Gradient Overlay (80% area judul/paragraf, memudar ke 15% di dasar) */
-.hero-gradient-overlay {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    180deg,
-    rgba(247, 243, 236, 0.85) 0%,
-    rgba(247, 243, 236, 0.80) 45%,
-    rgba(247, 243, 236, 0.45) 75%,
-    rgba(247, 243, 236, 0.15) 100%
-  );
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* Layer 4: Aksen Kepulan Abu / Kontur Kabut Halus (SVG) */
-.hero-top-contours {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 48%;
-  max-height: 320px;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.hero-top-contours-svg {
-  width: 100%;
-  height: 100%;
-  min-width: 1200px;
-  animation: heroTopContoursDrift 50s ease-in-out infinite alternate;
-}
-
-@keyframes heroTopContoursDrift {
-  0% {
-    transform: translateY(0);
-    opacity: 0.85;
-  }
-  100% {
-    transform: translateY(-10px);
-    opacity: 1;
-  }
-}
-
-/* Layer 5: Gradient Mask fading bottom edge into next section (#FFFFFF) */
-.hero-bottom-fade-mask {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 140px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.35) 35%,
-    rgba(255, 255, 255, 0.78) 70%,
-    #FFFFFF 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-}
-
-.hero-section > .container {
-  position: relative;
-  z-index: 2;
-}
-
-/* ── Hero Title ─────────────────────────────────────────────────── */
-.hero-section .hero-title {
-  margin-bottom: var(--spacing-4);
-  font-size: clamp(2.5rem, 7vw, 5rem) !important;
-  letter-spacing: -0.03em;
-  background: linear-gradient(135deg, var(--color-primary) 0%, #1e5bb8 60%, #3a7fc1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  line-height: 1.1;
-}
-
-/* ── Sequential Animated Text (Tranquil & Elegant Sequence) ──────── */
-.hero-title-animated {
-  opacity: 0;
-  animation: heroTitleReveal 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
-}
-
-.hero-subtitle-animated {
-  opacity: 0;
-  animation: heroSubtitleReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards;
-}
-
-.hero-desc-animated {
-  opacity: 0;
-  animation: heroFadeRise 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.3s forwards;
-}
-
-.hero-actions-animated {
-  opacity: 0;
-  animation: heroFadeRise 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.9s forwards;
-}
-
+/* Hero Radar Floating Card animation */
 .hero-status-card-animated {
   opacity: 1;
   animation: floatPill 6s ease-in-out infinite;
@@ -217,32 +57,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-title-animated,
-  .hero-subtitle-animated,
-  .hero-desc-animated,
-  .hero-actions-animated,
   .hero-status-card-animated {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
   }
-  .hero-section {
-    animation: none !important;
-  }
-  .hero-top-contours-svg {
-    animation: none !important;
-    transform: none !important;
-  }
-}
-
-.hero-section .hero-subtitle {
-  font-size: clamp(1.05rem, 2.5vw, 1.5rem) !important;
-  line-height: 1.55;
-  color: var(--color-primary);
-  font-weight: 500;
-  max-width: 600px;
-  margin: 0 auto var(--spacing-6);
 }
 
 .hero-actions {
@@ -612,7 +432,7 @@
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.55);
+  color: #E2E8F0;
   text-transform: uppercase;
 }
 
@@ -627,7 +447,8 @@
   font-family: var(--font-heading), 'Merriweather', serif;
   font-size: 1.45rem;
   font-weight: 900;
-  color: #00D2FF;
+  color: #FFFFFF;
+  text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
   white-space: nowrap;
   line-height: 1;
   letter-spacing: -0.02em;
@@ -645,16 +466,21 @@
   font-size: 0.88rem;
   font-weight: 600;
   color: #FFFFFF;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 320px;
+  white-space: normal;
+  max-width: 340px;
+  line-height: 1.3;
 }
 
 .hero-navy-gempa-time {
   font-family: var(--font-body), 'Inter', sans-serif;
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.74rem;
+  color: #CBD5E1;
   white-space: nowrap;
 }
 
@@ -696,26 +522,34 @@
 }
 
 .hero-navy-loc-text {
-  max-width: 130px;
+  max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: #FFFFFF;
 }
 
 .hero-navy-btn-change {
-  background: none;
-  border: none;
-  color: #00D2FF;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #FFFFFF;
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  text-decoration: underline;
-  padding: 0 2px;
-  transition: opacity 0.2s ease;
+  text-decoration: none;
+  padding: 3px 9px;
+  min-height: 28px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .hero-navy-btn-change:hover {
-  opacity: 0.85;
+  background: rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #FFFFFF;
 }
 
 .hero-navy-btn-select-loc {
@@ -821,7 +655,7 @@
   }
 
   .hero-navy-gempa-loc {
-    max-width: 200px;
+    max-width: 100%;
     font-size: 0.82rem;
   }
 
@@ -1597,10 +1431,6 @@
 /* Pada layar ≤ 640px, buat live-status-card full-width dengan
    arah kolom agar item tidak bergandengan */
 @media (max-width: 640px) {
-  .hero-section {
-    padding-top: calc(var(--navbar-height) + 3rem);
-  }
-
   .live-status-card {
     flex-direction: column;
     align-items: flex-start;
@@ -1626,7 +1456,6 @@
 }
 
 /* Pastikan section tidak ada overflow horizontal */
-.hero-section,
 .trust-bar {
   overflow-x: hidden;
 }

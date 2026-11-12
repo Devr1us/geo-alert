@@ -169,6 +169,19 @@ Route::middleware(['throttle:15,1'])->post('/api/chat', [ChatController::class, 
  */
 Route::middleware(['throttle:10,1'])->post('/api/subscribe', [SubscriberController::class, 'store']);
 
+// =============================================
+// INTERACTIVE STORYTELLING MAP HERO ("Kisah Tangguh Nusantara")
+// =============================================
+Route::get('/kisah', function () {
+    return response()->file(public_path('stories.html'));
+});
+Route::get('/cerita', function () {
+    return response()->file(public_path('stories.html'));
+});
+Route::get('/stories', function () {
+    return response()->file(public_path('stories.html'));
+});
+
 // Catch-all: serve React SPA for client-side routing (e.g., /peta, /kebijakan-privasi, /syarat-ketentuan)
 Route::get('/{any}', function () {
     return view('welcome');
