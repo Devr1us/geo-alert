@@ -180,14 +180,20 @@ export default function Navbar() {
 
           {/* Center Brand Logo (Desktop - Only Logo Icon, NO text) */}
           <Link to="/" className="nav-brand-center" aria-label="GeoAlert Beranda" onClick={goToHome}>
-            <svg viewBox="0 0 100 100" className="nav-logo-center-svg" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="50" cy="50" r="40" />
-              <circle cx="50" cy="50" r="24" />
-              <line x1="50" y1="6" x2="50" y2="94" />
-              <line x1="6" y1="50" x2="94" y2="50" />
-              <line x1="50" y1="50" x2="75" y2="25" />
-              <path d="M50 30 C43 30 38 35 38 42 C38 52 50 64 50 64 C50 64 62 52 62 42 C62 35 57 30 50 30 Z" fill="currentColor" stroke="none" />
-              <circle cx="50" cy="41" r="4" fill={isDarkHero ? 'rgba(255, 255, 255, 0.4)' : 'var(--bg-cream)'} />
+            <svg viewBox="0 0 100 100" className="nav-logo-center-svg" fill="none">
+              {/* Outer ring */}
+              <circle cx="50" cy="50" r="42" stroke="currentColor" strokeWidth="5"/>
+              {/* Inner ring */}
+              <circle cx="50" cy="50" r="27" stroke="currentColor" strokeWidth="4.5"/>
+              {/* Cardinal ticks between rings */}
+              <line x1="50" y1="6"  x2="50" y2="23" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round"/>
+              <line x1="50" y1="77" x2="50" y2="94" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round"/>
+              <line x1="6"  y1="50" x2="23" y2="50" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round"/>
+              <line x1="77" y1="50" x2="94" y2="50" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round"/>
+              {/* Location pin */}
+              <path d="M50 28 C41.5 28 35 34.5 35 43 C35 54 50 68 50 68 C50 68 65 54 65 43 C65 34.5 58.5 28 50 28 Z" fill="currentColor"/>
+              {/* Pin hole */}
+              <circle cx="50" cy="43" r="6.5" fill="white"/>
             </svg>
           </Link>
 
