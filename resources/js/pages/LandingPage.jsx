@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Map, Bell, Bot, Shield, ChevronRight, Activity, ArrowRight,
   Droplets, Mountain, ChevronDown, ChevronUp, MapPin, BellOff, RefreshCw,
@@ -90,12 +90,12 @@ const FAQ_DATA = [
 
 // Education content — Bencana Utama Indonesia (BMKG, BNPB, PVMBG, NASA FIRMS)
 const EDUCATION_DATA = [
-  { icon: <Activity size={32} color="var(--navy)" />, bg: 'rgba(18, 40, 92, 0.08)', accentColor: 'var(--navy)', title: 'Gempa Bumi', desc: 'Getaran tektonik tiba-tiba akibat pelepasan energi lempeng bumi. Indonesia berada di Cincin Api Pasifik dengan ribuan sesar aktif yang memerlukan kewaspadaan tinggi.' },
-  { icon: <Waves size={32} color="var(--navy)" />, bg: 'rgba(18, 40, 92, 0.08)', accentColor: 'var(--navy)', title: 'Tsunami', desc: 'Gelombang laut raksasa yang dipicu oleh gempa bumi dangkal di dasar laut, longsor bawah laut, atau letusan gunung api. Terapkan evakuasi emas 20-20-20 di pesisir.' },
-  { icon: <Flame size={32} color="var(--navy)" />, bg: 'rgba(18, 40, 92, 0.08)', accentColor: 'var(--navy)', title: 'Karhutla (Kebakaran Hutan & Lahan)', desc: 'Penyebab utama adalah pembakaran lahan ilegal dan kemarau di lahan gambut. Berdampak kabut asap beracun, lonjakan ISPA, dan gangguan transportasi darat/udara. Wajib pakai masker N95 dan laporkan titik api ke satgas BPBD/Manggala Agni.' },
-  { icon: <Droplets size={32} color="var(--navy)" />, bg: 'rgba(18, 40, 92, 0.08)', accentColor: 'var(--navy)', title: 'Banjir & Banjir Bandang', desc: 'Luapan air berlebih akibat curah hujan ekstrem atau kegagalan tanggul. Aliran air deras membawa material lumpur dan puing yang membahayakan nyawa dan kelistrikan.' },
-  { icon: <Mountain size={32} color="var(--navy)" />, bg: 'rgba(18, 40, 92, 0.08)', accentColor: 'var(--navy)', title: 'Tanah Longsor', desc: 'Pergerakan massa batuan atau tanah menuruni lereng saat kondisi tanah jenuh air. Selalu evakuasi secara tegak lurus (menyamping) dari jalur luncuran tebing.' },
-  { icon: <Mountain size={32} color="var(--navy)" />, bg: 'rgba(18, 40, 92, 0.08)', accentColor: 'var(--navy)', title: 'Erupsi Gunung Api', desc: 'Keluarnya magma, awan panas (wedhus gembel), lontaran batu pijar, dan abu silika dari kawah aktif. Kenakan masker debu/N95 dan patuhi radius Kawasan Rawan Bencana (KRB).' },
+  { icon: <Activity size={28} color="#B91C1C" strokeWidth={2.2} />, bg: '#FEE2E2', accentColor: '#B91C1C', title: 'Gempa Bumi', desc: 'Getaran tektonik tiba-tiba akibat pelepasan energi lempeng bumi. Indonesia berada di Cincin Api Pasifik dengan ribuan sesar aktif yang memerlukan kewaspadaan tinggi.' },
+  { icon: <Waves size={28} color="#0284C7" strokeWidth={2.2} />, bg: '#E0F2FE', accentColor: '#0284C7', title: 'Tsunami', desc: 'Gelombang laut raksasa yang dipicu oleh gempa bumi dangkal di dasar laut, longsor bawah laut, atau letusan gunung api. Terapkan evakuasi emas 20-20-20 di pesisir.' },
+  { icon: <Flame size={28} color="#EA580C" strokeWidth={2.2} />, bg: '#FFEDD5', accentColor: '#EA580C', title: 'Karhutla (Kebakaran Hutan & Lahan)', desc: 'Penyebab utama adalah pembakaran lahan ilegal dan kemarau di lahan gambut. Berdampak kabut asap beracun, lonjakan ISPA, dan gangguan transportasi darat/udara. Wajib pakai masker N95 dan laporkan titik api ke satgas BPBD/Manggala Agni.' },
+  { icon: <Droplets size={28} color="#0369A1" strokeWidth={2.2} />, bg: '#E0F2FE', accentColor: '#0369A1', title: 'Banjir & Banjir Bandang', desc: 'Luapan air berlebih akibat curah hujan ekstrem atau kegagalan tanggul. Aliran air deras membawa material lumpur dan puing yang membahayakan nyawa dan kelistrikan.' },
+  { icon: <Mountain size={28} color="#92400E" strokeWidth={2.2} />, bg: '#FEF3C7', accentColor: '#92400E', title: 'Tanah Longsor', desc: 'Pergerakan massa batuan atau tanah menuruni lereng saat kondisi tanah jenuh air. Selalu evakuasi secara tegak lurus (menyamping) dari jalur luncuran tebing.' },
+  { icon: <Mountain size={28} color="#B91C1C" strokeWidth={2.2} />, bg: '#FFE4E6', accentColor: '#B91C1C', title: 'Erupsi Gunung Api', desc: 'Keluarnya magma, awan panas (wedhus gembel), lontaran batu pijar, dan abu silika dari kawah aktif. Kenakan masker debu/N95 dan patuhi radius Kawasan Rawan Bencana (KRB).' },
 ];
 
 
@@ -252,6 +252,21 @@ async function sendBrowserNotification(title, body) {
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Scroll to hash target on mount or hash change
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace('#', '');
+      const timer = setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [location.hash, location.pathname]);
 
   // ---- State ----
   const [events, setEvents] = useState([]);
@@ -267,11 +282,8 @@ export default function LandingPage() {
 
   // Statistics
   const [liveAlerts, setLiveAlerts] = useState(0);
-  const [liveProvinces, setLiveProvinces] = useState(0);
 
   const alertsCount = useCountUp(liveAlerts, 1500);
-  const provincesCount = useCountUp(liveProvinces, 1500);
-  const speedCount = useCountUp(3, 1500);
 
   // ============================================================
   // Fetch Disaster events (BMKG + NASA FIRMS Karhutla)
@@ -284,14 +296,11 @@ export default function LandingPage() {
         setEvents(data);
         const activeCount = data.filter(e => e.risk === 'warning' || e.risk === 'danger').length;
         setLiveAlerts(activeCount > 0 ? activeCount : data.length);
-        const provinces = new Set(data.map(e => e.province).filter(Boolean));
-        setLiveProvinces(provinces.size);
         setEventsLoading(false);
       })
       .catch(() => {
         if (cancelled) return;
-        setLiveAlerts(12);
-        setLiveProvinces(38);
+        setLiveAlerts(0);
         setEventsLoading(false);
       });
     return () => { cancelled = true; };
@@ -361,24 +370,24 @@ export default function LandingPage() {
           <div className="stats-grid">
             {[
               {
-                value: eventsLoading ? '…' : alertsCount,
+                value: eventsLoading ? 'Memuat...' : alertsCount,
                 label: 'Peringatan Aktif',
-                note: '(BMKG & NASA FIRMS)',
+                note: 'Diperbarui otomatis tiap 5 menit',
               },
               {
-                value: eventsLoading ? '…' : provincesCount,
-                label: 'Provinsi Terpantau',
-                note: '(seluruh Indonesia)',
+                value: '38',
+                label: '38 Provinsi Terpantau',
+                note: 'Seluruh wilayah Indonesia',
               },
               {
-                value: `< ${speedCount}s`,
-                label: 'Kecepatan Notifikasi',
-                note: '',
+                value: '5 Menit',
+                label: 'Interval Pembaruan Data',
+                note: 'Sinkronisasi BMKG & NASA FIRMS',
               },
               {
                 value: '24/7',
-                label: 'Pemantauan Aktif',
-                note: '',
+                label: 'Pembaruan Otomatis',
+                note: 'Sistem berjalan tanpa henti',
               },
             ].map((s, i) => (
               <RevealSection
@@ -393,32 +402,46 @@ export default function LandingPage() {
             ))}
           </div>
 
-          {/* Section Terhubung Dengan Sumber Data Resmi (Badge Seragam & Rapi) */}
+          {/* Section Terhubung Dengan Sumber Data Resmi */}
           <div className="trust-bar-inline">
-            <span className="trust-bar-label">
-              Terhubung dengan sumber data resmi
-            </span>
-            <div className="trust-logos-grid">
-              <a href="https://www.bmkg.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="Badan Meteorologi, Klimatologi, & Geofisika">
-                <span className="trust-badge-unified">BMKG</span>
-                <span className="trust-name-unified">Badan Meteorologi, Klimatologi, &amp; Geofisika</span>
-              </a>
-              <a href="https://www.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="Badan Nasional Penanggulangan Bencana">
-                <span className="trust-badge-unified">BNPB</span>
-                <span className="trust-name-unified">Badan Penanggulangan Bencana</span>
-              </a>
-              <a href="https://inarisk.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="Portal Risiko Bencana BNPB">
-                <span className="trust-badge-unified">InaRISK</span>
-                <span className="trust-name-unified">Portal Risiko Bencana</span>
-              </a>
-              <a href="https://firms.modaps.eosdis.nasa.gov" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="NASA Fire Information for Resource Management System">
-                <span className="trust-badge-unified">FIRMS</span>
-                <span className="trust-name-unified">NASA FIRMS Satelit Global</span>
-              </a>
-              <a href="https://sipongi.menlhk.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="Sistem Monitoring Kebakaran Hutan & Lahan KLHK">
-                <span className="trust-badge-unified">SiPongi</span>
-                <span className="trust-name-unified">Sistem Monitoring Karhutla KLHK</span>
-              </a>
+            <div className="trust-groups-wrapper">
+              {/* Group 1: Sumber Data Terintegrasi (BMKG & NASA FIRMS) */}
+              <div className="trust-group">
+                <span className="trust-bar-label">
+                  SUMBER DATA TERINTEGRASI (REAL-TIME)
+                </span>
+                <div className="trust-logos-grid">
+                  <a href="https://www.bmkg.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="Badan Meteorologi, Klimatologi, & Geofisika">
+                    <span className="trust-badge-unified">BMKG</span>
+                    <span className="trust-name-unified">Badan Meteorologi, Klimatologi, &amp; Geofisika</span>
+                  </a>
+                  <a href="https://firms.modaps.eosdis.nasa.gov" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="NASA Fire Information for Resource Management System">
+                    <span className="trust-badge-unified">NASA FIRMS</span>
+                    <span className="trust-name-unified">Pemantauan Satelit Titik Panas Karhutla</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Group 2: Rujukan Informasi & SOP Mitigasi (BNPB, InaRISK, Kementerian Kehutanan) */}
+              <div className="trust-group">
+                <span className="trust-bar-label">
+                  RUJUKAN INFORMASI &amp; STANDAR MITIGASI
+                </span>
+                <div className="trust-logos-grid">
+                  <a href="https://www.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="Badan Nasional Penanggulangan Bencana">
+                    <span className="trust-badge-unified badge-secondary">BNPB</span>
+                    <span className="trust-name-unified">Badan Penanggulangan Bencana</span>
+                  </a>
+                  <a href="https://inarisk.bnpb.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="Portal Risiko Bencana BNPB">
+                    <span className="trust-badge-unified badge-secondary">InaRISK</span>
+                    <span className="trust-name-unified">Portal Risiko Bencana</span>
+                  </a>
+                  <a href="https://sipongi.menlhk.go.id" target="_blank" rel="noopener noreferrer" className="trust-item-card" title="Sistem Pemantauan Karhutla, Kementerian Kehutanan">
+                    <span className="trust-badge-unified badge-secondary">SiPongi</span>
+                    <span className="trust-name-unified">Sistem Pemantauan Karhutla, Kementerian Kehutanan</span>
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -618,24 +641,30 @@ export default function LandingPage() {
                   desc: 'Dapatkan lansiran peringatan dini langsung ke perangkat saat terjadi anomali.',
                   action: notifBrowserPerm === 'granted' ? (
                     <span className="notif-active-badge">
-                      <Bell size={13} /> Notifikasi Aktif
+                      <Bell size={14} /> Notifikasi Aktif
+                    </span>
+                  ) : notifBrowserPerm === 'denied' ? (
+                    <span
+                      className="notif-denied-badge"
+                      onClick={handleActivateNotif}
+                      title="Klik untuk membuka blokir notifikasi di pengaturan browser"
+                    >
+                      <BellOff size={14} /> Notifikasi Diblokir (Buka Izin di Browser)
                     </span>
                   ) : notifBrowserPerm === 'unsupported' ? (
                     <span className="notif-unsupported-badge">
-                      <BellOff size={13} /> Browser tidak mendukung notifikasi
+                      <BellOff size={14} /> Tidak didukung browser ini
                     </span>
                   ) : (
                     <button
                       onClick={handleActivateNotif}
                       disabled={notifRequesting}
-                      className={`btn-notif-action${notifBrowserPerm === 'denied' ? ' btn-notif-denied' : ''}`}
+                      className="btn-notif-action"
                     >
                       {notifRequesting ? (
                         <><span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin-notif 0.7s linear infinite' }} /> Meminta izin…</>
-                      ) : notifBrowserPerm === 'denied' ? (
-                        <><BellOff size={14} /> Buka pengaturan browser</>
                       ) : (
-                        <><Bell size={14} style={{ color: '#ffffff' }} /> Aktifkan Notifikasi Sekarang</>
+                        <><Bell size={14} style={{ color: '#ffffff' }} /> Aktifkan Notifikasi</>
                       )}
                     </button>
                   ),
@@ -805,43 +834,61 @@ export default function LandingPage() {
             {[
               {
                 key: 'karhutla',
-                icon: <Flame size={44} color="var(--navy)" />,
+                icon: <Flame size={26} color="#EA580C" strokeWidth={2.2} />,
+                bg: '#FFEDD5',
                 title: 'Karhutla & Kabut Asap',
                 desc: 'Gunakan masker N95 dan tutup ventilasi ruangan saat kabut asap pekat. Kurangi aktivitas luar, siapkan obat pernapasan, ikuti instruksi evakuasi BPBD, dan laporkan titik api ke 112 / Manggala Agni.',
               },
               {
                 key: 'gempa',
-                icon: <Activity size={44} color="var(--navy)" />,
+                icon: <Activity size={26} color="#B91C1C" strokeWidth={2.2} />,
+                bg: '#FEE2E2',
                 title: 'Gempa Bumi',
                 desc: 'Terapkan DUCK, COVER, HOLD ON. Jauhi jendela kaca, perabot tinggi, dan jangan gunakan lift. Evakuasi setelah getaran reda.',
               },
               {
                 key: 'tsunami',
-                icon: <Waves size={44} color="var(--navy)" />,
+                icon: <Waves size={26} color="#0284C7" strokeWidth={2.2} />,
+                bg: '#E0F2FE',
                 title: 'Tsunami',
                 desc: 'Gunakan aturan emas 20-20-20. Jika gempa terasa 20 detik, Anda punya 20 menit untuk lari ke tempat setinggi minimal 20 meter dpl.',
               },
               {
                 key: 'banjir',
-                icon: <Droplets size={44} color="var(--navy)" />,
+                icon: <Droplets size={26} color="#0369A1" strokeWidth={2.2} />,
+                bg: '#E0F2FE',
                 title: 'Banjir & Bandang',
                 desc: 'Matikan sakelar MCB listrik utama segera. Amankan dokumen ke wadah kedap air di lantai atas, dan jangan terobos arus deras.',
               },
               {
                 key: 'longsor',
-                icon: <Mountain size={44} color="var(--navy)" />,
+                icon: <Mountain size={26} color="#92400E" strokeWidth={2.2} />,
+                bg: '#FEF3C7',
                 title: 'Tanah Longsor',
                 desc: 'Kenali retakan tanah & dinding seret. Saat terjadi suara gemuruh tebing, evakuasi lari TEGAK LURUS (menyamping) dari luncuran.',
               },
               {
                 key: 'gunungapi',
-                icon: <Mountain size={44} color="var(--navy)" />,
+                icon: <Mountain size={26} color="#B91C1C" strokeWidth={2.2} />,
+                bg: '#FFE4E6',
                 title: 'Erupsi Gunung Api',
                 desc: 'Gunakan masker N95 dan kacamata pelindung dari abu silika. Patuhi radius zona steril KRB yang ditetapkan pos pemantauan PVMBG.',
               },
             ].map(card => (
               <div key={card.key} className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%', transition: 'transform 0.2s, box-shadow 0.2s' }}>
-                <div style={{ marginBottom: '1.25rem' }}>{card.icon}</div>
+                <div style={{
+                  width: '52px',
+                  height: '52px',
+                  borderRadius: '14px',
+                  background: card.bg,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '1.25rem',
+                  flexShrink: 0
+                }}>
+                  {card.icon}
+                </div>
                 <h3 style={{ marginBottom: '0.75rem', fontSize: '1.35rem' }}>{card.title}</h3>
                 <p className="text-muted" style={{ marginBottom: '1.75rem', fontSize: '0.95rem', lineHeight: '1.6', flex: 1 }}>{card.desc}</p>
                 <button

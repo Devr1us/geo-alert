@@ -750,16 +750,17 @@ html.js-ready .reveal-on-scroll.reveal-glow-in.is-visible {
 }
 
 .thinkai-prompt-card {
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--chat-card-bg, #F8FAFC);
+  border: 1px solid var(--chat-border, rgba(15, 23, 42, 0.08));
   border-radius: 16px;
   padding: 14px 16px;
   text-align: left;
-  color: #FFFFFF;
+  color: var(--chat-text, #0F1E3D);
   cursor: pointer;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
   transition: background 0.25s, border-color 0.25s, transform 0.25s, box-shadow 0.25s;
   opacity: 1;
   transform: translateY(0);
@@ -769,10 +770,10 @@ html.js-ready .reveal-on-scroll.reveal-glow-in.is-visible {
 }
 
 .thinkai-prompt-card:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(0, 210, 255, 0.4);
+  background: #FFFFFF;
+  border-color: rgba(14, 42, 92, 0.2);
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
 @keyframes card-stagger-in {
@@ -810,36 +811,34 @@ html.js-ready .reveal-on-scroll.reveal-glow-in.is-visible {
 }
 
 .thinkai-input-box {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
   border-radius: 24px;
   padding: 14px 18px 12px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
   transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
 }
 .thinkai-input-box:focus-within {
-  border-color: rgba(0, 210, 255, 0.5);
-  background: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);
+  border-color: #0284C7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
 }
 
 .thinkai-icon-btn {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid #E2E8F0;
+  background: #F8FAFC;
+  color: #64748B;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
 }
-.thinkai-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: #FFFFFF;
+.thinkai-icon-btn:hover:not(:disabled) {
+  background: #F1F5F9;
+  color: #0F1E3D;
   transform: translateY(-1px);
 }
 
@@ -856,7 +855,7 @@ html.js-ready .reveal-on-scroll.reveal-glow-in.is-visible {
   }
 }
 
-/* Custom Scrollbar for Dark Containers (AIChat, Modals, Dropdowns) */
+/* Custom Scrollbar for Containers (AIChat, Modals, Dropdowns) */
 .ai-chat-scroll-area::-webkit-scrollbar,
 .dark-scroll::-webkit-scrollbar {
   width: 6px;
@@ -867,17 +866,17 @@ html.js-ready .reveal-on-scroll.reveal-glow-in.is-visible {
 }
 .ai-chat-scroll-area::-webkit-scrollbar-thumb,
 .dark-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(15, 23, 42, 0.15);
   border-radius: 999px;
 }
 .ai-chat-scroll-area::-webkit-scrollbar-thumb:hover,
 .dark-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(15, 23, 42, 0.3);
 }
 .ai-chat-scroll-area,
 .dark-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  scrollbar-color: rgba(15, 23, 42, 0.15) transparent;
 }
 
 /* ============================================================
@@ -1319,9 +1318,9 @@ html.js-ready .reveal-on-scroll.reveal-glow-in.is-visible {
   overflow: hidden;
 }
 
-/* AI Chat Markdown Typography & Accessibility */
+/* AI Chat Markdown Typography & Accessibility (Light Theme) */
 .ai-chat-bubble-markdown {
-  color: #FFFFFF;
+  color: var(--chat-text, #0F1E3D);
   font-size: 0.92rem;
   line-height: 1.65;
   word-break: break-word;
@@ -1356,45 +1355,47 @@ html.js-ready .reveal-on-scroll.reveal-glow-in.is-visible {
 }
 
 .ai-chat-bubble-markdown strong {
-  color: #FFFFFF;
+  color: #0F1E3D;
   font-weight: 700;
 }
 
 .ai-chat-bubble-markdown em {
-  color: #E2E8F0;
+  color: #475569;
   font-style: italic;
 }
 
 .ai-chat-bubble-markdown a {
-  color: #60A5FA;
+  color: #0284C7;
   text-decoration: underline;
   text-underline-offset: 3px;
-  font-weight: 500;
+  font-weight: 600;
   transition: color 0.15s ease;
 }
 
 .ai-chat-bubble-markdown a:hover,
 .ai-chat-bubble-markdown a:focus {
-  color: #93C5FD;
-  outline: 2px solid #60A5FA;
+  color: #0369A1;
+  outline: 2px solid #0284C7;
   outline-offset: 2px;
   border-radius: 2px;
 }
 
 .ai-chat-bubble-markdown code {
-  background: rgba(255, 255, 255, 0.12);
-  color: #93C5FD;
+  background: #F1F5F9;
+  color: #0F1E3D;
   padding: 0.15rem 0.4rem;
   border-radius: 4px;
   font-family: 'Fira Code', monospace;
   font-size: 0.85em;
+  border: 1px solid #E2E8F0;
 }
 
 .ai-chat-bubble-markdown blockquote {
-  border-left: 3px solid #60A5FA;
+  border-left: 3px solid #0284C7;
   margin: 0.5rem 0 0.85rem 0;
   padding-left: 0.75rem;
-  color: rgba(255, 255, 255, 0.85);
+  color: #475569;
+  background: #F8FAFC;
   font-style: italic;
 }
 

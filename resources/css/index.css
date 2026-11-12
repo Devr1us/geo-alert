@@ -3,7 +3,21 @@
   --bg-cream: #FAF7F0;
   --bg-cream-soft: #FCFAF5;
 
+  /* AI Chat Theme Variables (Light Mode) */
+  --chat-bg: #FFFFFF;
+  --chat-text: #0F1E3D;
+  --chat-muted: #475569;
+  --chat-border: rgba(15, 23, 42, 0.08);
+  --chat-card-bg: #F8FAFC;
+
+  /* Stats Section Variables (Cream) */
+  --stats-bg: #F3EEE3;
+  --stats-card-bg: #FFFFFF;
+  --stats-text: #0E2A5C;
+  --stats-muted: #64748B;
+
   /* Colors */
+  --navy: #0E2A5C;
   --color-primary: #0E2A5C;
   --color-primary-hover: #0a1f44;
   --color-alert: #C0492B;

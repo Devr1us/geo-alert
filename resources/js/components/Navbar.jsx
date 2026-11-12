@@ -122,12 +122,13 @@ export default function Navbar() {
     e.preventDefault();
     setIsOpen(false);
     if (location.pathname !== '/') {
-      navigate('/', { replace: false });
+      navigate(`/#${id}`);
       setTimeout(() => {
         const el = document.getElementById(id);
         if (el) el.scrollIntoView({ behavior: 'smooth' });
       }, 150);
     } else {
+      window.history.pushState(null, '', `/#${id}`);
       const el = document.getElementById(id);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth' });
@@ -155,9 +156,27 @@ export default function Navbar() {
         <div className={`nav-links-wrapper ${isOpen ? 'active' : ''}`}>
           {/* Left Group Links */}
           <div className="nav-group nav-group-left">
-            <Link to="/" className="nav-link" onClick={goToHome}>Beranda</Link>
-            <a href="/peta" className="nav-link" onClick={goToMap}>Peta Bencana</a>
-            <a href="#mitigasi" className="nav-link" onClick={scrollToSection('mitigasi')}>Mitigasi</a>
+            <Link
+              to="/"
+              className={`nav-link ${location.pathname === '/' && !location.hash ? 'active' : ''}`}
+              onClick={goToHome}
+            >
+              Beranda
+            </Link>
+            <Link
+              to="/peta"
+              className={`nav-link ${location.pathname === '/peta' ? 'active' : ''}`}
+              onClick={goToMap}
+            >
+              Peta Bencana
+            </Link>
+            <a
+              href="/#mitigasi"
+              className={`nav-link ${location.pathname === '/' && location.hash === '#mitigasi' ? 'active' : ''}`}
+              onClick={scrollToSection('mitigasi')}
+            >
+              Mitigasi
+            </a>
           </div>
 
           {/* Center Brand Logo (Desktop - Only Logo Icon, NO text) */}
@@ -175,9 +194,27 @@ export default function Navbar() {
 
           {/* Right Group Links */}
           <div className="nav-group nav-group-right">
-            <a href="#cara-penggunaan" className="nav-link" onClick={scrollToSection('cara-penggunaan')}>Tutorial</a>
-            <a href="#tentang" className="nav-link" onClick={scrollToSection('tentang')}>Tentang Kami</a>
-            <a href="#kontak" className="nav-link" onClick={scrollToSection('kontak')}>Kontak</a>
+            <a
+              href="/#cara-penggunaan"
+              className={`nav-link ${location.pathname === '/' && location.hash === '#cara-penggunaan' ? 'active' : ''}`}
+              onClick={scrollToSection('cara-penggunaan')}
+            >
+              Tutorial
+            </a>
+            <a
+              href="/#tentang"
+              className={`nav-link ${location.pathname === '/' && location.hash === '#tentang' ? 'active' : ''}`}
+              onClick={scrollToSection('tentang')}
+            >
+              Tentang Kami
+            </a>
+            <a
+              href="/#kontak"
+              className={`nav-link ${location.pathname === '/' && location.hash === '#kontak' ? 'active' : ''}`}
+              onClick={scrollToSection('kontak')}
+            >
+              Kontak
+            </a>
           </div>
         </div>
 

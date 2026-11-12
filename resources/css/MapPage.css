@@ -671,8 +671,8 @@
   border-radius: var(--radius-xl);
   overflow: hidden;
   background-color: var(--color-white);
-  box-shadow: var(--shadow-md);
-  border: 1px solid rgba(224, 217, 205, 0.7);
+  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 @media (min-width: 992px) {

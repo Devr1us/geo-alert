@@ -108,9 +108,10 @@ export default function Footer() {
             <ul className="footer-links-list">
               <li><Link to="/" className="footer-link-item">Beranda</Link></li>
               <li><Link to="/peta" className="footer-link-item">Peta Bencana</Link></li>
-              <li><a href="#tentang" className="footer-link-item">Tentang Kami</a></li>
-              <li><a href="#cara-penggunaan" className="footer-link-item">Cara Penggunaan</a></li>
-              <li><a href="#faq" className="footer-link-item">Pertanyaan Umum (FAQ)</a></li>
+              <li><a href="/#tentang" className="footer-link-item">Tentang Kami</a></li>
+              <li><a href="/#cara-penggunaan" className="footer-link-item">Cara Penggunaan</a></li>
+              <li><a href="/#mitigasi" className="footer-link-item">Panduan Mitigasi</a></li>
+              <li><a href="/#faq" className="footer-link-item">Pertanyaan Umum (FAQ)</a></li>
             </ul>
           </RevealSection>
 
