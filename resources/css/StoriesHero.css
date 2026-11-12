@@ -18,14 +18,18 @@
 
   position: relative;
   width: 100%;
-  min-height: auto;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: var(--sh-paper);
   color: var(--sh-ink);
   font-family: var(--sh-font-sans);
-  /* Top clearance: Generous breathing room below floating pill navbar */
-  padding-top: calc(var(--navbar-height, 96px) + 2rem);
-  padding-bottom: 0 !important; /* Dinolkan agar jarak tombol ke kartu diatur di SATU tempat oleh margin-top wrapper 4 kartu */
-  overflow: hidden;
+  /* Balanced top and bottom clearance: Generous breathing room below floating navbar & above fold */
+  padding-top: clamp(96px, 10vh, 112px);
+  padding-bottom: clamp(96px, 10vh, 112px);
+  overflow: visible; /* Tidak memotong pulau, glow, atau pulse dots */
   box-sizing: border-box;
 }
 
@@ -42,21 +46,21 @@
 
 /* Container */
 .stories-hero-container {
-  max-width: 1720px;
-  margin: 0 auto;
-  padding-left: clamp(24px, 3.5vw, 64px);
-  padding-right: clamp(32px, 5vw, 96px); /* Jarak ke tepi kanan minimal clamp(32px, 5vw, 96px) */
+  max-width: 1280px;
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: clamp(24px, 5vw, 64px);
   position: relative;
   z-index: 2;
   box-sizing: border-box;
 }
 
-/* Grid Layout (Desktop >= 1024px: ~36% text left, ~64% interactive map right) */
+/* Grid Layout (Desktop >= 1024px: 2 columns, left content & right map+selector) */
 .stories-hero-grid {
   display: grid;
-  grid-template-columns: minmax(0, 32%) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
   align-items: center;
-  column-gap: clamp(24px, 2.5vw, 44px);
+  column-gap: clamp(32px, 4vw, 64px);
   min-height: auto;
   width: 100%;
   box-sizing: border-box;
@@ -140,13 +144,14 @@
   font-size: 1.02rem;
   line-height: 1.6;
   color: var(--sh-ink-subtle);
-  max-width: 58ch; /* Max ~60 karakter per baris */
+  max-width: 52ch; /* Disetel ~52 karakter per baris agar rapi dan tidak terlalu lebar */
   margin: 0 0 1.75rem 0;
 }
 
 .stories-hero-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.85rem;
   flex-wrap: wrap;
 }
@@ -201,8 +206,17 @@
 }
 
 /* ==========================================================================
-   RIGHT COLUMN: INTERACTIVE MAP & SEPARATED ZONE SELECTOR
+   RIGHT COLUMN: PETA INDONESIA (KIRI) + PILIH WILAYAH (KANAN) DALAM 1 WRAPPER
    ========================================================================== */
+.stories-hero-right-col {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: clamp(24px, 2.5vw, 32px);
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+
 .stories-hero-center {
   position: relative;
   display: flex;
@@ -220,22 +234,22 @@
   align-items: center;
   justify-content: flex-end;
   z-index: 20;
-  min-width: 170px;
+  min-width: 160px;
   flex-shrink: 0;
 }
 
-/* Coordinates in top-right corner of the right column */
+/* Coordinates in top-right corner of the map (12-16px from edge, no collision) */
 .sh-coords-block {
   position: absolute;
-  top: 6px;
-  right: 12px;
+  top: 12px;
+  right: 14px;
   font-family: var(--sh-font-mono);
   font-size: 10.5px;
   line-height: 1.6;
   color: var(--sh-ink-subtle);
-  z-index: 15;
+  z-index: 30;
   pointer-events: none;
-  background: rgba(246, 243, 234, 0.85);
+  background: rgba(246, 243, 234, 0.88);
   backdrop-filter: blur(4px);
   padding: 4px 10px;
   border-radius: 6px;
@@ -500,6 +514,55 @@
   background-color: var(--sh-terracotta);
   transition: top 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 0 8px var(--sh-terracotta-glow);
+}
+
+/* ==========================================================================
+   SCROLL DOWN INDICATOR (Bottom Center of Hero Section)
+   ========================================================================== */
+.sh-scroll-indicator {
+  position: absolute;
+  bottom: clamp(16px, 2.5vh, 28px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sh-ink-subtle);
+  text-decoration: none;
+  z-index: 10;
+  opacity: 0.75;
+  transition: opacity 0.25s ease, color 0.25s ease;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.sh-scroll-indicator:hover,
+.sh-scroll-indicator:focus-visible {
+  opacity: 1;
+  color: var(--sh-terracotta);
+  outline: none;
+}
+
+.sh-scroll-indicator-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: shBounceIndicator 2.2s ease-in-out infinite;
+}
+
+@keyframes shBounceIndicator {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sh-scroll-indicator-arrow {
+    animation: none !important;
+  }
 }
 
 /* ==========================================================================
@@ -1569,20 +1632,19 @@ html.js-enabled .stories-hero:not(.is-visible) .sh-coord-secondary {
    RESPONSIVE MEDIA QUERIES
    ========================================================================== */
 
-/* 1024px - 1279px: Kolom teks ~38%, peta mengisi sisa, daftar terlihat penuh */
+/* 1024px - 1279px: Kolom teks ~40%, peta + daftar mengisi sisa */
 @media (min-width: 1024px) and (max-width: 1279px) {
   .stories-hero-container {
-    padding-left: 28px;
-    padding-right: 40px;
+    padding-inline: clamp(24px, 4vw, 40px);
   }
 
   .stories-hero-grid {
-    grid-template-columns: minmax(0, 36%) minmax(0, 1fr) auto;
-    column-gap: 24px;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
+    column-gap: 28px;
   }
 
   .sh-zone-selector {
-    min-width: 150px;
+    min-width: 140px;
     gap: 12px;
   }
 
@@ -1594,18 +1656,28 @@ html.js-enabled .stories-hero:not(.is-visible) .sh-coord-secondary {
 
 @media (max-width: 1023px) {
   .stories-hero {
-    padding-top: calc(var(--navbar-height, 70px) + 1.25rem);
-    padding-bottom: 0 !important;
-    min-height: auto;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: calc(var(--navbar-height, 70px) + 2rem);
+    padding-bottom: clamp(48px, 6vh, 64px);
+    overflow: visible;
   }
 
   .stories-hero-container {
-    padding: 0 1.25rem;
+    padding-inline: clamp(20px, 4vw, 32px);
   }
 
   .stories-hero-grid {
     grid-template-columns: 1fr;
     gap: 1.75rem;
+  }
+
+  .stories-hero-right-col {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
 
   .stories-hero-left {
@@ -1834,6 +1906,21 @@ html.js-enabled .stories-hero:not(.is-visible) .sh-coord-secondary {
 @keyframes shTickerFade {
   0% { opacity: 0; }
   100% { opacity: 1; }
+}
+
+/* Mobile Screen (<640px): 1 kolom, padding horizontal 20px, judul clamp */
+@media (max-width: 640px) {
+  .stories-hero {
+    min-height: 100svh;
+  }
+
+  .stories-hero-container {
+    padding-inline: 20px;
+  }
+
+  .stories-hero-title {
+    font-size: clamp(1.85rem, 7.5vw, 2.5rem);
+  }
 }
 
 /* Extreme mobile width: 360px without horizontal scroll */

@@ -529,7 +529,7 @@
 }
 
 /* ============================================================
-   STATS SECTION — MATCHING HERO SECTION PAPER THEME (#F6F3EA)
+   STATS SECTION — STANDALONE SECTION (#ringkasan) MATCHING CREAM THEME
    ============================================================ */
 
 .stats-section {
@@ -537,13 +537,15 @@
   background-color: var(--stats-bg, #F6F3EA);
   background: var(--stats-bg, #F6F3EA);
   color: var(--stats-text, #0E2A5C);
-  padding: 0 0 clamp(80px, 6vw, 96px) !important; /* Padding-top dinetralkan (0), padding-bottom 80-96px agar chip SiPongi tidak terpotong */
+  padding: clamp(72px, 9vw, 112px) 0 !important; /* Spacing hierarki: clamp(72px, 9vw, 112px) atas & bawah */
   height: auto;
   min-height: auto;
   position: relative;
-  overflow: visible; /* Hapus overflow: hidden agar konten bawah tidak terpotong */
-  border-top: none;
+  overflow: visible; /* Tidak memotong konten atau chip */
+  scroll-margin-top: 96px; /* Offset navbar untuk smooth scroll dari tombol Pelajari Lebih Lanjut */
+  border-top: 1px solid rgba(28, 26, 23, 0.08);
   border-bottom: 1px solid rgba(28, 26, 23, 0.08);
+  text-align: center;
 }
 
 /* Subtle dot texture matching the hero section above it */
@@ -557,35 +559,80 @@
   z-index: 0;
 }
 
-.stats-section > .container {
+.stats-section > .container,
+.stats-container {
+  max-width: 1280px;
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: clamp(24px, 5vw, 64px);
   position: relative;
   z-index: 1;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* Judul kecil mono (eyebrow) penanda blok di atas kartu */
+.stats-section-eyebrow {
+  margin-bottom: 32px; /* Spacing: Eyebrow ke kartu 32px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stats-eyebrow-text {
+  font-family: var(--sh-font-mono, 'IBM Plex Mono', monospace);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--sh-terracotta, #C35933);
+  text-transform: uppercase;
+  background: rgba(195, 89, 51, 0.08);
+  padding: 4px 12px;
+  border-radius: 9999px;
+  border: 1px solid rgba(195, 89, 51, 0.18);
+  display: inline-block;
+}
+
+/* Eyebrow bi-directional reveal animation */
+html.js-ready .stats-section-eyebrow,
+html.js-enabled .stats-section-eyebrow {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 650ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+html.js-ready .stats-section.is-visible .stats-section-eyebrow,
+html.js-enabled .stats-section.is-visible .stats-section-eyebrow {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1.25rem;
-  max-width: 1080px;
-  margin-top: clamp(64px, 8vw, 112px) !important; /* SATU-SATUNYA PENGATUR JARAK DARI HERO TOMBOL KE KARTU: 112px desktop (>1024px), 88px tablet, 64px mobile */
-  margin-bottom: 0;
-  margin-left: auto;
-  margin-right: auto;
+  gap: 24px;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .stat-item {
   background: var(--stats-card-bg, #FFFFFF);
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 16px;
-  padding: 1.25rem 1rem;
+  padding: 1.5rem 1.25rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* Sejajarkan konten dari atas agar angka dan label sejajar horizontal */
+  justify-content: center; /* Angka dan label berada di tengah vertikal & horizontal */
   text-align: center;
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
-  min-height: 124px;
+  min-height: 140px;
+  height: 100%;
   box-sizing: border-box;
 }
 
@@ -593,6 +640,29 @@
   transform: translateY(-4px);
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
   border-color: rgba(15, 23, 42, 0.16);
+}
+
+/* Stagger card reveal animation (turun dan naik berbalik) */
+html.js-ready .stat-item,
+html.js-enabled .stat-item {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 650ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(100ms + var(--i, 0) * 90ms);
+  will-change: opacity, transform;
+}
+
+html[data-scroll-dir="up"] .stat-item {
+  transition-delay: calc(100ms + (3 - var(--i, 0)) * 90ms);
+}
+
+html.js-ready .stats-section.is-visible .stat-item,
+html.js-ready .stat-item.is-visible,
+html.js-enabled .stats-section.is-visible .stat-item,
+html.js-enabled .stat-item.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .stat-number {
@@ -611,14 +681,14 @@
 
 .stat-label {
   font-family: var(--font-body), 'Inter', sans-serif;
-  font-size: 0.86rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: #334155;
   line-height: 1.3;
   margin-bottom: 0.25rem;
   max-width: 180px;
   text-align: center;
-  min-height: 2.4rem; /* Menyamakan tinggi area judul agar angka di atas dan catatan di bawah sejajar */
+  min-height: 2.4rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -630,13 +700,13 @@
   color: var(--stats-muted, #64748B);
   line-height: 1.25;
   text-align: center;
-  margin-top: auto; /* Selalu menempel rapi di bagian bawah kartu */
+  margin-top: 0.25rem;
 }
 
 /* Trust Bar di dalam Stats Section (Cream Theme) */
 .trust-bar-inline {
   text-align: center;
-  margin-top: 48px; /* 48px: Jarak dari kartu statistik ke garis pemisah sesuai hierarki spacing (112px > 48px > 32px > 14px > 12px) */
+  margin-top: 48px; /* Spacing hierarki: kartu statistik ke garis pemisah ~48px */
   padding-top: 0;
   position: relative;
 }
@@ -647,15 +717,15 @@
   max-width: 960px;
   height: 1px;
   background: rgba(15, 23, 42, 0.08);
-  margin: 0 auto 2.25rem;
+  margin: 0 auto 40px; /* Spacing hierarki: garis pemisah ke label kelompok 1 ~40px */
   transform-origin: center center;
 }
 
 .trust-groups-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 32px; /* Jarak antar grup: 32px */
-  max-width: 960px;
+  gap: 32px; /* Spacing hierarki: kelompok 1 ke label kelompok 2 ~32px */
+  max-width: 920px;
   margin: 0 auto;
   width: 100%;
 }
@@ -664,7 +734,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px; /* Jarak label ke chip-nya: 14px */
+  gap: 14px; /* Spacing hierarki: label kelompok ke chip ~14px */
   width: 100%;
 }
 
@@ -688,7 +758,7 @@
 }
 
 .trust-logos-grid-wide {
-  max-width: 960px; /* Muat satu baris di desktop */
+  max-width: 920px; /* Muat satu baris di desktop untuk BNPB, InaRISK, SiPongi */
   margin: 0 auto;
 }
 
@@ -765,7 +835,9 @@ html.js-enabled .trust-divider-line {
 }
 
 html.js-ready .trust-bar-inline.is-visible .trust-divider-line,
-html.js-enabled .trust-bar-inline.is-visible .trust-divider-line {
+html.js-ready .stats-section.is-visible .trust-divider-line,
+html.js-enabled .trust-bar-inline.is-visible .trust-divider-line,
+html.js-enabled .stats-section.is-visible .trust-divider-line {
   transform: scaleX(1);
 }
 
@@ -782,7 +854,9 @@ html.js-enabled .trust-bar-label {
 }
 
 html.js-ready .trust-bar-inline.is-visible .trust-bar-label,
-html.js-enabled .trust-bar-inline.is-visible .trust-bar-label {
+html.js-ready .stats-section.is-visible .trust-bar-label,
+html.js-enabled .trust-bar-inline.is-visible .trust-bar-label,
+html.js-enabled .stats-section.is-visible .trust-bar-label {
   opacity: 1;
   transform: translateY(0);
   letter-spacing: 0.1em;
@@ -799,7 +873,9 @@ html.js-enabled .trust-chip-wrap {
 }
 
 html.js-ready .trust-bar-inline.is-visible .trust-chip-wrap,
-html.js-enabled .trust-bar-inline.is-visible .trust-chip-wrap {
+html.js-ready .stats-section.is-visible .trust-chip-wrap,
+html.js-enabled .trust-bar-inline.is-visible .trust-chip-wrap,
+html.js-enabled .stats-section.is-visible .trust-chip-wrap {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
@@ -811,43 +887,56 @@ html.js-enabled .trust-bar-inline.is-visible .trust-chip-wrap {
   html.js-ready .trust-bar-label,
   html.js-enabled .trust-bar-label,
   html.js-ready .trust-chip-wrap,
-  html.js-enabled .trust-chip-wrap {
+  html.js-enabled .trust-chip-wrap,
+  html.js-ready .stats-section-eyebrow,
+  html.js-enabled .stats-section-eyebrow,
+  html.js-ready .stat-item,
+  html.js-enabled .stat-item {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
     letter-spacing: 0.1em !important;
   }
 
-  .trust-item-card:hover {
+  .trust-item-card:hover,
+  .stat-item:hover {
     transform: none !important;
   }
 }
 
-/* Responsivitas Stats Grid */
+/* Responsivitas Stats Grid & Section */
 @media (max-width: 992px) {
+  .stats-section {
+    padding: clamp(64px, 8vw, 88px) 0 !important;
+  }
+
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem;
-    margin-top: clamp(64px, 8vw, 112px) !important;
+    gap: 20px;
+    margin: 0 auto;
   }
 }
 
 @media (max-width: 640px) {
   .stats-section {
-    padding: 0 0 clamp(80px, 6vw, 96px) !important; /* Hapus padding-top lama yang menumpuk; pertahankan padding-bottom 80-96px agar chip SiPongi tidak terpotong */
+    padding: clamp(56px, 8vw, 80px) 0 !important;
+  }
+
+  .stats-container {
+    padding-inline: 20px;
   }
 
   .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.85rem;
-    margin-top: clamp(64px, 8vw, 112px) !important;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin: 0 auto;
   }
 
   .stat-item {
-    padding: 1.25rem 0.75rem;
-    min-height: 130px;
+    padding: 1.25rem 1rem;
+    min-height: 120px;
     border-radius: 14px;
-    justify-content: flex-start;
+    justify-content: center;
   }
 
   .stat-number {
@@ -860,6 +949,18 @@ html.js-enabled .trust-bar-inline.is-visible .trust-chip-wrap {
 
   .stat-note {
     font-size: 0.72rem;
+  }
+
+  .trust-bar-inline {
+    margin-top: 36px;
+  }
+
+  .trust-divider-line {
+    margin: 0 auto 28px;
+  }
+
+  .trust-groups-wrapper {
+    gap: 24px;
   }
 
   .trust-item-card {

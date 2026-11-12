@@ -286,6 +286,35 @@ export default function LandingPage() {
 
   const alertsCount = useCountUp(liveAlerts, 1500);
 
+  // IntersectionObserver untuk Section #ringkasan (Stats + Trust Bar)
+  const statsSectionRef = useRef(null);
+  const [isStatsVisible, setIsStatsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = statsSectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setIsStatsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsStatsVisible(entry.isIntersecting);
+        if (entry.isIntersecting) {
+          el.classList.add('is-visible');
+        } else {
+          el.classList.remove('is-visible');
+        }
+      },
+      {
+        threshold: 0.15,
+      }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   // ============================================================
   // Fetch Disaster events (BMKG + NASA FIRMS Karhutla)
   // ============================================================
@@ -364,9 +393,19 @@ export default function LandingPage() {
       {/* =================== STORIES HERO SECTION (INTERACTIVE INDONESIA MAP) =================== */}
       <StoriesHero onCekBencana={handleCekBencana} />
 
-      {/* =================== STATS + TRUST BAR (GABUNGAN) =================== */}
-      <section className="stats-section">
-        <div className="container">
+      {/* =================== SECTION RINGKASAN: STATS + TRUST BAR =================== */}
+      <section
+        id="ringkasan"
+        ref={statsSectionRef}
+        className={`stats-section reveal ${isStatsVisible ? 'is-visible' : ''}`}
+        aria-label="Ringkasan Statistik dan Sumber Data GeoAlert"
+      >
+        <div className="container stats-container">
+          {/* Judul kecil mono di atas kartu */}
+          <div className="stats-section-eyebrow" data-reveal="stats-eyebrow">
+            <span className="stats-eyebrow-text">GEOALERT DALAM ANGKA</span>
+          </div>
+
           {/* Stats Cards (4 Kolom Sama Tinggi & Struktur Identik) */}
           <div className="stats-grid">
             {[
@@ -391,15 +430,16 @@ export default function LandingPage() {
                 note: 'Sistem berjalan tanpa henti',
               },
             ].map((s, i) => (
-              <RevealSection
+              <div
                 key={i}
-                className="stat-item"
-                style={{ transitionDelay: `${i * 120}ms` }}
+                className={`stat-item reveal ${isStatsVisible ? 'is-visible' : ''}`}
+                data-reveal="stat-card"
+                style={{ '--i': i }}
               >
                 <div className="stat-number tabular-nums">{s.value}</div>
                 <div className="stat-label">{s.label}</div>
                 {s.note ? <div className="stat-note">{s.note}</div> : null}
-              </RevealSection>
+              </div>
             ))}
           </div>
 
